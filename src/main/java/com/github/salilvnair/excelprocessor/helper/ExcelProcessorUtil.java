@@ -57,6 +57,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.util.Units;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
@@ -112,6 +113,7 @@ public class ExcelProcessorUtil {
 	public static final String EXCEL_FILE_TYPE_XLS = ExcelSheetConstant.EXCEL_FILE_TYPE_XLS;
 	public static final String EXCEL_FILE_TYPE_XLSX = ExcelSheetConstant.EXCEL_FILE_TYPE_XLSX;
 	public static final String APPEND_UNDERSCORE="_";
+	public static final String IGNORE_LIST_ITEM="IGNORE_LIST_ITEM";
 	private static final String HEADER_KEY_NUMBER = "1";
 	private static final String EXCEL_COLUMN_INDENT_START = "A";
 	private static final String EXCEL_COLUMN_FIELD_TYPE_INTEGER = "Integer";
@@ -134,7 +136,7 @@ public class ExcelProcessorUtil {
 	private Map<String,Set<String>> dynamicFieldMap;
 	private Map<String,String> dynamicFieldHeaderMap;
 	private boolean copyHeaderStyle = false;
-	
+	private List<? extends Object> multiOrientedExcelList;
 	
 	public class ValidRowPredicate<T> implements Predicate{
 	    @Override
@@ -1761,6 +1763,19 @@ public class ExcelProcessorUtil {
 		}
 		return fromExcelMultiSheetMap;
 	}
+	
+	public Workbook toExcel(boolean hasMultiOrientationInSheet,List<? extends Object> toExcelList, String excelFileType, String sheetName,Workbook existingWorkBook,boolean hasCustomHeader,boolean pivotEnabled)
+			throws JSONException, InstantiationException, IllegalAccessException, ClassNotFoundException, IOException, ParseException {
+		Workbook wb = toExcel(toExcelList, excelFileType, sheetName, existingWorkBook, hasCustomHeader, pivotEnabled);
+		if(multiOrientedExcelList!=null && !multiOrientedExcelList.isEmpty()) {
+			processSheetAnnotation((BaseExcelSheet) multiOrientedExcelList.get(0));
+			this.customHeader = flipMap(this.customHeader);
+			ExcelSheet excelSheet = multiOrientedExcelList.get(0).getClass().getAnnotation(ExcelSheet.class);
+			pivotEnabled = excelSheet.isVertical();
+			wb = toExcel(multiOrientedExcelList, excelFileType, sheetName, wb, hasCustomHeader, pivotEnabled);
+		}
+		return wb;
+	}
 
 	public Workbook toExcel(List<? extends Object> toExcelList, String excelFileType, String sheetName,Workbook existingWorkBook,boolean hasCustomHeader,boolean pivotEnabled)
 			throws JSONException, InstantiationException, IllegalAccessException, ClassNotFoundException, IOException, ParseException {
@@ -1779,7 +1794,10 @@ public class ExcelProcessorUtil {
 		CellStyle cellStyle = workbook.createCellStyle();
 		Sheet sheet = null;
 		if(!hasExcelTemplate) {
-			sheet = workbook.createSheet(sheetName);
+			sheet =  workbook.getSheet(sheetName);
+			if(workbook.getSheetIndex(sheet)==-1) {
+				sheet = workbook.createSheet(sheetName);
+			}
 		}		
 		List<Object[]> valObjList = new ArrayList<Object[]>();
 		List<Object[]> valObjVerticalList = new ArrayList<Object[]>();
@@ -1962,6 +1980,8 @@ public class ExcelProcessorUtil {
 				int columnHeader = toIndentNumber(this.headerColumn)  - 1;
 				Cell headerRowCell = row.getCell(columnHeader);
 				headerKey = headerRowCell.toString();
+				headerKey = cleanJsonKey(headerKey);
+				headerKey = processSimilarKey(headerKey,(BaseExcelSheet) object , columnHeader, rownum);
 				if(headerFieldMap.containsKey(headerKey)) {
 					jsonKey = headerFieldMap.get(headerKey);
 					dateFormat = getToExcelFieldDateFormat(jsonKey,fieldExcelHeaderMap);
@@ -1973,10 +1993,21 @@ public class ExcelProcessorUtil {
 					if(ignoreHeaderList!=null && ignoreHeaderList.contains(legendString)) {
 						row = sheet.getRow(rownum++);
 						headerRowIndex++;
+						headerRowCell = row.getCell(columnHeader);
+						headerKey = headerRowCell.toString();
+						headerKey = cleanJsonKey(headerKey);
+						headerKey = processSimilarKey(headerKey,(BaseExcelSheet) object , columnHeader, rownum-1);
+						if(headerFieldMap.containsKey(headerKey)) {
+							jsonKey = headerFieldMap.get(headerKey);
+							dateFormat = getToExcelFieldDateFormat(jsonKey,fieldExcelHeaderMap);
+						}
 					}
 				}
 			}
 			else{
+				if(rownum==0) {
+					rownum = headerRowNum;
+				}
 				row = sheet.createRow(rownum++);
 			}
 			Object[] valObjArray = (Object[]) excelData.get(key);
@@ -2000,10 +2031,36 @@ public class ExcelProcessorUtil {
 					}
 				}
 				
+				if(hasExcelTemplate && !pivotEnabled && isCopyHeaderStyle()) {
+					if(key!=1) {
+						Cell headerCell = headerRowData.getCell(cellnum);
+						headerKey = headerCell.toString();
+						if(headerFieldMap.containsKey(headerKey)) {
+							jsonKey = headerFieldMap.get(headerKey);
+							dateFormat = getToExcelFieldDateFormat(jsonKey,fieldExcelHeaderMap);
+							pictureTypeHeader = getToExcelPictureHeader(jsonKey,fieldExcelHeaderMap);
+						}	
+					}
+				}
+				
 				Cell cell = row.createCell(cellnum++);
+				
 			    if(hasStyleTemplate && !isCopyHeaderStyle()) {
 				    copySheetStyle(workbook,sheetName,sheet,cell,rownum-1,cellnum-1);
 			    }
+			    
+			    if(!hasExcelTemplate && !pivotEnabled) {
+			    	headerRowData = sheet.getRow(headerRowNum);
+					Cell headerCell = headerRowData.getCell(cellIndex++);
+					headerKey = headerCell.toString();
+					if(headerFieldMap.containsKey(headerKey)) {
+						jsonKey = headerFieldMap.get(headerKey);
+						dateFormat = getToExcelFieldDateFormat(jsonKey,fieldExcelHeaderMap);
+						pictureTypeHeader = getToExcelPictureHeader(jsonKey,fieldExcelHeaderMap);
+					}
+			    }
+			    
+			    
 			    if(rownum == headerRowNum+1 && isCopyHeaderStyle() && !pivotEnabled) {
 			    	Cell headerCell = headerRowData.getCell(cellIndex++);
 					copyCellStyle(headerCell, cell);
@@ -2062,6 +2119,7 @@ public class ExcelProcessorUtil {
 					}
 					cell.setCellStyle(cellStyle);
 				}
+				setUserDefinedCellStyle(cell, workbook, jsonKey, fieldExcelHeaderMap);
 			}
 		}
 		logger.debug("ExcelProcessorUtil>>toExcel(existingWorkBook&customHeader)>>ends..");
@@ -2103,7 +2161,7 @@ public class ExcelProcessorUtil {
 	private Set<Field> filterDynamicFields(Set<Field> fields,String sheetName) {
 		Set<String> dynamicFields = this.dynamicFields;
 		if(dynamicFields==null) {
-			if(this.dynamicFieldMap.containsKey(sheetName)) {
+			if(this.dynamicFieldMap!=null && this.dynamicFieldMap.containsKey(sheetName)) {
 				dynamicFields = this.dynamicFieldMap.get(sheetName);
 			}
 			else {
@@ -2465,13 +2523,18 @@ public class ExcelProcessorUtil {
 					ExcelHeader excelHeader = field.getAnnotation(ExcelHeader.class);
 					String columnName = toIndentName(columnIndex+1);
 					if(!ExcelValidatorConstant.EMPTY_STRING.equals(excelHeader.value())
-						&& excelHeader.value().equals(jsonKey)
-						&& excelHeader.column().equals(columnName)) {						
-						if(!ExcelValidatorConstant.EMPTY_STRING.equals(excelHeader.column())){
-							return jsonKey+APPEND_UNDERSCORE+excelHeader.column();
+							&& excelHeader.value().equals(jsonKey)) {
+						if(excelSheet.isVertical()) {
+							if((excelHeader.row()-1) == rowIndex) {						
+								return jsonKey+APPEND_UNDERSCORE+excelHeader.row();
+							}						
 						}
-						break;
-					}
+						else {
+							if(excelHeader.column().equals(columnName)) {	
+								return jsonKey+APPEND_UNDERSCORE+excelHeader.column();
+							}
+						}	
+					}					
 				}
 			}
 		}
@@ -3362,21 +3425,11 @@ public class ExcelProcessorUtil {
 			hasValidationBool=", hasValidation=true";
 		}
 		if(isPivotEnabled && !ignoreExcelAnnotation) {
-			if(!EXCEL_COLUMN_INDENT_START.equals(headerColumn)) {
-				sb.append("@ExcelSheet(value=\""+sheetName+"\""+hasValidationBool+", isVertical=true"+hasDuplicateHeaderString+", headerColumnAt=\""+headerColumn+"\")\n");
-			}
-			else {
-				sb.append("@ExcelSheet(value=\""+sheetName+"\""+hasValidationBool+", isVertical=true"+hasDuplicateHeaderString+")\n");
-			}			
+			sb.append("@ExcelSheet(value=\""+sheetName+"\""+hasValidationBool+", isVertical=true"+hasDuplicateHeaderString+", headerRowAt="+headerRowNumber+", headerColumnAt=\""+headerColumn+"\")\n");		
 		}
 		else {
 			if(!ignoreExcelAnnotation) {
-				if(headerRowNumber>1) {
-					sb.append("@ExcelSheet(value=\""+sheetName+"\""+hasValidationBool+", headerRowAt="+headerRowNumber+""+hasDuplicateHeaderString+")\n");
-				}
-				else {
-					sb.append("@ExcelSheet(value=\""+sheetName+"\""+hasValidationBool+""+hasDuplicateHeaderString+")\n");
-				}
+				sb.append("@ExcelSheet(value=\""+sheetName+"\""+hasValidationBool+hasDuplicateHeaderString+", headerRowAt="+headerRowNumber+", headerColumnAt=\""+headerColumn+"\")\n");
 			}
 		}		
 		String parentBaseSheet = "BaseExcelSheet";
@@ -3390,12 +3443,17 @@ public class ExcelProcessorUtil {
 			sb.append("public class "+className+"Sheet {\n");
 		}		
 		for(String field:jsonHeaderValidJavaVariableList) {
+			if(IGNORE_LIST_ITEM.equals(field)) {
+				index++;
+				continue;
+			}
 			if(duplicateItemList.contains(field)) {
 				if(isPivotEnabled) {
+					int pivotRowNum = headerRowNumber + index;
 					if(!ignoreExcelAnnotation) {
-						sb.append("    @ExcelHeader(value=\""+jsonHeaderList.get(index)+"\", row="+(index+1)+")\n");
+						sb.append("    @ExcelHeader(value=\""+jsonHeaderList.get(index)+"\", row="+(pivotRowNum)+")\n");
 					}
-					sb.append("    private "+jsonHeaderTypeList.get(index)+ " "+field+APPEND_UNDERSCORE+(index+1)+";");
+					sb.append("    private "+jsonHeaderTypeList.get(index)+ " "+field+APPEND_UNDERSCORE+(pivotRowNum)+";");
 				}
 				else {
 					String column = toIndentName(index+1);
@@ -3419,14 +3477,19 @@ public class ExcelProcessorUtil {
 		sb.append("  //getters and setters");
 		sb.append("\n");
 		for(String field:jsonHeaderValidJavaVariableList) {
+			if(IGNORE_LIST_ITEM.equals(field)) {
+				index++;
+				continue;
+			}
 			String toggleCasefield = field.substring(0,1).toUpperCase()+field.substring(1);
+			int pivotRowNum = headerRowNumber + index;
 			if(duplicateItemList.contains(field)) {
 				if(isPivotEnabled) {
-					sb.append("    public "+jsonHeaderTypeList.get(index)+ " get"+toggleCasefield+APPEND_UNDERSCORE+(index+1)+"() {");
-					sb.append("\n       return this."+field+APPEND_UNDERSCORE+(index+1)+";");
+					sb.append("    public "+jsonHeaderTypeList.get(index)+ " get"+toggleCasefield+APPEND_UNDERSCORE+(pivotRowNum)+"() {");
+					sb.append("\n       return this."+field+APPEND_UNDERSCORE+(pivotRowNum)+";");
 					sb.append("\n    }\n");
-					sb.append("    public void set"+toggleCasefield+APPEND_UNDERSCORE+(index+1)+"("+jsonHeaderTypeList.get(index)+" "+field+APPEND_UNDERSCORE+(index+1)+") {");
-					sb.append("\n        this."+field+APPEND_UNDERSCORE+(index+1)+" = "+field+APPEND_UNDERSCORE+(index+1)+";");
+					sb.append("    public void set"+toggleCasefield+APPEND_UNDERSCORE+(pivotRowNum)+"("+jsonHeaderTypeList.get(index)+" "+field+APPEND_UNDERSCORE+(pivotRowNum)+") {");
+					sb.append("\n        this."+field+APPEND_UNDERSCORE+(pivotRowNum)+" = "+field+APPEND_UNDERSCORE+(pivotRowNum)+";");
 				}
 				else {
 					String column = toIndentName(index+1);
@@ -3579,6 +3642,11 @@ public class ExcelProcessorUtil {
 	private void generateExcelBeanAndCustomHeaderPivotFromExcel(Sheet currentSheet,int cellCounter,String jsonKey,List<String> jsonHeaderList,List<String> jsonHeaderTypeList,List<String> jsonHeaderValidJavaVariableList, List<String> ignoreHeaderList) {
 		Iterator<Row> rowIterator = currentSheet.iterator();
 		int rowCounter = 0;
+		int headerRowNum=0;		
+		if(getHeaderRowNumber()!=0){
+			headerRowNum=getHeaderRowNumber()-1;
+		}
+		rowCounter = headerRowNum;
 		while (rowIterator.hasNext()) {
 			boolean isKey = true;
 			boolean isValue = false;
@@ -3603,9 +3671,15 @@ public class ExcelProcessorUtil {
 					jsonKey = cleanJsonKey(jsonKey);
 					jsonKey = jsonKey.trim();
 					if(ignoreHeaderList!=null && !ignoreHeaderList.isEmpty() && ignoreHeaderList.contains(jsonKey)) {
-						break;
+						jsonHeaderValidJavaVariableList.add(IGNORE_LIST_ITEM);
+						jsonHeaderList.add(IGNORE_LIST_ITEM);
+						jsonHeaderTypeList.add(IGNORE_LIST_ITEM);
+						break;						
 					}
 					if ("".equals(jsonKey)) {
+						jsonHeaderValidJavaVariableList.add(IGNORE_LIST_ITEM);
+						jsonHeaderList.add(IGNORE_LIST_ITEM);
+						jsonHeaderTypeList.add(IGNORE_LIST_ITEM);
 						break;
 					}
 					else {
@@ -3803,9 +3877,25 @@ public class ExcelProcessorUtil {
                 break;
             default:
                 break;
-        }
-         
+        } 
     }
+    
+    private void setUserDefinedCellStyle(Cell cell, Workbook workbook, String jsonKey, Map<String, ExcelHeader> fieldExcelHeaderMap) {
+    	if(jsonKey!=null && fieldExcelHeaderMap.containsKey(jsonKey)) {
+    		ExcelHeader excelHeader = fieldExcelHeaderMap.get(jsonKey);
+    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BORDER_TOP, excelHeader.borderStyle());
+    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BORDER_RIGHT, excelHeader.borderStyle());
+    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BORDER_BOTTOM, excelHeader.borderStyle());
+    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BORDER_LEFT, excelHeader.borderStyle());
+    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.TOP_BORDER_COLOR, excelHeader.borderColor().getIndex());
+    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.RIGHT_BORDER_COLOR, excelHeader.borderColor().getIndex());
+    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BOTTOM_BORDER_COLOR, excelHeader.borderColor().getIndex());
+    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.LEFT_BORDER_COLOR, excelHeader.borderColor().getIndex());
+    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.FILL_FOREGROUND_COLOR, excelHeader.foregroundColor().getIndex());
+    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.FILL_PATTERN, excelHeader.fillPattern());
+    	}
+    }
+    
     public static  String advancedTrim(String string){
     	if(string==null) {
     		return null;
@@ -4083,6 +4173,14 @@ public class ExcelProcessorUtil {
 
 	public void setDynamicFieldMap(Map<String,Set<String>> dynamicFieldMap) {
 		this.dynamicFieldMap = dynamicFieldMap;
+	}
+	
+	public List<? extends Object> getMultiOrientedExcelList() {
+		return multiOrientedExcelList;
+	}
+
+	public void setMultiOrientedExcelList(List<? extends Object> multiOrientedExcelList) {
+		this.multiOrientedExcelList = multiOrientedExcelList;
 	}
 	
 }

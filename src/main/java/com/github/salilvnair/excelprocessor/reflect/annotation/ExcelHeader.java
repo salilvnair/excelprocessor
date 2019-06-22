@@ -5,6 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
+
 import com.github.salilvnair.excelprocessor.reflect.constant.ExcelHeaderConstant;
 import com.github.salilvnair.excelprocessor.reflect.helper.ExcelDateFormat;
 import com.github.salilvnair.excelprocessor.reflect.type.PictureAnchorType;
@@ -28,4 +31,9 @@ public @interface ExcelHeader {
 	PictureSourceType pictureSource() default PictureSourceType.FILE_PATH; 
 	PictureAnchorType pictureAnchorType() default PictureAnchorType.DONT_MOVE_AND_RESIZE;
 	double pictureResizeScale() default 1.0;
+	IndexedColors foregroundColor() default IndexedColors.AUTOMATIC;
+	IndexedColors backgroundColor() default IndexedColors.AUTOMATIC;
+	short fillPattern() default CellStyle.NO_FILL;
+	short borderStyle() default CellStyle.BORDER_THIN;
+	IndexedColors borderColor() default IndexedColors.BLACK;
 }

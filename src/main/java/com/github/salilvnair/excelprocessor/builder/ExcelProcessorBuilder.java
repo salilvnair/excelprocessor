@@ -80,12 +80,20 @@ public class ExcelProcessorBuilder {
 	private Map<String,Set<String>> dynamicHeaderMap;
 	private boolean copyHeaderStyle = false;
 	private Map<String, String> dynamicFieldHeaderMap;
+	private boolean hasMultiOrientationInSheet;
+	private List<? extends Object> multiOrientedExcelList;
 	
 	public ExcelProcessorBuilder copyHeaderStyle(boolean copyHeaderStyle) {
 		this.copyHeaderStyle = copyHeaderStyle;
 		return this;
 	}
 	
+	public ExcelProcessorBuilder setMultiOrientedExcelList(List<? extends Object> multiOrientedExcelList) {
+		this.multiOrientedExcelList = multiOrientedExcelList;
+		this.hasMultiOrientationInSheet = true;
+		return this;
+	}
+		
 	public ExcelProcessorBuilder setEnableHBMGenerator(boolean enableHBMGenerator) {
 		this.enableHBMGenerator = enableHBMGenerator;
 		return this;
@@ -661,6 +669,7 @@ public class ExcelProcessorBuilder {
 		this.excelProcessorUtil.setDynamicFieldMap(dynamicHeaderMap);
 		this.excelProcessorUtil.setCopyHeaderStyle(copyHeaderStyle);
 		this.excelProcessorUtil.setDynamicFieldHeaderMap(dynamicFieldHeaderMap);
+		this.excelProcessorUtil.setMultiOrientedExcelList(multiOrientedExcelList);
 	}
 	
 	private Map<String, Map<String, List<? extends Object>>> invokeFromExcelMap(int fromRow,int toRow) throws NoSuchFieldException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, JSONException {
@@ -729,6 +738,9 @@ public class ExcelProcessorBuilder {
 					 return excelProcessorUtil.toExcel(toExcelList, excelFileType, sheetName, existingWorkBook, hasCustomHeader, hasInfoRowFirst, hasInfoRowLast);
 				 }
 				 else {
+					 if(hasMultiOrientationInSheet) {
+						 return excelProcessorUtil.toExcel(hasMultiOrientationInSheet,toExcelList, excelFileType, sheetName, existingWorkBook, hasCustomHeader, pivotEnabled);
+					 }
 					 return excelProcessorUtil.toExcel(toExcelList, excelFileType, sheetName, existingWorkBook, hasCustomHeader, pivotEnabled);
 				 }
 			}		
@@ -816,10 +828,9 @@ public class ExcelProcessorBuilder {
 		dynamicHeaderMap = null;
 		copyHeaderStyle = false;
 		dynamicFieldHeaderMap = null;
+		multiOrientedExcelList = null;
+		hasMultiOrientationInSheet = false;
 		initExcelProcessorUtil();
 		return this;
-	}
-
-
-	
+	}	
 }
