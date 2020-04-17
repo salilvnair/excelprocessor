@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -112,34 +111,7 @@ public class ExcelProcessorTestSuite {
 	
 	public static void generateExcelSheetMappingBeanFromExcel(String fileName,String sheetName,int headerRow,String columnHeader,boolean isPivot,boolean hasHeaderValidation,boolean ignoreExcelAnnotation) {
 		File excelfile = getFileFromResource(TEST_EXCEL_FOLDER,fileName);
-		String[] s = {
-				"Site Information",
-				"VPN Details",
-				"Port",
-				"IP Port:",
-				"Ethernet Port:",
-				"ATM Port:",
-				"FR Port:",
-				"DSL Port:",
-				"Access",
-				"COS",
-				"Router",
-				"Router Information:",
-				"Supported LAN Protocol:",
-				"Router Configuration:",
-				"Logical Channel",
-				"COS Features and Options:",
-				"CE Policing CoS Values:",
-				"CE Queuing CoS Values:",
-				"PE Egress CoS Values:",
-				"IP Common Features and Options:",
-				"IPV4 Features and Options:",
-				"IPv4 Static Routing Details:",
-				"IPV6 Features and Options:",
-				"IPv6 Static Routing Details:",
-				"Price"
-			};
-		List<String> ignoreList = Arrays.asList(s);
+		List<String> ignoreList = new ArrayList<>();
 		try {
 			ExcelProcessorBuilder excelProcessorBuilder = new ExcelProcessorBuilder();
 			System.out.println(

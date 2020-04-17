@@ -1824,7 +1824,7 @@ public class ExcelProcessorUtil {
 		}
 		if(pivotEnabled){
 			for (String key : fieldNameList) {
-				Object[] valueObjectVerticalArray = new Object[toExcelList.size()+1];
+				Object[] valueObjectVerticalArray = new Object[toExcelList.size()];
 				int keyValCounter = 0;
 				String excelHeader = key;
 				if(hasCustomHeader){
