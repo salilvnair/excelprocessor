@@ -36,7 +36,7 @@ public class CustomMethodValidator extends BaseExcelValidator {
 			methodName = excelHeaderValidator.customTask();
 			if(ExcelValidatorConstant.EMPTY_STRING.equals(methodName) &&
 					excelHeaderValidator.customTasks().length>0	) {
-				StringBuilder errorMessageBuilder = new StringBuilder("");
+				StringBuilder errorMessageBuilder = new StringBuilder();
 				for(String methodNameItr:excelHeaderValidator.customTasks()) {
 					errorMessage = invokeCustomTask(validatorContext,methodNameItr,sheetValidator,excelHeaderValidator,validatorTask);
 					if(errorMessage!=null) {

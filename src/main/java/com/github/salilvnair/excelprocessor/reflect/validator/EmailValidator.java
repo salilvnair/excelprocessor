@@ -66,9 +66,14 @@ public class EmailValidator extends BaseExcelValidator {
 		String errorMessage = null;
 		if(invalidEmail) {
 			String columnAt = getColumn(validatorContext);
-			errorMessage = headerKey+" at row["+rowNum+"] is not a valid email format.";
-			if(!ExcelValidatorConstant.EMPTY_STRING.equals(columnAt)) {
-				errorMessage = headerKey+"'s length at row["+rowNum+"],column["+columnAt+"] is not a valid email format.";
+			if(excelSheet!=null && (excelSheet.isSingleValueVerticalSheet() || excelSheet.verticallyScatteredHeaders())){
+				errorMessage = headerKey+" is not a valid email format.";
+			}
+			else {
+				errorMessage = headerKey+" at row["+rowNum+"] is not a valid email format.";
+				if(!ExcelValidatorConstant.EMPTY_STRING.equals(columnAt)) {
+					errorMessage = headerKey+"'s length at row["+rowNum+"],column["+columnAt+"] is not a valid email format.";
+				}
 			}
 			String userDefinedMessage = excelHeaderValidator.userDefinedMessage();
 			if(!ExcelValidatorConstant.EMPTY_STRING.equals(excelHeaderValidator.userDefinedMessage())){

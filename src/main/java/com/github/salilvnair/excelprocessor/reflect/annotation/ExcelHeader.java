@@ -30,7 +30,7 @@ public @interface ExcelHeader {
 	double pictureResizeScale() default 1.0;
 	IndexedColors foregroundColor() default IndexedColors.AUTOMATIC;
 	IndexedColors backgroundColor() default IndexedColors.AUTOMATIC;
-	short fillPattern() default 0;
-	short borderStyle() default 1;
+	short fillPattern() default CellStyle.NO_FILL;
+	short borderStyle() default CellStyle.BORDER_NONE;
 	IndexedColors borderColor() default IndexedColors.BLACK;
 }

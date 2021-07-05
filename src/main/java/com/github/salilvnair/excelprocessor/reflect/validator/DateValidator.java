@@ -62,24 +62,15 @@ public class DateValidator extends BaseExcelValidator {
 	}
 	public static boolean isValidMaxDate(Date inputDate, String maxDateString, String[] dateFormats) {
 		Date maxDate = DateParsingUtil.parseDate(maxDateString, dateFormats);
-		if(DateParsingUtil.compareDate(maxDate, inputDate)==0 || DateParsingUtil.compareDate(maxDate, inputDate)==1) {
-			return true;
-		}
-		return false;
+		return DateParsingUtil.compareDate(maxDate, inputDate) == 0 || DateParsingUtil.compareDate(maxDate, inputDate) == 1;
 	}
 	public static boolean isValidMinDate(Date inputDate, String minDateString, String[] dateFormats) {
 		Date maxDate = DateParsingUtil.parseDate(minDateString, dateFormats);
-		if(DateParsingUtil.compareDate(maxDate, inputDate)==0 || DateParsingUtil.compareDate(maxDate, inputDate)==-1) {
-			return true;
-		}
-		return false;
+		return DateParsingUtil.compareDate(maxDate, inputDate) == 0 || DateParsingUtil.compareDate(maxDate, inputDate) == -1;
 	}
 	public static boolean isValidSameDate(Date inputDate, String dateString, String[] dateFormats) {
 		Date maxDate = DateParsingUtil.parseDate(dateString, dateFormats);
-		if(DateParsingUtil.compareDate(maxDate, inputDate)==0) {
-			return true;
-		}
-		return false;
+		return DateParsingUtil.compareDate(maxDate, inputDate) == 0;
 	}
 	private String prepareErrorString(Object columnValue,
 										ValidatorContext validatorContext,

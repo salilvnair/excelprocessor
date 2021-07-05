@@ -2,17 +2,29 @@ package com.github.salilvnair.excelprocessor.test.sheet;
 
 import com.github.salilvnair.excelprocessor.bean.BaseExcelValidationSheet;
 import com.github.salilvnair.excelprocessor.reflect.annotation.ExcelHeader;
+import com.github.salilvnair.excelprocessor.reflect.annotation.ExcelHeaderValidator;
 import com.github.salilvnair.excelprocessor.reflect.annotation.ExcelSheet;
 import com.github.salilvnair.excelprocessor.reflect.type.PictureAnchorType;
 import com.github.salilvnair.excelprocessor.reflect.type.PictureSourceType;
+import com.github.salilvnair.excelprocessor.test.task.SchoolSheetTask;
+import org.apache.poi.ss.usermodel.IndexedColors;
 
-@ExcelSheet(value="School", hasValidation=true)
+@ExcelSheet(
+        value="School",
+        hasValidation=true,
+        customTaskValidator = SchoolSheetTask.class,
+        highlightCellWithError = true,
+        highlightedErrorCellColor = IndexedColors.RED,
+        commentCellWithError = true )
 public class SchoolSheet extends BaseExcelValidationSheet{
     @ExcelHeader("Name")
+    @ExcelHeaderValidator(required = true)
     private String name;
     @ExcelHeader(value="State")
+    @ExcelHeaderValidator(required = true)
     private String state;
     @ExcelHeader("No of students")
+    @ExcelHeaderValidator(conditional = true, condition = "noOfStudentCheck")
     private Integer noOfStudents;
     @ExcelHeader(value="Image",
     			pictureResizeScale=-1,

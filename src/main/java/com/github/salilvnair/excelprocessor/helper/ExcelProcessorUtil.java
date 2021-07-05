@@ -10,25 +10,11 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.github.salilvnair.excelprocessor.reflect.context.ExcelValidationMessage;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.ArrayUtils;
@@ -40,22 +26,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellValue;
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Drawing;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Picture;
-import org.apache.poi.ss.usermodel.RichTextString;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.util.IOUtils;
@@ -1289,6 +1260,191 @@ public class ExcelProcessorUtil {
 			return fromExcelMultiSheetMap;
 	}
 
+	public Map<String, List<? extends Object>> fromExcelVerticalScatteredSheetBeanMap(File excelfile,Workbook workbook,Map<String, Class<? extends BaseExcelSheet>> excelHeaderBeanMap, boolean hasCustomHeader,boolean pivotEnabled) throws IOException, JSONException, NoSuchFieldException, SecurityException, ClassNotFoundException,InstantiationException, IllegalAccessException, InvalidFormatException {
+		logger.debug("ExcelProcessorUtil>>fromExcelExcelList(isPivotEnabled)>>begins..");
+		Map<String, List<? extends Object>> fromExcelMultiSheetMap = new HashMap<String, List<? extends Object>>();
+		Map<String,List<String>> sheetErrorListMap=new HashMap<>();
+		List<Map<String,List<String>>> sheetErrorMapList = new ArrayList<>();
+		if (!pivotEnabled) {
+			logger.debug("ExcelProcessorUtil>>fromExcelExcelList(isPivotEnabled)>>isPivotEnabled " + pivotEnabled+" calling the normal fromExcelExcelList");
+			fromExcelMultiSheetMap=fromExcelBeanMap(excelfile,null,excelHeaderBeanMap,hasCustomHeader);
+			return fromExcelMultiSheetMap;
+		}
+		Class<? extends BaseExcelSheet> excelHeaderBeanClass = null;
+		if(workbook==null) {
+			//commenting below for performance reason
+			//refer https://stackoverflow.com/questions/11154678/xssfworkbook-takes-a-lot-of-time-to-load
+			//FileInputStream inputS = new FileInputStream(excelfile);
+			workbook = getWorkbook(excelfile);
+		}
+		Set<String> sheetNameSet = excelHeaderBeanMap.keySet();
+		for (String sheetName:sheetNameSet){
+			Sheet currentSheet =  workbook.getSheet(sheetName);
+			if(workbook.getSheetIndex(currentSheet)==-1) {
+				continue;
+			}
+			List<String> errorList = new ArrayList<>();
+			if (workbook.isSheetHidden(workbook.getSheetIndex(currentSheet))) {
+				continue;
+			}
+			if (excelHeaderBeanMap.containsKey(sheetName.trim())) {
+				excelHeaderBeanClass = excelHeaderBeanMap.get(sheetName.trim());
+			} else {
+				continue;
+			}
+			currentSheet = removeTrailingEmptyRowsFromSheet(currentSheet);
+			Class<?> clazz = excelHeaderBeanClass;
+			BaseExcelSheet baseExcelSheet = excelHeaderBeanClass.newInstance();
+			processSheetAnnotation(baseExcelSheet);
+			ExcelSheet excelSheet = getExcelSheetFromBaseExcelSheet(baseExcelSheet);
+			Map<String,Object> fieldArgumentMap = new HashMap<>();
+			Map<String,ExcelHeader> fieldExcelHeaderMap = new HashMap<>();
+			//commenting below to get only the fields which are annotated with ExcelHeader
+			//making ExcelHeader mandatory for this utility to recognize the header name
+			//Field[] fieldArray = clazz.getDeclaredFields();
+			Set<Field> excelHeaderFields = AnnotationUtil.getAnnotatedFields(clazz, ExcelHeader.class);
+			for (Field field : excelHeaderFields) {
+				fieldArgumentMap.put(field.getName(), field.getType().getName());
+				prepareFieldExcelHeaderMap(field,fieldExcelHeaderMap);
+			}
+			List<BaseExcelSheet> excelHeaderBeanList = new ArrayList<BaseExcelSheet>();
+			int rowCounter = 0;
+			if(getHeaderRowNumber()!=0){
+				rowCounter=getHeaderRowNumber()-1;
+			}
+			int totalRowCount = currentSheet.getLastRowNum();
+			int columnHeader = toIndentNumber(this.headerColumn)  - 1;
+			int totalColumn = currentSheet.getRow(rowCounter).getPhysicalNumberOfCells();
+			if(excelSheet!=null && (excelSheet.valueRowEndsAt()!=-1||!"".equals(excelSheet.valueColumnEndsAt()))) {
+				if(rowCounter>excelSheet.valueRowEndsAt()) {
+					rowCounter = excelSheet.valueRowEndsAt();
+				}
+				int columnEnd = toIndentNumber(excelSheet.valueColumnEndsAt())  - 1;
+				if(totalColumn>columnEnd) {
+					rowCounter = columnEnd;
+				}
+			}
+			JSONObject jsonKeyValues = new JSONObject();
+			JSONObject jsonKeyRowNums = new JSONObject();
+			Set<String> uploadedExcelHeaders = new HashSet<>();
+			Map<String, String> headerKeyPositionInfo = new HashMap<>();
+			Map<String, Cell> positionKeyCellInfo = new HashMap<>();
+			for(int i = rowCounter ; i<=totalRowCount;i++){
+				if(currentSheet.getRow(i)==null){
+					continue;
+				}
+				int totalColumnCount = currentSheet.getRow(i).getPhysicalNumberOfCells();
+				for(int c = 0; c<= totalColumnCount ; c++) {
+					if(currentSheet.getRow(i).getCell(c)==null){
+						continue;
+					}
+					Cell cellValue = currentSheet.getRow(i).getCell(c);
+					String jsonKey = null;
+					if (cellValue != null) {
+						switch (cellValue.getCellType()) {
+							case Cell.CELL_TYPE_STRING:
+								jsonKey = cellValue.getStringCellValue();
+								break;
+							case Cell.CELL_TYPE_BOOLEAN:
+								Boolean bolVal = cellValue.getBooleanCellValue();
+								jsonKey = bolVal.toString();
+								break;
+							case Cell.CELL_TYPE_NUMERIC:
+								Double numVal = cellValue.getNumericCellValue();
+								jsonKey = numVal.toString();
+								break;
+							// for Formula
+							case Cell.CELL_TYPE_FORMULA:
+								FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
+								CellValue formulaEvaluatedCellValue = formulaEvaluator.evaluate(cellValue);
+								switch (cellValue.getCachedFormulaResultType()) {
+									case Cell.CELL_TYPE_NUMERIC:
+										Double formNumVal = formulaEvaluatedCellValue.getNumberValue();
+										jsonKey = formNumVal.toString();
+										break;
+									case Cell.CELL_TYPE_STRING:
+										jsonKey = cellValue.getStringCellValue().replaceAll("'", "");
+										break;
+								}
+								break;
+						}
+					}
+					if(jsonKey==null || ExcelValidatorConstant.EMPTY_STRING.equals(jsonKey)){
+						continue;
+					}
+					if(ignoreHeaderList!=null && ignoreHeaderList.contains(jsonKey)) {
+						continue;
+					}
+					if (jsonKey != null && !ExcelValidatorConstant.EMPTY_STRING.equals(jsonKey)){
+						jsonKey = cleanJsonKey(jsonKey);
+						if(hasCustomHeader){
+							String modifiedJsonKey = jsonKey;
+							modifiedJsonKey = processSimilarKey(jsonKey,baseExcelSheet,columnHeader,i);
+							uploadedExcelHeaders.add(modifiedJsonKey);
+							if(getCustomHeader().containsKey(modifiedJsonKey.trim())){
+								jsonKey=getCustomHeader().get(modifiedJsonKey.trim());
+							}
+							else{
+								//trim the spaces so that Gson can parse value to the respective objects.
+								jsonKey=jsonKey.trim();
+							}
+						}
+						else{
+							//trim the spaces so that Gson can parse value to the respective objects.
+							jsonKey=jsonKey.trim();
+							uploadedExcelHeaders.add(jsonKey);
+						}
+					}
+					if(!fieldArgumentMap.containsKey(jsonKey)){
+						//its value
+						if(c==0) {
+							continue;
+						}
+						Cell valueCell = currentSheet.getRow(i).getCell(c);
+						positionKeyCellInfo.put(i+"_"+(c-1), valueCell);
+					}
+					else {
+						headerKeyPositionInfo.put(jsonKey, i+"_"+c);
+					}
+					//k1_0
+					//v1_0
+				}
+			}//row loop ends here
+			Set<String> jsonKeySet = fieldArgumentMap.keySet();
+			int valueArrayCounter = 0;
+			JSONObject jsonKV = new JSONObject();
+
+			for(String jsonKey:jsonKeySet){
+				String postionVal = headerKeyPositionInfo.get(jsonKey);
+				Cell cellValue = positionKeyCellInfo.get(postionVal);
+				Object value = extractCellValue(workbook, jsonKey, cellValue, fieldArgumentMap, fieldExcelHeaderMap);
+				jsonKV.put(jsonKey, value);
+			}
+
+			String columnNum = toIndentName((columnHeader+2)+valueArrayCounter);
+			jsonKV.put(ExcelValidatorConstant.EXCEL_VALIDATOR_COLUMN_NAME, columnNum);
+			Gson gson = new GsonBuilder().setDateFormat("E MMM dd hh:mm:ss Z yyyy").create();
+			baseExcelSheet = gson.fromJson(jsonKV.toString(), baseExcelSheet.getClass());
+			excelHeaderBeanList.add(baseExcelSheet);
+
+			fromExcelMultiSheetMap.put(sheetName, excelHeaderBeanList);
+			Map<String,Object> excelValidationMetaDataMap = new HashMap<>();
+			excelValidationMetaDataMap.put(ExcelValidatorConstant.EXCEL_FIELD_KEY_ROW_VALUE_MAP, jsonKeyRowNums);
+			excelValidationMetaDataMap.put(ExcelValidatorConstant.EXCEL_HEADER_KEYS_MAP, uploadedExcelHeaders);
+			excelValidationMetaDataMap.put(ExcelValidatorConstant.EXCEL_HEADER_KEY_POSITION_INFO_MAP, headerKeyPositionInfo);
+			List<String> processedErrorList = processExcelValidation(excelHeaderBeanList,excelValidationMetaDataMap);
+			if(!processedErrorList.isEmpty()){
+				errorList.addAll(processedErrorList);
+				//add the error list to the fromExcelMultiSheetMap
+				sheetErrorListMap.put(sheetName, errorList);
+			}
+		}
+		sheetErrorMapList.add(sheetErrorListMap);
+		fromExcelMultiSheetMap.put(EXCEL_ERROR_LIST, sheetErrorMapList);
+		logger.debug("ExcelProcessorUtil>>fromExcelExcelList(isPivotEnabled)>>ends..");
+		return fromExcelMultiSheetMap;
+	}
+
 	public Map<String, List<? extends Object>> fromExcelVerticalSheetBeanMap(File excelfile,Workbook workbook,Map<String, Class<? extends BaseExcelSheet>> excelHeaderBeanMap, boolean hasCustomHeader,boolean pivotEnabled) throws IOException, JSONException, NoSuchFieldException, SecurityException, ClassNotFoundException,InstantiationException, IllegalAccessException, InvalidFormatException {
 		logger.debug("ExcelProcessorUtil>>fromExcelExcelList(isPivotEnabled)>>begins..");
 		Map<String, List<? extends Object>> fromExcelMultiSheetMap = new HashMap<String, List<? extends Object>>();
@@ -1564,12 +1720,12 @@ public class ExcelProcessorUtil {
 			JSONObject jsonKV = new JSONObject();
 			JSONObject jsonKeyRowNums = new JSONObject();
 			Set<String> uploadedExcelHeaders = new HashSet<>();
-			int totalRows = currentSheet.getPhysicalNumberOfRows();
+			int totalRows = currentSheet.getLastRowNum();
 			int rowCounter = 0;
 			if(getHeaderRowNumber()!=0){
 				rowCounter=getHeaderRowNumber()-1;
 			}
-			for(int i=rowCounter;i<totalRows;i++){
+			for(int i=rowCounter;i<=totalRows;i++){
 				int columnHeader = toIndentNumber(this.headerColumn)  - 1;
 				if (currentSheet.getRow(i)==null){
 					continue;
@@ -1839,6 +1995,7 @@ public class ExcelProcessorUtil {
 					}
 				}
 				if(!hasExcelTemplate) {
+					valueObjectVerticalArray = new Object[toExcelList.size() + 1];
 					valueObjectVerticalArray[keyValCounter] = excelHeader;	
 					keyValCounter++;
 				}
@@ -1906,8 +2063,7 @@ public class ExcelProcessorUtil {
 		if(pivotEnabled){
 			for (int i = 0; i < fieldNameList.size(); i++) {
 				Integer k = i + 1;
-				Object[] excelvalobjArr = new Object[toExcelList.size()+1];
-				excelvalobjArr = valObjVerticalList.get(i);
+				Object[] excelvalobjArr = valObjVerticalList.get(i);
 				excelData.put(k, excelvalobjArr);
 			}
 		}
@@ -1977,6 +2133,10 @@ public class ExcelProcessorUtil {
 					headerRowIndex = headerRowNum;
 				}
 				row = sheet.getRow(headerRowIndex++);
+				while(row == null) {
+					rownum++;
+					row = sheet.getRow(headerRowIndex++);
+				}
 				int columnHeader = toIndentNumber(this.headerColumn)  - 1;
 				Cell headerRowCell = row.getCell(columnHeader);
 				headerKey = headerRowCell.toString();
@@ -1985,6 +2145,18 @@ public class ExcelProcessorUtil {
 				if(headerFieldMap.containsKey(headerKey)) {
 					jsonKey = headerFieldMap.get(headerKey);
 					dateFormat = getToExcelFieldDateFormat(jsonKey,fieldExcelHeaderMap);
+				}
+				if(ignoreHeaderList!=null && ignoreHeaderList.contains(headerKey)) {
+					rownum++;
+					row = sheet.getRow(headerRowIndex++);
+					headerRowCell = row.getCell(columnHeader);
+					headerKey = headerRowCell.toString();
+					headerKey = cleanJsonKey(headerKey);
+					headerKey = processSimilarKey(headerKey,(BaseExcelSheet) object , columnHeader, rownum-1);
+					if(headerFieldMap.containsKey(headerKey)) {
+						jsonKey = headerFieldMap.get(headerKey);
+						dateFormat = getToExcelFieldDateFormat(jsonKey,fieldExcelHeaderMap);
+					}
 				}
 				row = sheet.getRow(rownum++);
 				Cell firstCellWithIgnoreLegend = row.getCell(0);
@@ -2120,6 +2292,7 @@ public class ExcelProcessorUtil {
 					cell.setCellStyle(cellStyle);
 				}
 				setUserDefinedCellStyle(cell, workbook, jsonKey, fieldExcelHeaderMap);
+				configureCellWithErrorIfAny(toExcelList, workbook, object, fieldExcelHeaderMap, key, jsonKey, cell);
 			}
 		}
 		logger.debug("ExcelProcessorUtil>>toExcel(existingWorkBook&customHeader)>>ends..");
@@ -2157,7 +2330,27 @@ public class ExcelProcessorUtil {
 		}
 		return workbook;
 	}
-	
+
+	private void configureCellWithErrorIfAny(List<?> toExcelList, Workbook workbook, Object object, Map<String, ExcelHeader> fieldExcelHeaderMap, Integer key, String jsonKey, Cell cell) {
+		if(key != 1 && !toExcelList.isEmpty()) {
+			object = toExcelList.get(0);
+			if(object instanceof BaseExcelValidationSheet) {
+				BaseExcelValidationSheet baseExcelValidationSheet = (BaseExcelValidationSheet) object;
+				ExcelSheet excelSheet = getExcelSheetFromBaseExcelSheet(baseExcelValidationSheet);
+				int listIndex = key - 2;
+				if(excelSheet.isSingleValueVerticalSheet()) {
+					listIndex = 0;
+				}
+				if(excelSheet.highlightCellWithError()) {
+					highlightCellWithError(baseExcelValidationSheet, excelSheet, cell, workbook, jsonKey, fieldExcelHeaderMap, toExcelList.get(listIndex));
+				}
+				if(excelSheet.commentCellWithError()) {
+					commentCellWithError(baseExcelValidationSheet, excelSheet, cell, workbook, jsonKey, fieldExcelHeaderMap, toExcelList.get(listIndex));
+				}
+			}
+		}
+	}
+
 	private Set<Field> filterDynamicFields(Set<Field> fields,String sheetName) {
 		Set<String> dynamicFields = this.dynamicFields;
 		if(dynamicFields==null) {
@@ -2514,6 +2707,84 @@ public class ExcelProcessorUtil {
 		return row;
 	}
 
+	private Object extractCellValue(Workbook workbook, String jsonKey, Cell cellValue, Map<String,Object> fieldArgumentMap, Map<String,ExcelHeader> fieldExcelHeaderMap) {
+		Integer jsonIntegerValue = null;
+		Long jsonLongValue = null;
+		Double jsonDoubleValue = null;
+		String jsonStringValue = null;
+		Boolean jsonBooleanValue = null;
+		Date jsonDateValue = null;
+		if (cellValue != null) {
+			switch (cellValue.getCellType()) {
+				case Cell.CELL_TYPE_STRING:
+					jsonStringValue = cellValue.getStringCellValue();
+					break;
+				case Cell.CELL_TYPE_BOOLEAN:
+					jsonBooleanValue = cellValue.getBooleanCellValue();
+					jsonStringValue = jsonBooleanValue.toString();
+					break;
+				case Cell.CELL_TYPE_NUMERIC:
+					jsonDoubleValue = cellValue.getNumericCellValue();
+					jsonLongValue = new BigDecimal(cellValue.getNumericCellValue()).longValue();
+					jsonIntegerValue = new BigDecimal(cellValue.getNumericCellValue()).intValue();
+					jsonDateValue = cellValue.getDateCellValue();
+					jsonStringValue = jsonDoubleValue.toString();
+					break;
+				// for Formula
+				case Cell.CELL_TYPE_FORMULA:
+					FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
+					CellValue formulaEvaluatedCellValue = formulaEvaluator.evaluate(cellValue);
+					switch (cellValue.getCachedFormulaResultType()) {
+						case Cell.CELL_TYPE_NUMERIC:
+							jsonDoubleValue = formulaEvaluatedCellValue.getNumberValue();
+							jsonLongValue = new BigDecimal(jsonDoubleValue).longValue();
+							jsonIntegerValue = new BigDecimal(jsonDoubleValue).intValue();
+							jsonDateValue = DateUtil.getJavaDate(jsonDoubleValue);//cellValue.getDateCellValue();
+							jsonStringValue = jsonDoubleValue.toString();
+							break;
+						case Cell.CELL_TYPE_STRING:
+							jsonStringValue = cellValue.getStringCellValue().replaceAll("'", "");
+							break;
+					}
+					break;
+			}
+		}
+		Object jsonVal = null;
+		if (fieldArgumentMap.containsKey(jsonKey)) {
+			String fullySpecfiedfieldTypeName = (String) fieldArgumentMap.get(jsonKey);
+			String[] fullySpecfiedfieldTypeNameArray = Arrays.copyOfRange(fullySpecfiedfieldTypeName.split("\\."), 0, 3);
+			String fieldType = fullySpecfiedfieldTypeNameArray[2];
+			if (fieldType.equals(EXCEL_COLUMN_FIELD_TYPE_STRING)) {
+				ExcelHeader excelHeader = fieldExcelHeaderMap.get(jsonKey);
+				jsonStringValue = processNumericString(excelHeader,jsonStringValue,jsonLongValue,jsonDoubleValue,jsonBooleanValue,jsonIntegerValue,jsonDateValue);
+				if(jsonStringValue!=null) {
+					jsonStringValue = advancedTrim(jsonStringValue);
+				}
+				jsonVal = jsonStringValue;
+			} else if (fieldType.equals(EXCEL_COLUMN_FIELD_TYPE_LONG)) {
+				jsonVal = jsonLongValue;
+			} else if (fieldType.equals(EXCEL_COLUMN_FIELD_TYPE_DOUBLE)) {
+				jsonVal = jsonDoubleValue;
+			} else if (fieldType.equals(EXCEL_COLUMN_FIELD_TYPE_BOOLEAN)) {
+				jsonVal = jsonBooleanValue;
+			} else if (fieldType.equals(EXCEL_COLUMN_FIELD_TYPE_INTEGER)) {
+				jsonVal = jsonIntegerValue;
+			}
+			else if (fieldType.equals(EXCEL_COLUMN_FIELD_TYPE_DATE)) {
+				if(jsonDateValue==null) {
+					if(jsonStringValue!=null) {
+						ExcelHeader excelHeader = fieldExcelHeaderMap.get(jsonKey);
+						if(DateParsingUtil.isDate(jsonStringValue, excelHeader.fromExcelDateFormats())) {
+							jsonDateValue = DateParsingUtil.parseDate(jsonStringValue, excelHeader.fromExcelDateFormats());
+						}
+					}
+				}
+				jsonVal = jsonDateValue;
+			}
+		}
+		return jsonVal;
+	}
+
 	private String processSimilarKey(String jsonKey, BaseExcelSheet baseExcelSheet, int columnIndex, int rowIndex) {
 		if(baseExcelSheet.getClass().isAnnotationPresent(ExcelSheet.class)) {
 			ExcelSheet excelSheet = baseExcelSheet.getClass().getAnnotation(ExcelSheet.class);
@@ -2521,7 +2792,6 @@ public class ExcelProcessorUtil {
 				Set<Field> fields = AnnotationUtil.getAnnotatedFields(baseExcelSheet.getClass(), ExcelHeader.class);
 				for(Field field:fields) {
 					ExcelHeader excelHeader = field.getAnnotation(ExcelHeader.class);
-					String columnName = toIndentName(columnIndex+1);
 					if(!ExcelValidatorConstant.EMPTY_STRING.equals(excelHeader.value())
 							&& excelHeader.value().equals(jsonKey)) {
 						if(excelSheet.isVertical()) {
@@ -2530,6 +2800,7 @@ public class ExcelProcessorUtil {
 							}						
 						}
 						else {
+							String columnName = toIndentName(columnIndex+1);
 							if(excelHeader.column().equals(columnName)) {	
 								return jsonKey+APPEND_UNDERSCORE+excelHeader.column();
 							}
@@ -2702,8 +2973,22 @@ public class ExcelProcessorUtil {
 			ValidatorContext validatorContext,BaseExcelSheet baseExcelSheet, List<String> errorList){
 		if(excelHeaderBeanValidatorList.size()>0){										
 			for(IExcelValidator iexcelValidator:excelHeaderBeanValidatorList){
-				processValidator(iexcelValidator, validatorContext, errorList);
+				if(excelValidatorContext!=null && excelValidatorContext.validateInDetail()) {
+					BaseExcelValidationSheet sheet = (BaseExcelValidationSheet)baseExcelSheet;
+					List<ExcelValidationMessage> errorMessages = sheet.getErrorMessages();
+					processValidatorsInDetail(iexcelValidator, validatorContext, errorMessages);
+				}
+				else {
+					processValidator(iexcelValidator, validatorContext, errorList);
+				}
 			}
+		}
+	}
+
+	private void processValidatorsInDetail(IExcelValidator iexcelValidator, ValidatorContext validatorContext, List<ExcelValidationMessage> errorMessages){
+		ExcelValidationMessage validationMessage = iexcelValidator.validateInDetail(validatorContext);
+		if(validationMessage!=null && validationMessage.getMessage()!=null) {
+			errorMessages.add(validationMessage);
 		}
 	}
 	
@@ -3641,22 +3926,21 @@ public class ExcelProcessorUtil {
 	
 	private void generateExcelBeanAndCustomHeaderPivotFromExcel(Sheet currentSheet,int cellCounter,String jsonKey,List<String> jsonHeaderList,List<String> jsonHeaderTypeList,List<String> jsonHeaderValidJavaVariableList, List<String> ignoreHeaderList) {
 		Iterator<Row> rowIterator = currentSheet.iterator();
-		int rowCounter = 0;
 		int headerRowNum=0;		
 		if(getHeaderRowNumber()!=0){
 			headerRowNum=getHeaderRowNumber()-1;
 		}
-		rowCounter = headerRowNum;
 		while (rowIterator.hasNext()) {
 			boolean isKey = true;
 			boolean isValue = false;
-			rowIterator.next();
+			Row row = rowIterator.next();
 			int columnHeader = toIndentNumber(this.headerColumn) - 1;
-			for(int i=columnHeader;i<=columnHeader+1;i++){
-				if(currentSheet.getRow(rowCounter)==null) {
-					continue;
-				}
-				if (currentSheet.getRow(rowCounter).getCell(i) == null) {
+			if(row==null) {
+				continue;
+			}
+			int columns = row.getPhysicalNumberOfCells();
+			for(int i=columnHeader;i<=columns;i++) {
+				if (row.getCell(i) == null) {
 					if(isValue){
 						 String jsonStringValue = EXCEL_COLUMN_FIELD_TYPE_NOT_AVAILABLE_DEFAULT_STRING;
 						 jsonHeaderTypeList.add(jsonStringValue);
@@ -3664,10 +3948,10 @@ public class ExcelProcessorUtil {
 					continue;
 				}
 				if (isKey) {											
-					if (currentSheet.getRow(rowCounter).getCell(i) == null) {
+					if (row.getCell(i) == null) {
 						continue;
 					}
-					jsonKey = currentSheet.getRow(rowCounter).getCell(i).getStringCellValue();
+					jsonKey = row.getCell(i).getStringCellValue();
 					jsonKey = cleanJsonKey(jsonKey);
 					jsonKey = jsonKey.trim();
 					if(ignoreHeaderList!=null && !ignoreHeaderList.isEmpty() && ignoreHeaderList.contains(jsonKey)) {
@@ -3698,7 +3982,7 @@ public class ExcelProcessorUtil {
 					isValue = false;
 					isKey = true;
 					 String jsonStringValue = null;
-					 Cell cellValue=currentSheet.getRow(rowCounter).getCell(i);
+					 Cell cellValue=row.getCell(i);
 						if(cellValue!=null){
 							switch (cellValue.getCellType()) {
 								case Cell.CELL_TYPE_STRING:
@@ -3756,8 +4040,7 @@ public class ExcelProcessorUtil {
 							jsonHeaderTypeList.add(jsonStringValue);
 				}
 			  }
-			}							
-			rowCounter++;
+			}
 		}	
 	}
 	
@@ -3879,6 +4162,65 @@ public class ExcelProcessorUtil {
                 break;
         } 
     }
+
+    private void commentCellWithError(BaseExcelValidationSheet sheet, ExcelSheet excelSheet, Cell cell, Workbook workbook, String jsonKey, Map<String, ExcelHeader> fieldExcelHeaderMap, Object object) {
+		if(!sheet.getErrorMessages().isEmpty() && jsonKey!=null) {
+			Optional<ExcelValidationMessage> validationMessage = sheet
+					.getErrorMessages()
+					.stream()
+					.filter(msg -> jsonKey.equals(msg.getMappedFieldName()))
+					.findFirst();
+			if(validationMessage.isPresent()) {
+				ExcelValidationMessage excelValidationMessage = validationMessage.get();
+				setCellComment(cell, excelValidationMessage.getMessage());
+			}
+		}
+	}
+
+	private void highlightCellWithError(BaseExcelValidationSheet sheet, ExcelSheet excelSheet, Cell cell, Workbook workbook, String jsonKey, Map<String, ExcelHeader> fieldExcelHeaderMap, Object object) {
+		if(!sheet.getErrorMessages().isEmpty() && jsonKey!=null) {
+			Optional<ExcelValidationMessage> validationMessage = sheet
+					.getErrorMessages()
+					.stream()
+					.filter(msg -> jsonKey.equals(msg.getMappedFieldName()))
+					.findFirst();
+			if(validationMessage.isPresent()) {
+				ExcelValidationMessage excelValidationMessage = validationMessage.get();
+				highlightCell(workbook, cell, excelSheet);
+			}
+		}
+	}
+
+
+	protected void highlightCell(Workbook workbook, Cell cell, ExcelSheet excelSheet) {
+		CellStyle cs = workbook.createCellStyle();
+		cs.setFillForegroundColor(excelSheet.highlightedErrorCellColor().getIndex());
+		cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		cell.setCellStyle(cs);
+	}
+
+	protected void setCellComment(Cell cell, String message) {
+		Drawing drawing = cell.getSheet().createDrawingPatriarch();
+		CreationHelper factory = cell.getSheet().getWorkbook()
+				.getCreationHelper();
+		// When the comment box is visible, have it show in a 1x3 space
+		ClientAnchor anchor = factory.createClientAnchor();
+		anchor.setCol1(cell.getColumnIndex());
+		anchor.setCol2(cell.getColumnIndex() + 2);
+		anchor.setRow1(cell.getRowIndex());
+		anchor.setRow2(cell.getRowIndex() + 3);
+		anchor.setDx1(100);
+		anchor.setDx2(100);
+		anchor.setDy1(100);
+		anchor.setDy2(100);
+
+		// Create the comment and set the text+author
+		Comment comment = drawing.createCellComment(anchor);
+		RichTextString str = factory.createRichTextString(message);
+		comment.setString(str);
+		// Assign the comment to the cell
+		cell.setCellComment(comment);
+	}
     
     private void setUserDefinedCellStyle(Cell cell, Workbook workbook, String jsonKey, Map<String, ExcelHeader> fieldExcelHeaderMap) {
     	if(jsonKey!=null && fieldExcelHeaderMap.containsKey(jsonKey)) {
@@ -3998,7 +4340,7 @@ public class ExcelProcessorUtil {
         return !mergedRegions.contains(newMergedRegion);
     }
     
-    public  int toIndentNumber(String name) {
+    public static  int toIndentNumber(String name) {
         int number = 0;
         for (int i = 0; i < name.length(); i++) {
             number = number * 26 + (name.charAt(i) - ('A' - 1));
@@ -4006,7 +4348,7 @@ public class ExcelProcessorUtil {
         return number;
     }
 
-    public  String toIndentName(int number) {
+    public static String toIndentName(int number) {
         StringBuilder sb = new StringBuilder();
         while (number-- > 0) {
             sb.append((char)('A' + (number % 26)));

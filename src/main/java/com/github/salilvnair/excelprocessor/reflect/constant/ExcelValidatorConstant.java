@@ -51,5 +51,7 @@ public class ExcelValidatorConstant {
 	public static final String EXCEL_FIELD_KEY_ROW_VALUE_MAP = "EXCEL_FIELD_KEY_ROW_VALUE_MAP";
 	
 	public static final String EXCEL_HEADER_KEYS_MAP = "EXCEL_HEADER_KEYS_MAP";
-	
+
+	public static final String EXCEL_HEADER_KEY_POSITION_INFO_MAP = "EXCEL_HEADER_KEY_POSITION_INFO_MAP";
+
 }

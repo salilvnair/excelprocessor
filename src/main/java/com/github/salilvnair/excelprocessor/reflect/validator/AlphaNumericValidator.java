@@ -4,8 +4,8 @@ import com.github.salilvnair.excelprocessor.reflect.annotation.ExcelHeaderValida
 import com.github.salilvnair.excelprocessor.reflect.annotation.ExcelSheet;
 import com.github.salilvnair.excelprocessor.reflect.constant.ExcelHeaderConstant;
 import com.github.salilvnair.excelprocessor.reflect.constant.ExcelValidatorConstant;
+import com.github.salilvnair.excelprocessor.reflect.context.ExcelValidationMessage;
 import com.github.salilvnair.excelprocessor.reflect.context.ValidatorContext;
-
 
 
 public class AlphaNumericValidator extends BaseExcelValidator {
@@ -49,7 +49,7 @@ public class AlphaNumericValidator extends BaseExcelValidator {
 		}
 		return errorMessage;
 	}
-	
+
 	private String prepareErrorString(Object columnValue,
 										ValidatorContext validatorContext,
 										String headerKey,

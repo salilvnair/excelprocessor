@@ -52,7 +52,7 @@ public class UniqueValidator extends BaseExcelValidator {
 		}
 		if(excelSheet!=null){
 			if(excelSheet.isVertical()){
-				if(excelSheet.isSingleValueVerticalSheet()){
+				if(excelSheet.isSingleValueVerticalSheet() || excelSheet.verticallyScatteredHeaders()){
 					errorMessage = headerKey+" should be unique!";
 				}
 				else{						
