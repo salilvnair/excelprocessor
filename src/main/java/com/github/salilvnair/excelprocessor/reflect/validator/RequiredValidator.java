@@ -27,7 +27,7 @@ public class RequiredValidator extends BaseExcelValidator {
 			}
 			if(excelSheet!=null){
 				if(excelSheet.isVertical()){
-					if(excelSheet.isSingleValueVerticalSheet()){
+					if(excelSheet.isSingleValueVerticalSheet() || excelSheet.verticallyScatteredHeaders()){
 						errorMessage = headerKey+" cannot be empty!";
 					}
 					else{						

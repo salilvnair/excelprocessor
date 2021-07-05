@@ -3,12 +3,55 @@ package com.github.salilvnair.excelprocessor.reflect.validator;
 import java.util.Map;
 import java.util.Set;
 
+import com.github.salilvnair.excelprocessor.helper.ExcelProcessorUtil;
+import com.github.salilvnair.excelprocessor.reflect.annotation.ExcelSheet;
+import com.github.salilvnair.excelprocessor.reflect.context.ExcelValidationMessage;
+import com.github.salilvnair.excelprocessor.reflect.helper.ExcelValidatorUtil;
 import org.json.JSONObject;
 
 import com.github.salilvnair.excelprocessor.reflect.constant.ExcelValidatorConstant;
 import com.github.salilvnair.excelprocessor.reflect.context.ValidatorContext;
 
 public abstract class BaseExcelValidator implements IExcelValidator {
+
+	@Override
+	public ExcelValidationMessage validateInDetail(ValidatorContext validatorContext) {
+		String message = validate(validatorContext);
+		ExcelValidationMessage excelValidationMessage = new ExcelValidationMessage();
+		excelValidationMessage.setMessage(message);
+		processRowAndColumnDetails(validatorContext, excelValidationMessage);
+		excelValidationMessage.setHeader(validatorContext.getHeaderKey());
+		excelValidationMessage.setMappedFieldName(validatorContext.getJsonKey());
+		return excelValidationMessage;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void processRowAndColumnDetails(ValidatorContext validatorContext, ExcelValidationMessage excelValidationMessage) {
+		ExcelSheet excelSheet = validatorContext.getExcelSheet();
+		String jsonKey = validatorContext.getJsonKey();
+		int row = validatorContext.getRowNum();
+		String col = validatorContext.getColumnName();
+		if(excelSheet.isVertical()){
+			int rowAt = getRow(validatorContext);
+			row = rowAt == -1 ? row : rowAt;
+		}
+		else {
+			String columnAt = getColumn(validatorContext);
+			col = ExcelValidatorConstant.EMPTY_STRING .equals(columnAt) ? validatorContext.getColumnName() : columnAt;
+		}
+		if(excelSheet.verticallyScatteredHeaders()) {
+			Map<String, String> headerKeyPositionInfo  = (Map<String, String>) validatorContext.getExcelValidationMetaDataMap().get(ExcelValidatorConstant.EXCEL_HEADER_KEY_POSITION_INFO_MAP);
+			String rowUndCol = headerKeyPositionInfo.get(jsonKey);
+			String rowIndex = rowUndCol.split("_")[0];
+			int rowIndexNum = Integer.parseInt(rowIndex);
+			row = rowIndexNum+1;
+			String colIndex = rowUndCol.split("_")[1];
+			int colIndexNum = Integer.parseInt(colIndex);
+			col = ExcelProcessorUtil.toIndentName(colIndexNum+2);
+		}
+		excelValidationMessage.setRow(row);
+		excelValidationMessage.setColumn(col);
+	}
 
 	public static Integer getRow(ValidatorContext validatorContext) {
 		int row = -1;
@@ -55,9 +98,7 @@ public abstract class BaseExcelValidator implements IExcelValidator {
 		Set<?> uploadedExcelHeaders = null;
 		if(excelValidationMetaDataMap.containsKey(ExcelValidatorConstant.EXCEL_HEADER_KEYS_MAP)) {
 			uploadedExcelHeaders = (Set<?>) excelValidationMetaDataMap.get(ExcelValidatorConstant.EXCEL_HEADER_KEYS_MAP);
-			if(!uploadedExcelHeaders.contains(headerKey)) {
-				return true;
-			}
+			return !uploadedExcelHeaders.contains(headerKey);
 		}
 		return false;
 	}

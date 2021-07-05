@@ -6,6 +6,7 @@ import java.util.Map;
 public class ExcelValidatorContext {
 	private  Map<String,List<String>> predefinedDatasetMap;
 	private  Map<String,Object> userValidatorMap;
+	private boolean validateInDetail;
 
 	public Map<String,List<String>> getPredefinedDatasetMap() {
 		return predefinedDatasetMap;
@@ -21,5 +22,13 @@ public class ExcelValidatorContext {
 
 	public void setUserValidatorMap(Map<String,Object> userValidatorMap) {
 		this.userValidatorMap = userValidatorMap;
+	}
+
+	public boolean validateInDetail() {
+		return validateInDetail;
+	}
+
+	public void setValidateInDetail(boolean validateInDetail) {
+		this.validateInDetail = validateInDetail;
 	}
 }
