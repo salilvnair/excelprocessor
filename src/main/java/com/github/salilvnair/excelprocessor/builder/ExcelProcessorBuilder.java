@@ -44,7 +44,7 @@ public class ExcelProcessorBuilder {
 	private boolean ignoreFormatting;
 	private boolean wrapTexting;
 	private File excelTemplate;
-	private ExcelProcessorUtil excelProcessorUtil = new ExcelProcessorUtil();	
+	private final ExcelProcessorUtil excelProcessorUtil = new ExcelProcessorUtil();
 	private List<? extends BaseExcelSheet> toExcelList;
 	private LinkedHashMap<String,List<? extends BaseExcelSheet>> toExcelListOrderedMap;
 	private String excelFileType;
@@ -63,6 +63,7 @@ public class ExcelProcessorBuilder {
 	private boolean hasInfoRowDetail;
 	private boolean hasPivotDetail;
 	private boolean isSingleValueVerticalSheet;
+	private boolean verticallyScatteredHeaders;
 	private List<String> ignoreHeaderList;
 	private boolean autoResizeColoumn;
 	private ExcelValidatorContext excelValidatorContext;
@@ -102,6 +103,14 @@ public class ExcelProcessorBuilder {
 	public ExcelProcessorBuilder copyRowStyleFromExistingTemplate(int rowNumber) {
 		this.copyStyleFromRow = rowNumber-1;
 		this.hasStyleTemplate = true;
+		return this;
+	}
+
+	public ExcelProcessorBuilder validateInDetail() {
+		if(this.excelValidatorContext==null) {
+			this.excelValidatorContext = new ExcelValidatorContext();
+		}
+		this.excelValidatorContext.setValidateInDetail(true);
 		return this;
 	}
 	
@@ -285,7 +294,7 @@ public class ExcelProcessorBuilder {
 	
 	@SuppressWarnings("unchecked")
 	public ExcelProcessorBuilder setExcelMappingBeanClass(String baseExcelSheetClassName) throws ClassNotFoundException {
-		this.fromExcelHeaderBeanClass = (Class<? extends BaseExcelSheet>) Class.forName(baseExcelSheetClassName);;
+		this.fromExcelHeaderBeanClass = (Class<? extends BaseExcelSheet>) Class.forName(baseExcelSheetClassName);
 		return this;
 	}
 	
@@ -306,7 +315,7 @@ public class ExcelProcessorBuilder {
 			finalBaseExcelSheetClass[classSheetCounter] = baseExcelSheetClass;
 			classSheetCounter++;
 		}
-		this.fromExcelHeaderBeanClasses =  (Class<? extends BaseExcelSheet>[]) finalBaseExcelSheetClass;
+		this.fromExcelHeaderBeanClasses = finalBaseExcelSheetClass;
 		return this;
 	}
 	
@@ -405,7 +414,7 @@ public class ExcelProcessorBuilder {
 		Map<String, List<? extends Object>> extractedMap = invokeFromExcelMap();
 		Map<String, List<? extends BaseExcelSheet>> sheetMap = new HashMap<>();
 		for(Class<? extends BaseExcelSheet> beanClass:fromExcelHeaderBeanClasses) {
-			BaseExcelSheet baseExcelSheet = (BaseExcelSheet) beanClass.newInstance();
+			BaseExcelSheet baseExcelSheet = beanClass.newInstance();
 			if(baseExcelSheet.getClass().isAnnotationPresent(ExcelSheet.class)) {
 				ExcelSheet excelSheet = baseExcelSheet.getClass().getAnnotation(ExcelSheet.class);
 				String sheetName = excelSheet.value();
@@ -503,6 +512,7 @@ public class ExcelProcessorBuilder {
 							setIsVertical(excelSheet.isVertical());
 						}
 						isSingleValueVerticalSheet = excelSheet.isSingleValueVerticalSheet();
+						verticallyScatteredHeaders = excelSheet.verticallyScatteredHeaders();
 						prepareMultiSheetReaderMetaData(excelSheet,excelHeaderBeanClass,fromExcelSheetReaderMetaDataMap);
 						fromExcelBeanMap.put(sheetName, excelHeaderBeanClass);
 					}
@@ -527,6 +537,7 @@ public class ExcelProcessorBuilder {
 			ExcelSheet excelSheet = toExcelList.get(0).getClass().getAnnotation(ExcelSheet.class);	
 			if(!"".equals(excelSheet.value())){
 				isSingleValueVerticalSheet = excelSheet.isSingleValueVerticalSheet();
+				verticallyScatteredHeaders = excelSheet.verticallyScatteredHeaders();
 				setHeaderRowNumber(excelSheet.headerRowAt());
 				setHeaderColumn(excelSheet.headerColumnAt());
 				setSheetName(excelSheet.value());
@@ -582,6 +593,7 @@ public class ExcelProcessorBuilder {
 				setHeaderRowNumber(excelSheet.headerRowAt());
 				setHeaderColumn(excelSheet.headerColumnAt());
 				isSingleValueVerticalSheet = excelSheet.isSingleValueVerticalSheet();
+				verticallyScatteredHeaders = excelSheet.verticallyScatteredHeaders();
 				singleSheetName = "".equals(excelSheet.value())? null:excelSheet.value();
 			}
 		}
@@ -643,7 +655,16 @@ public class ExcelProcessorBuilder {
 		return null;
 	}
 	
-	private void initExcelProcessorUtil() {		
+	private Map<String, Map<String, List<? extends Object>>> invokeFromExcelMap(int fromRow,int toRow) throws NoSuchFieldException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, JSONException {
+		if(fromExcelBeanMap!=null) {
+			return this.excelProcessorUtil.fromExcelBeanMap(excelfile, existingWorkBook, fromRow, toRow, fromExcelBeanMap, hasCustomHeader);
+		}
+		else {
+			return null;
+		}
+	}
+
+	private void initExcelProcessorUtil() {
 		this.excelProcessorUtil.setFirstRowValue(firstRowValue);
 		this.excelProcessorUtil.setLastRowValue(lastRowValue);
 		this.excelProcessorUtil.setCustomHeader(customHeader);
@@ -671,16 +692,7 @@ public class ExcelProcessorBuilder {
 		this.excelProcessorUtil.setDynamicFieldHeaderMap(dynamicFieldHeaderMap);
 		this.excelProcessorUtil.setMultiOrientedExcelList(multiOrientedExcelList);
 	}
-	
-	private Map<String, Map<String, List<? extends Object>>> invokeFromExcelMap(int fromRow,int toRow) throws NoSuchFieldException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, JSONException {
-		if(fromExcelBeanMap!=null) {
-			return this.excelProcessorUtil.fromExcelBeanMap(excelfile, existingWorkBook, fromRow, toRow, fromExcelBeanMap, hasCustomHeader);
-		}
-		else {
-			return null;
-		}
-	}
-	
+
 	private Map<String, Map<String,Object>> validateExcelBeanMap() throws NoSuchFieldException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, JSONException{
 		return this.excelProcessorUtil.validateExcelBeanMap(excelfile, existingWorkBook, fromExcelBeanMap, hasCustomHeader, pivotEnabled);
 	}
@@ -688,7 +700,10 @@ public class ExcelProcessorBuilder {
 	private Map<String, List<? extends Object>> invokeFromExcelMap() throws NoSuchFieldException, SecurityException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException, JSONException, InvalidFormatException {
 		if(fromExcelBeanMap!=null && fromExcelSheetReaderMetaDataMap==null) {
 			if(hasPivotDetail) {
-				if(isSingleValueVerticalSheet){
+				if(verticallyScatteredHeaders) {
+					return this.excelProcessorUtil.fromExcelVerticalScatteredSheetBeanMap(excelfile, existingWorkBook, fromExcelBeanMap, hasCustomHeader, pivotEnabled);
+				}
+				else if(isSingleValueVerticalSheet){
 					return this.excelProcessorUtil.fromSingleValueVerticalSheetBeanMap(excelfile, existingWorkBook, fromExcelBeanMap, hasCustomHeader, pivotEnabled);
 				}
 				else{
@@ -789,7 +804,7 @@ public class ExcelProcessorBuilder {
 		rowHeight=0;
 		formatDateIndex=0;
 		headerRowNumber=0;
-		headerColumn="A";;
+		headerColumn="A";
 		excelTemplate = null;	
 		toExcelList = null;
 		excelFileType = null;
@@ -819,6 +834,7 @@ public class ExcelProcessorBuilder {
 		ignoreFormatting = false;
 		autoResizeColoumn = false;
 		isSingleValueVerticalSheet=false;
+		verticallyScatteredHeaders = false;
 		ignoreExcelAnnotation=false;
 		enableHBMGenerator = false;
 		enableTableGenerator = false;

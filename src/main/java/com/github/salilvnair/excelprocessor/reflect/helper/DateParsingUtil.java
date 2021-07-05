@@ -73,7 +73,7 @@ public class DateParsingUtil {
 	        SLASH_YYYY_DD_MMM("yyyy/dd/MMM"), 
 	        SLASH_MMM_DD_YYYY("MMM/dd/yyyy");
 	        
-	        private String dateFormat;
+	        private final String dateFormat;
 
 	        DateFormats(String dateFormat) {this.dateFormat = dateFormat;}
 
@@ -116,7 +116,7 @@ public class DateParsingUtil {
 	        SLASH_YYYY_MMM_DD_HH_MM_SSA("yyyy/MMM/dd, hh:mm:ssa"), 
 	        SLASH_DD_MMM_YYYY_HH_MM_SSA("dd/MMM/yyyy, hh:mm:ssa");
 	        
-	        private String dateTimeFormat;
+	        private final String dateTimeFormat;
 
 	        DateTimeFormats(String dateTimeFormat) {this.dateTimeFormat = dateTimeFormat;}
 

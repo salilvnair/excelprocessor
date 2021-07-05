@@ -34,6 +34,6 @@ public @interface ExcelHeader {
 	IndexedColors foregroundColor() default IndexedColors.AUTOMATIC;
 	IndexedColors backgroundColor() default IndexedColors.AUTOMATIC;
 	short fillPattern() default CellStyle.NO_FILL;
-	short borderStyle() default CellStyle.BORDER_THIN;
+	short borderStyle() default CellStyle.BORDER_NONE;
 	IndexedColors borderColor() default IndexedColors.BLACK;
 }

@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 import com.github.salilvnair.excelprocessor.reflect.constant.ExcelSheetConstant;
 import com.github.salilvnair.excelprocessor.reflect.service.AbstractCustomValidatorTask;
+import org.apache.poi.ss.usermodel.IndexedColors;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -17,6 +18,7 @@ public @interface ExcelSheet {
 	boolean hasValidation() default false;
 	boolean isVertical() default false;
 	boolean isSingleValueVerticalSheet() default false;
+	boolean verticallyScatteredHeaders() default false;
 	boolean ignoreUnknown() default true;
 	String customTask() default "";
 	String[] customTasks() default {};
@@ -34,4 +36,7 @@ public @interface ExcelSheet {
 	boolean hasDuplicateHeaders() default false;
 	String userDefinedMessage() default "";
 	boolean containsPicture() default false;
+	boolean commentCellWithError() default false;
+	boolean highlightCellWithError() default false;
+	IndexedColors highlightedErrorCellColor() default IndexedColors.AUTOMATIC;
 }

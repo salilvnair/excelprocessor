@@ -47,7 +47,7 @@ public class DependencyValidator extends BaseExcelValidator {
 		}
 		if(dependencyHeaders!=null) {
 			String[] dependencyHeadersWithCustomValidation = new String[dependencyHeaders.length];
-			StringBuilder dependencyErrorBuilder = new StringBuilder("");
+			StringBuilder dependencyErrorBuilder = new StringBuilder();
 			errorMessage = processDependencyHeadersWithoutCustomValidation(excelHeaderValidator, dependencyHeaders, dependencyHeadersWithCustomValidation,validatorContext, customheaderMap, jsonExcelBean, columnValue, dependencyErrorBuilder, jsonKey, errorMessage);
 			errorMessage = processDependencyHeadersWithCustomValidation(excelHeaderValidator, dependencyHeaders, dependencyHeadersWithCustomValidation, validatorContext, customheaderMap, jsonExcelBean, columnValue, dependencyErrorBuilder, jsonKey, errorMessage);
 			
@@ -130,7 +130,7 @@ public class DependencyValidator extends BaseExcelValidator {
 				}			
 				String customMethod = dependentHeaderWithCustomValidator.split(ExcelValidatorConstant.EXCEL_CUSTOM_METHOD_VALIDATOR_PLACEHOLDER)[1];				
 				validatorContext.setCustomTaskMethod(customMethod);
-				dependencyErrorBuilder = new StringBuilder("");
+				dependencyErrorBuilder = new StringBuilder();
 				if(errorMessage!=null){
 					dependencyErrorBuilder.append(excelSheet.messageDelimitter());
 				}

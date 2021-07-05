@@ -9,7 +9,7 @@ import com.github.salilvnair.excelprocessor.reflect.context.ValidatorContext;
 import com.github.salilvnair.excelprocessor.reflect.service.ICustomValidatorTask;
 
 public class ExcelValidatorUtil {
-	private static Log log = LogFactory.getLog(ExcelValidatorUtil.class);
+	private static final Log log = LogFactory.getLog(ExcelValidatorUtil.class);
 	
 	private String methodName;
 	

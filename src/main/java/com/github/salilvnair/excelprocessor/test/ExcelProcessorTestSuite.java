@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.github.salilvnair.excelprocessor.test.sheet.*;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.util.IOUtils;
@@ -17,16 +18,13 @@ import org.json.JSONException;
 
 import com.github.salilvnair.excelprocessor.bean.BaseExcelSheet;
 import com.github.salilvnair.excelprocessor.builder.ExcelProcessorBuilder;
-import com.github.salilvnair.excelprocessor.test.sheet.CollegeSheet;
-import com.github.salilvnair.excelprocessor.test.sheet.EmployerSheet;
-import com.github.salilvnair.excelprocessor.test.sheet.SchoolSheet;
 
 public class ExcelProcessorTestSuite {
 
 	public static final String TEST_EXCEL_FOLDER = "excel";
 
 	public static void main(String[] args) {
-		String fileName = "MultiOrientedExportTemplate.xls";
+		String fileName = "ExcelProcessorTest.xls";
 		
 		//generateExcelSheetMappingBeanFromExcel(fileName);
 		
@@ -36,12 +34,50 @@ public class ExcelProcessorTestSuite {
 		
 		//writeToExcel(fileName);
 		
-		writeToExcelWithMultipleOrientation(fileName);
+		//writeToExcelWithMultipleOrientation(fileName);
 		
 		//getExcelInfo(fileName);
+
+		readAndWriteError(fileName);
 		
 	}
-	
+
+	private static void readAndWriteError(String fileName) {
+		File excelfile = getFileFromResource(TEST_EXCEL_FOLDER,fileName);
+		List<CountryStateInfoSheet> sheetData = null;
+		try {
+			ExcelProcessorBuilder excelProcessorBuilder = new ExcelProcessorBuilder();
+			long startTime = System.nanoTime();
+			excelProcessorBuilder.clear();
+			sheetData =
+					excelProcessorBuilder
+							.setExcelfile(excelfile)
+							.setExcelMappingBeanClasses(CountryStateInfoSheet.class)
+							.validateInDetail()
+							.fromExcel()
+							.toSheetList(CountryStateInfoSheet.class);
+			excelProcessorBuilder.clear();
+			String currentUser = System.getProperty("user.name");
+			String templateFile = "ExcelProcessorTest1.xls";
+			File filetemplate = getFileFromResource(TEST_EXCEL_FOLDER,templateFile);
+			excelProcessorBuilder
+					.fromSheetList(sheetData)
+					.setExcelTemplate(filetemplate)
+					.copyHeaderStyle(true)
+					.toExcel()
+					.save("Test_Ouput","C:\\Users\\"+currentUser+"\\Desktop");
+
+			long endTime = System.nanoTime();
+			long duration = (endTime - startTime);
+			System.out.println((duration/1000000));
+			System.out.println("File saved at:"+"C:\\Users\\"+currentUser+"\\Desktop\\Test_Ouput.xls");
+
+		}
+		catch (Exception e1) {
+			e1.printStackTrace();
+		}
+	}
+
 	private static void writeToExcelWithMultipleOrientation(String fileName) {
 		
 		try {
@@ -89,16 +125,16 @@ public class ExcelProcessorTestSuite {
 		boolean isVerticalSheet = true;
 		//set this to true if generated pojo has to extend BaseExcelValidationSheet
 		// and metadata regarding the validation
-		boolean hasHeaderValidation = false;
+		boolean hasHeaderValidation = true;
 		//set this as true if you want to generate pojo for Hiberanate Entity 
 		//which will be replica of sheet bean without excel header annotation
 		boolean ignoreExcelAnnoation = false;
 		
-		String sheetName = "AVPN";
+		String sheetName = "CountryStateInfo";
 		
-		int headerRowStartsFrom = 4;
+		int headerRowStartsFrom = 2;
 		
-		String headerColumnStartsFrom = "A";
+		String headerColumnStartsFrom = "B";
 		
 		generateExcelSheetMappingBeanFromExcel(fileName,
 											   sheetName,
@@ -112,6 +148,13 @@ public class ExcelProcessorTestSuite {
 	public static void generateExcelSheetMappingBeanFromExcel(String fileName,String sheetName,int headerRow,String columnHeader,boolean isPivot,boolean hasHeaderValidation,boolean ignoreExcelAnnotation) {
 		File excelfile = getFileFromResource(TEST_EXCEL_FOLDER,fileName);
 		List<String> ignoreList = new ArrayList<>();
+
+		ignoreList.add("Test Data");
+		ignoreList.add("GENERAL INFORAMTION");
+		ignoreList.add("ADDITIONAL INFORAMTION");
+		ignoreList.add("Internet Info");
+		ignoreList.add("Comments");
+
 		try {
 			ExcelProcessorBuilder excelProcessorBuilder = new ExcelProcessorBuilder();
 			System.out.println(
@@ -185,21 +228,21 @@ public class ExcelProcessorTestSuite {
 			ExcelProcessorBuilder excelProcessorBuilder = new ExcelProcessorBuilder();
 			long startTime = System.nanoTime();
 			excelProcessorBuilder.clear();
-			List<SchoolSheet> sheetData =
+			List<VerticalInfoSheet> sheetData =
 					excelProcessorBuilder
 								.setExcelfile(excelfile)
-								.setExcelMappingBeanClasses(SchoolSheet.class,
-										CollegeSheet.class,
-										EmployerSheet.class)
+								.setExcelMappingBeanClasses(VerticalInfoSheet.class)
+								.validateInDetail()
 								.fromExcel()
-								.toSheetList(SchoolSheet.class);
+								.toSheetList(VerticalInfoSheet.class);
 			excelProcessorBuilder.clear();
 			System.out.println(sheetData);
 			long endTime = System.nanoTime();
 			long duration = (endTime - startTime);
 			System.out.println((duration/1000000));
 			
-		} catch (Exception e1) {
+		}
+		catch (Exception e1) {
 			e1.printStackTrace();
 		}
 	}
