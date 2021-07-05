@@ -160,4 +160,4 @@ public class SchoolSheetCustomValidatorTask extends AbstractCustomValidatorTask 
 }
 ```
 
-> For detailed usage check the file [ExcelProcessorTestSuite.java](src/main/java/com/github/salilvnair/excelprocessor/v1/test/ExcelProcessorTestSuite.java)
+> For detailed usage check the file [ExcelProcessorTestSuite.java](src/main/java/com/github/salilvnair/excelprocessor/test/ExcelProcessorTestSuite.java)
