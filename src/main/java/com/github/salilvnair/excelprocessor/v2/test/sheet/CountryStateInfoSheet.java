@@ -1,0 +1,63 @@
+package com.github.salilvnair.excelprocessor.v2.test.sheet;
+
+
+import com.github.salilvnair.excelprocessor.v2.annotation.ExcelHeader;
+import com.github.salilvnair.excelprocessor.v2.annotation.ExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+
+@ExcelSheet(
+        value="CountryStateInfo",
+        isVertical=true,
+        headerRowAt=2,
+        headerColumnAt="B",
+        ignoreHeaders = {
+                "General",
+                "Info"
+        },
+        valueRowEndsAt = 8
+)
+public class CountryStateInfoSheet extends BaseExcelSheet {
+    @ExcelHeader("Country")
+    private String country;
+    @ExcelHeader("State")
+    private String state;
+    @ExcelHeader("Number of schools")
+    private Long numberOfSchools;
+    @ExcelHeader("State Govt")
+    private Long stateGovt;
+    @ExcelHeader("Private")
+    private Long privateCount;
+
+    //getters and setters
+    public String getCountry() {
+        return this.country;
+    }
+    public void setCountry(String country) {
+        this.country = country;
+    }
+    public String getState() {
+        return this.state;
+    }
+    public void setState(String state) {
+        this.state = state;
+    }
+    public Long getNumberOfSchools() {
+        return this.numberOfSchools;
+    }
+    public void setNumberOfSchools(Long numberOfSchools) {
+        this.numberOfSchools = numberOfSchools;
+    }
+    public Long getStateGovt() {
+        return this.stateGovt;
+    }
+    public void setStateGovt(Long stateGovt) {
+        this.stateGovt = stateGovt;
+    }
+    public Long getPrivateCount() {
+        return privateCount;
+    }
+
+    public void setPrivateCount(Long privateCount) {
+        this.privateCount = privateCount;
+    }
+}

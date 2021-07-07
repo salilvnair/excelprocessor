@@ -1,7 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.annotation;
 
-import com.github.salilvnair.excelprocessor.reflect.constant.ExcelSheetConstant;
-import com.github.salilvnair.excelprocessor.reflect.service.AbstractCustomValidatorTask;
+import com.github.salilvnair.excelprocessor.v1.reflect.constant.ExcelSheetConstant;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.task.core.AbstractExcelTaskValidator;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 public @interface ExcelSheet {
 	String value() default "";
 	String type() default ExcelSheetConstant.EXCEL_FILE_TYPE_XLS;
-	Class<? extends AbstractCustomValidatorTask> customTaskValidator() default AbstractCustomValidatorTask.class;
+	Class<? extends AbstractExcelTaskValidator> excelTaskValidator() default DefaultTaskValidator.class;
 	boolean hasValidation() default false;
 	boolean isVertical() default false;
 	boolean isSingleValueVerticalSheet() default false;
@@ -23,15 +23,17 @@ public @interface ExcelSheet {
 	String[] ignoreHeaders() default {};
 	String ignoreHeaderKey() default "";
 	String headerColumnAt() default "A";
-	String valueColumnAt() default "B";
-	String valueColumnBeginsAt() default "B";
+	String valueColumnAt() default "";
+	String valueColumnBeginsAt() default "";
 	String valueColumnEndsAt() default "";
 	int headerRowAt() default 1;
-	int valueRowAt() default 2;
-	int valueRowBeginsAt() default 2;
+	int valueRowAt() default -1;
+	int valueRowBeginsAt() default -1;
 	int valueRowEndsAt() default -1;
 	String messageDelimitter() default ",";
 	boolean hasDuplicateHeaders() default false;
 	String userDefinedMessage() default "";
 	boolean containsPicture() default false;
+
+	final static class DefaultTaskValidator extends AbstractExcelTaskValidator {}
 }

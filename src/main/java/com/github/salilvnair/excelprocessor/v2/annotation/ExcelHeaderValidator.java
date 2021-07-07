@@ -1,6 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.annotation;
 
-import com.github.salilvnair.excelprocessor.reflect.constant.ExcelHeaderConstant;
+
+import com.github.salilvnair.excelprocessor.v2.processor.validator.type.MessageType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -27,12 +28,12 @@ public @interface ExcelHeaderValidator {
 	boolean alphaNumeric() default false;
 	boolean numeric() default false;
 	boolean currency() default false;
-	String typeOfCurrency() default ExcelHeaderConstant.COLUMN_VALUE_CURRENCY_TYPE_DOLLAR;
-	String typeOfNumeric() default ExcelHeaderConstant.COLUMN_VALUE_NUMERIC_DEFAULT;
 	String customTask() default "";
 	String[] customTasks() default {};
 	String[] dependentHeaders() default {};
 	String dependentHeaderKey() default "";	
 	String userDefinedMessage() default "";
-	String[] userDefinedMessages() default {};	
+	String messageId()  default "";
+	MessageType messageType() default MessageType.ERROR;
+	UserDefinedMessage[] userDefinedMessages() default {};
 }

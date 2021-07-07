@@ -73,7 +73,7 @@ private String email;
       ```java
       //below snippet shows how to extract data of single sheet
       
-			List<SchoolSheet> sheetData = excelProcessorBuilder
+			List<SchoolSheet> sheet = excelProcessorBuilder
                                     .setExcelfile(excelfile)
                                     .setExcelMappingBeanClasses(
                                         SchoolSheet.class,
@@ -160,4 +160,4 @@ public class SchoolSheetCustomValidatorTask extends AbstractCustomValidatorTask 
 }
 ```
 
-> For detailed usage check the file [ExcelProcessorTestSuite.java](src/main/java/com/github/salilvnair/excelprocessor/test/ExcelProcessorTestSuite.java)
+> For detailed usage check the file [ExcelProcessorTestSuite.java](src/main/java/com/github/salilvnair/excelprocessor/v1/test/ExcelProcessorTestSuite.java)
