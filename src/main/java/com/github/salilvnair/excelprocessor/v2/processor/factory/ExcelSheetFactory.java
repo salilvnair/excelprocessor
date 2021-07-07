@@ -1,8 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.processor.factory;
 
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.annotation.MultiOrientedSheet;
-import com.github.salilvnair.excelprocessor.v2.processor.core.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.BaseExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.HorizontalSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.MultiOrientedSheetReader;
@@ -16,8 +15,8 @@ public class ExcelSheetFactory {
     private ExcelSheetFactory(){}
 
 
-    public static BaseExcelSheetReader generateReader(ExcelSheet excelSheet) {
-        if(excelSheet.isVertical()) {
+    public static BaseExcelSheetReader generateReader(Sheet sheet) {
+        if(sheet.isVertical()) {
             return new VerticalSheetReader();
         }
         else {
@@ -30,8 +29,8 @@ public class ExcelSheetFactory {
         if(multiOrientedSheet!=null) {
             return new MultiOrientedSheetReader();
         }
-        ExcelSheet excelSheet = clazz.getAnnotation(ExcelSheet.class);
-        return excelSheet != null ? generateReader(excelSheet) : null;
+        Sheet sheet = clazz.getAnnotation(Sheet.class);
+        return sheet != null ? generateReader(sheet) : null;
     }
 
 }

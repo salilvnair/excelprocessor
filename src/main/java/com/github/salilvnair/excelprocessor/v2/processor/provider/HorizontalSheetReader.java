@@ -2,16 +2,14 @@ package com.github.salilvnair.excelprocessor.v2.processor.provider;
 
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
 import com.github.salilvnair.excelprocessor.util.ReflectionUtil;
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelHeader;
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
+import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.helper.TypeConvertor;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.core.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
 import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import java.lang.reflect.Field;
 import java.util.*;
@@ -31,11 +29,11 @@ public class HorizontalSheetReader extends BaseExcelSheetReader {
             return;//change it to exception later on
         }
 
-        ExcelSheet excelSheet = clazz.getAnnotation(ExcelSheet.class);
+        Sheet excelSheet = clazz.getAnnotation(Sheet.class);
         int headerRowIndex = excelSheet.headerRowAt() - 1;
         int headerColumnIndex = ExcelSheetReader.toIndentNumber(excelSheet.headerColumnAt())  - 1;
         String sheetName = context.sheetName() == null ? excelSheet.value(): context.sheetName();
-        Sheet sheet = workbook.getSheet(sheetName);
+        org.apache.poi.ss.usermodel.Sheet sheet = workbook.getSheet(sheetName);
         int totalRows = sheet.getLastRowNum();
         Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap = new LinkedHashMap<>();
         Row headerRow = sheet.getRow(headerRowIndex);
@@ -58,7 +56,7 @@ public class HorizontalSheetReader extends BaseExcelSheetReader {
                 cellInfo.setRowIndex(r);
                 cellInfo.setColumnIndex(c);
                 String headerKey = headerColumnIndexKeyedHeaderValueMap.get(c);
-                Cell cell = row.getCell(c);
+                org.apache.poi.ss.usermodel.Cell cell = row.getCell(c);
                 if(cell == null){
                     cellInfo.setValue(null);
                     headerKeyCellInfoMap.put(headerKey, cellInfo);
@@ -71,16 +69,17 @@ public class HorizontalSheetReader extends BaseExcelSheetReader {
             rowIndexKeyedHeaderKeyCellInfoMap.put(r, headerKeyCellInfoMap);
         }
 
-        Set<Field> excelHeaders = AnnotationUtil.getAnnotatedFields(clazz, ExcelHeader.class);
+        Set<Field> excelHeaders = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
         Map<String, Field> headerKeyFieldMap = excelHeaders.stream().collect(Collectors.toMap(excelHeader -> {
-            ExcelHeader excelHeaderAnn = excelHeader.getAnnotation(ExcelHeader.class);
-            return excelHeaderAnn.value();
+            Cell cellAnn = excelHeader.getAnnotation(Cell.class);
+            return cellAnn.value();
         }, excelHeader -> excelHeader, (o, n) -> n));
         List<BaseExcelSheet> baseSheetList = new LinkedList<>();
         rowIndexKeyedHeaderKeyCellInfoMap.forEach((key, value) -> {
             try {
                 BaseExcelSheet classObject = clazz.asSubclass(BaseExcelSheet.class).newInstance();
                 classObject.setRowIndex(key);
+                classObject.setRow(key+1);
                 headerKeyFieldMap.forEach((headerKey, field) -> {
                     CellInfo cellInfo = value.get(headerKey);
                     if(cellInfo!=null) {
@@ -96,6 +95,6 @@ public class HorizontalSheetReader extends BaseExcelSheetReader {
         context.setHeaderKeyFieldMap(headerKeyFieldMap);
         context.setRowIndexKeyedHeaderKeyCellInfoMap(rowIndexKeyedHeaderKeyCellInfoMap);
         context.setSheetData(Collections.unmodifiableList(baseSheetList));
-        context.setExcelSheet(excelSheet);
+        context.setSheet(excelSheet);
     }
 }

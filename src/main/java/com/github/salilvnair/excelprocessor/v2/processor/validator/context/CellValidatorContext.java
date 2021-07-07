@@ -1,6 +1,6 @@
 package com.github.salilvnair.excelprocessor.v2.processor.validator.context;
 
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.IExcelValidator;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
@@ -10,8 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ValidatorContext {
-    private ExcelSheet excelSheet;
+public class CellValidatorContext {
+    private Sheet sheet;
+    private String sheetName;
     private BaseExcelSheet currentRow;
     private List<? extends BaseExcelSheet> currentSheet;
     private Map<String, List<? extends BaseExcelSheet>> excelSheets;
@@ -80,12 +81,12 @@ public class ValidatorContext {
         this.userDefinedMessageDataSet = userDefinedMessageDataSet;
     }
 
-    public ExcelSheet excelSheet() {
-        return excelSheet;
+    public Sheet sheet() {
+        return sheet;
     }
 
-    public void setExcelSheet(ExcelSheet excelSheet) {
-        this.excelSheet = excelSheet;
+    public void setSheet(Sheet sheet) {
+        this.sheet = sheet;
     }
 
     public IExcelValidator validator() {
@@ -117,5 +118,13 @@ public class ValidatorContext {
 
     public void setCurrentRow(BaseExcelSheet currentRow) {
         this.currentRow = currentRow;
+    }
+
+    public String sheetName() {
+        return sheetName;
+    }
+
+    public void setSheetName(String sheetName) {
+        this.sheetName = sheetName;
     }
 }

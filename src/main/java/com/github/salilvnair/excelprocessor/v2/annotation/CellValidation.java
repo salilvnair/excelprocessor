@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ExcelHeaderValidator {
+public @interface CellValidation {
 	boolean required() default false;
 	boolean unique() default false;
 	boolean conditional() default false;

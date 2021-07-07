@@ -2,6 +2,7 @@ package com.github.salilvnair.excelprocessor.v2.test.sheet;
 
 
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
+import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
 
@@ -16,9 +17,10 @@ import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
         },
         valueRowEndsAt = 8
 )
-public class CountryStateInfoSheet extends BaseExcelSheet {
+public class MultiOrientedCountryStateInfoSheet extends BaseExcelSheet {
     @Cell("Country")
     private String country;
+    @CellValidation(required = true)
     @Cell("State")
     private String state;
     @Cell("Number of schools")

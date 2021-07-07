@@ -1,7 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.processor.validator.helper;
 
-import com.github.salilvnair.excelprocessor.v2.processor.validator.context.ValidationMessage;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.context.ValidatorContext;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
 
 import java.util.Collections;
@@ -12,14 +12,14 @@ import java.util.Map;
  * @author Salil V Nair
  */
 public class ExcelValidator {
-    private ExcelValidator(ValidatorContext validatorContext) {
+    private ExcelValidator(CellValidatorContext validatorContext) {
         this.validatorContext = validatorContext;
     }
-    private ValidatorContext validatorContext;
+    private CellValidatorContext validatorContext;
     private BaseExcelSheet row;
     private List<? extends BaseExcelSheet> rows;
 
-    public static ExcelValidator init(ValidatorContext validatorContext) {
+    public static ExcelValidator init(CellValidatorContext validatorContext) {
         return new ExcelValidator(validatorContext);
     }
 
@@ -37,7 +37,7 @@ public class ExcelValidator {
 
     private void initValidatorContext() {
         if(this.validatorContext==null) {
-            this.validatorContext = new ValidatorContext();
+            this.validatorContext = new CellValidatorContext();
         }
     }
 
@@ -58,7 +58,12 @@ public class ExcelValidator {
         return this;
     }
 
-    public List<ValidationMessage> validate() {
+    public ExcelValidator multiOriented(String sheetName) {
+        validatorContext.setSheetName(sheetName);
+        return this;
+    }
+
+    public List<CellValidationMessage> validate() {
         if(row==null && (this.rows==null||this.rows.isEmpty())) {
             return Collections.emptyList();
         }

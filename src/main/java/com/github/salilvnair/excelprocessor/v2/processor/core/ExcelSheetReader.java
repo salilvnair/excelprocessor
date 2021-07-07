@@ -2,7 +2,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.core;
 
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.context.ValidationMessage;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -22,13 +22,11 @@ public interface ExcelSheetReader {
 
   default Map<String, List<? extends BaseExcelSheet>> read(Class<? extends BaseExcelSheet>[] classes, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyMap();}
 
-  default List<ValidationMessage> validate(List<? extends BaseExcelSheet> sheetData, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyList();}
+  default List<CellValidationMessage> validate(List<? extends BaseExcelSheet> sheetData, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyList();}
 
-  default Map<String, List<ValidationMessage>> validate(Map<String, List<? extends BaseExcelSheet>> excelData, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyMap();}
+  default Map<String, List<CellValidationMessage>> validate(Map<String, List<? extends BaseExcelSheet>> excelData, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyMap();}
 
   default void readAndValidate(Class<? extends BaseExcelSheet> clazz, ExcelSheetContext sheetContext) throws Exception {}
-
-  default void readAndValidate(Class<? extends BaseExcelSheet> clazz, boolean multiOriented, ExcelSheetContext sheetContext) throws Exception { }
 
   default void readAndValidate(String[] fullyQualifiedClassNames, ExcelSheetContext sheetContext) throws Exception {}
 

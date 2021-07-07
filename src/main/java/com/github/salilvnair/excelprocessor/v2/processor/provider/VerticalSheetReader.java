@@ -2,8 +2,8 @@ package com.github.salilvnair.excelprocessor.v2.processor.provider;
 
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
 import com.github.salilvnair.excelprocessor.util.ReflectionUtil;
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelHeader;
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
+import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.helper.TypeConvertor;
 import com.github.salilvnair.excelprocessor.v2.processor.core.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
@@ -31,10 +31,10 @@ public class VerticalSheetReader extends BaseExcelSheetReader {
             return;//change it to exception later on
         }
 
-        ExcelSheet excelSheet = clazz.getAnnotation(ExcelSheet.class);
+        Sheet excelSheet = clazz.getAnnotation(Sheet.class);
         int headerRowIndex = excelSheet.headerRowAt() - 1;
         String sheetName = context.sheetName() == null ? excelSheet.value(): context.sheetName();
-        Sheet sheet = workbook.getSheet(sheetName);
+        org.apache.poi.ss.usermodel.Sheet sheet = workbook.getSheet(sheetName);
         int totalRows = sheet.getLastRowNum();
         totalRows = excelSheet.valueRowEndsAt()!=-1 ? excelSheet.valueRowEndsAt() - 1 : totalRows;
         int headerColumnIndex = ExcelSheetReader.toIndentNumber(excelSheet.headerColumnAt())  - 1;
@@ -56,7 +56,7 @@ public class VerticalSheetReader extends BaseExcelSheetReader {
                 maxColumnC = ExcelSheetReader.toIndentNumber(excelSheet.valueColumnEndsAt()) - 1;
             }
             for (int c = headerColumnIndex ; c < headerColumnIndex+1; c++) {
-                Cell headerCell = row.getCell(headerColumnIndex);
+                org.apache.poi.ss.usermodel.Cell headerCell = row.getCell(headerColumnIndex);
                 if(headerCell == null){
                     continue;
                 }
@@ -74,10 +74,15 @@ public class VerticalSheetReader extends BaseExcelSheetReader {
                 }
                 String headerKey = headerRowIndexKeyedHeaderValueMap.get(r);
                 for (int c = cIndex ; c < cIndex + 1; c++) {
-                    Cell cell = row.getCell(c);
+                    org.apache.poi.ss.usermodel.Cell cell = row.getCell(c);
                     CellInfo cellInfo = new CellInfo();
                     cellInfo.setRowIndex(r);
                     cellInfo.setColumnIndex(c);
+                    if(cell == null){
+                        cellInfo.setValue(null);
+                        headerKeyCellInfoMap.put(headerKey, cellInfo);
+                        continue;
+                    }
                     Object cellValue = extractValueBasedOnCellType(workbook, cell, cellInfo);
                     cellInfo.setValue(cellValue);
                     headerKeyCellInfoMap.put(headerKey, cellInfo);
@@ -88,15 +93,17 @@ public class VerticalSheetReader extends BaseExcelSheetReader {
         }
 
 
-        Set<Field> excelHeaders = AnnotationUtil.getAnnotatedFields(clazz, ExcelHeader.class);
+        Set<Field> excelHeaders = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
         Map<String, Field> headerKeyFieldMap = excelHeaders.stream().collect(Collectors.toMap(excelHeader -> {
-            ExcelHeader excelHeaderAnn = excelHeader.getAnnotation(ExcelHeader.class);
-            return excelHeaderAnn.value();
+            Cell cellAnn = excelHeader.getAnnotation(Cell.class);
+            return cellAnn.value();
         }, excelHeader -> excelHeader, (o, n) -> n));
         List<BaseExcelSheet> baseSheetList = new ArrayList<>();
         colIndexKeyedHeaderKeyCellInfoMap.forEach((key, value) -> {
             try {
                 BaseExcelSheet classObject = clazz.getConstructor().newInstance();
+                classObject.setColumnIndex(key);
+                classObject.setColumn(ExcelSheetReader.toIndentName(key+1));
                 headerKeyFieldMap.forEach((headerKey, field) -> {
                     CellInfo cellInfo = value.get(headerKey);
                     if(cellInfo!=null) {
@@ -107,13 +114,13 @@ public class VerticalSheetReader extends BaseExcelSheetReader {
                 baseSheetList.add(classObject);
             }
             catch (Exception ignored) {
-                ignored.printStackTrace();
+
             }
         });
         context.setHeaderRowIndexKeyedHeaderValueMap(headerRowIndexKeyedHeaderValueMap);
         context.setHeaderKeyFieldMap(headerKeyFieldMap);
         context.setColIndexKeyedHeaderKeyCellInfoMap(colIndexKeyedHeaderKeyCellInfoMap);
         context.setSheetData(Collections.unmodifiableList(baseSheetList));
-        context.setExcelSheet(excelSheet);
+        context.setSheet(excelSheet);
     }
 }

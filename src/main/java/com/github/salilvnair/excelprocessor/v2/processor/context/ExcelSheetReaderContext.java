@@ -1,12 +1,13 @@
 package com.github.salilvnair.excelprocessor.v2.processor.context;
 
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
 import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ public class ExcelSheetReaderContext {
     private InputStream excelFileInputStream;
     private String fileName;
     private Workbook workbook;
-    private ExcelSheet excelSheet;
+    private Sheet sheet;
     private String sheetName;
     private Map<String, Field> headerKeyFieldMap;
     private Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap;
@@ -28,6 +29,7 @@ public class ExcelSheetReaderContext {
     private boolean extractMultiOrientedMap;
     private Map<String, List<? extends BaseExcelSheet>> multiOrientedSheetMap;
     private Map<String, List<? extends BaseExcelSheet>> scatteredSheetMap;
+    private Map<String, ExcelSheetReaderContext> multiOrientedReaderContexts;
 
 
     public Map<String, Field> getHeaderKeyFieldMap() {
@@ -78,12 +80,12 @@ public class ExcelSheetReaderContext {
         this.workbook = workbook;
     }
 
-    public ExcelSheet getExcelSheet() {
-        return excelSheet;
+    public Sheet sheet() {
+        return sheet;
     }
 
-    public void setExcelSheet(ExcelSheet excelSheet) {
-        this.excelSheet = excelSheet;
+    public void setSheet(Sheet sheet) {
+        this.sheet = sheet;
     }
 
     public List<? extends BaseExcelSheet> getSheetData() {
@@ -140,5 +142,12 @@ public class ExcelSheetReaderContext {
 
     public void setScatteredSheetMap(Map<String, List<? extends BaseExcelSheet>> scatteredSheetMap) {
         this.scatteredSheetMap = scatteredSheetMap;
+    }
+
+    public Map<String, ExcelSheetReaderContext> multiOrientedReaderContexts() {
+        if(multiOrientedReaderContexts == null) {
+            multiOrientedReaderContexts =  new HashMap<>();
+        }
+        return multiOrientedReaderContexts;
     }
 }

@@ -1,27 +1,27 @@
 package com.github.salilvnair.excelprocessor.v2.test.sheet;
 
 
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelHeader;
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelHeaderValidator;
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
+import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
+import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
 import com.github.salilvnair.excelprocessor.v2.test.sheet.task.CollegeSheetTaskValidator;
 
-@ExcelSheet(
+@Sheet(
         value="College",
         hasValidation=true,
         excelTaskValidator = CollegeSheetTaskValidator.class
 )
 public class CollegeSheet extends BaseExcelSheet {
-    @ExcelHeader("Name")
+    @Cell("Name")
     private String name;
-    @ExcelHeaderValidator(customTask = "defaultUniversity")
-    @ExcelHeader("University")
+    @CellValidation(customTask = "defaultUniversity")
+    @Cell("University")
     private String university;
-    @ExcelHeader("State")
+    @Cell("State")
     private String state;
-    @ExcelHeaderValidator(conditional = true, condition = "shouldBeGreaterThanZero")
-    @ExcelHeader("No of students")
+    @CellValidation(conditional = true, condition = "shouldBeGreaterThanZero")
+    @Cell("No of students")
     private Long noOfStudents;
 
   //getters and setters

@@ -5,28 +5,39 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
-import com.github.salilvnair.excelprocessor.v2.test.sheet.task.SchoolSheetTaskValidator;
+import com.github.salilvnair.excelprocessor.v2.test.sheet.task.CollegeSheetTaskValidator;
 
 @Sheet(
-        value="School",
+        value="College",
         hasValidation=true,
-        excelTaskValidator = SchoolSheetTaskValidator.class
+        headerRowAt = 10,
+        headerColumnAt = "B",
+        excelTaskValidator = CollegeSheetTaskValidator.class
 )
-public class SchoolSheet extends BaseExcelSheet {
+public class MultiOrientedCollegeSheet extends BaseExcelSheet {
     @Cell("Name")
     private String name;
-    @CellValidation(required = true, messageId = "10001")
-    @Cell(value="State")
+    @CellValidation(customTask = "defaultUniversity")
+    @Cell("University")
+    private String university;
+    @Cell("State")
     private String state;
-    @CellValidation(conditional = true, condition = "shouldBeGreaterThanZero", messageId = "2000")
+    @CellValidation(conditional = true, condition = "shouldBeGreaterThanZero")
     @Cell("No of students")
     private Long noOfStudents;
+
   //getters and setters
     public String getName() {
        return this.name;
     }
     public void setName(String name) {
         this.name = name;
+    }
+    public String getUniversity() {
+       return this.university;
+    }
+    public void setUniversity(String university) {
+        this.university = university;
     }
     public String getState() {
        return this.state;
@@ -42,6 +53,8 @@ public class SchoolSheet extends BaseExcelSheet {
     }
 	@Override
 	public String toString() {
-		return "SchoolSheet [name=" + name + ", state=" + state + ", noOfStudents=" + noOfStudents + "]";
+		return "CollegeSheet [name=" + name + ", university=" + university + ", state=" + state + ", noOfStudents="
+				+ noOfStudents + "]";
 	}
+    
 }

@@ -1,11 +1,11 @@
 package com.github.salilvnair.excelprocessor.v2.processor.validator.provider;
 
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelHeaderValidator;
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelSheet;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.context.ValidationMessage;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.context.ValidatorContext;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.core.BaseExcelValidator;
+import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
+import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.core.AbstractExcelValidator;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.ExcelSheetValidatorType;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.helper.ExcelValidatorUtil;
 
@@ -18,16 +18,16 @@ import java.util.Set;
 /**
  * @author Salil V Nair
  */
-public class RowValidator extends BaseExcelValidator {
+public class RowValidator extends AbstractExcelValidator {
     private Set<Field> columns = new HashSet<>();
     public RowValidator(Object rowInstance) {
-        columns = AnnotationUtil.getAnnotatedFields(rowInstance.getClass(), ExcelHeaderValidator.class);
+        columns = AnnotationUtil.getAnnotatedFields(rowInstance.getClass(), CellValidation.class);
     }
     @Override
-    public List<ValidationMessage> validate(Object currentInstance, ValidatorContext validatorContext) {
-        List<ValidationMessage> errors = new ArrayList<>();
-        ExcelSheet excelSheet = currentInstance.getClass().getAnnotation(ExcelSheet.class);
-        validatorContext.setExcelSheet(excelSheet);
+    public List<CellValidationMessage> validate(Object currentInstance, CellValidatorContext validatorContext) {
+        List<CellValidationMessage> errors = new ArrayList<>();
+        Sheet sheet = currentInstance.getClass().getAnnotation(Sheet.class);
+        validatorContext.setSheet(sheet);
         for (Field column: columns) {
             ExcelValidatorUtil validatorUtil = new ExcelValidatorUtil(column, ExcelSheetValidatorType.COLUMN);
             validatorContext.setField(column);

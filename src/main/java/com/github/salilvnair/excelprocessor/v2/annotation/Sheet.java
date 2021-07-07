@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface ExcelSheet {
+public @interface Sheet {
 	String value() default "";
 	String type() default ExcelSheetConstant.EXCEL_FILE_TYPE_XLS;
 	Class<? extends AbstractExcelTaskValidator> excelTaskValidator() default DefaultTaskValidator.class;
@@ -30,7 +30,7 @@ public @interface ExcelSheet {
 	int valueRowAt() default -1;
 	int valueRowBeginsAt() default -1;
 	int valueRowEndsAt() default -1;
-	String messageDelimitter() default ",";
+	String messageDelimiter() default ",";
 	boolean hasDuplicateHeaders() default false;
 	String userDefinedMessage() default "";
 	boolean containsPicture() default false;

@@ -1,18 +1,18 @@
 package com.github.salilvnair.excelprocessor.v2.test.sheet;
 
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelHeader;
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
+import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
 
-@ExcelSheet(value="Employer", hasValidation=true)
+@Sheet(value="Employer", hasValidation=true)
 public class EmployerSheet extends BaseExcelSheet{
-    @ExcelHeader("Name")
+    @Cell("Name")
     private String name;
-    @ExcelHeader("State")
+    @Cell("State")
     private String state;
-    @ExcelHeader("CMM Level")
+    @Cell("CMM Level")
     private Double cmmLevel;
-    @ExcelHeader("No of employees")
+    @Cell("No of employees")
     private Double noOfEmployees;
 
   //getters and setters

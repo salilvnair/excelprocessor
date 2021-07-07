@@ -2,7 +2,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.validator.context;
 
 import com.github.salilvnair.excelprocessor.v2.processor.validator.type.ValidatorType;
 
-public class ValidationMessage {
+public class CellValidationMessage {
     private String header;
     private String mappedFieldName;
     private String message;

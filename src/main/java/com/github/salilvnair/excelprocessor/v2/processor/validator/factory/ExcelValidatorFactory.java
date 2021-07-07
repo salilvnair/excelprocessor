@@ -1,6 +1,6 @@
 package com.github.salilvnair.excelprocessor.v2.processor.validator.factory;
 
-import com.github.salilvnair.excelprocessor.v2.annotation.ExcelHeaderValidator;
+import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.IExcelValidator;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.ExcelSheetValidatorType;
@@ -15,15 +15,6 @@ import java.util.List;
  */
 public class ExcelValidatorFactory {
     private ExcelValidatorFactory(){}
-    
-//    public static List<IExcelValidator> generate(Field field, ValidatorContext validatorContext) {
-//        ExcelHeaderValidator headerValidator = field.getAnnotation(ExcelHeaderValidator.class);
-//        List<IExcelValidator> validators = new ArrayList<>();
-//        if(headerValidator.required()) {
-//            validators.add(new RequiredValidator());
-//        }
-//        return validators;
-//    }
 
     public static List<IExcelValidator> generate(Object classInstance, ExcelSheetValidatorType excelSheetValidatorType) {
         List<IExcelValidator> validators = new ArrayList<>();
@@ -48,14 +39,14 @@ public class ExcelValidatorFactory {
 
     private static List<IExcelValidator> generateColumnValidators(Field column) {
         List<IExcelValidator> validators = new ArrayList<>();
-        ExcelHeaderValidator headerValidator = column.getAnnotation(ExcelHeaderValidator.class);
-        if(headerValidator.required()) {
+        CellValidation cellValidation = column.getAnnotation(CellValidation.class);
+        if(cellValidation.required()) {
             validators.add(new RequiredValidator(column));
         }
-        if(headerValidator.conditional()) {
+        if(cellValidation.conditional()) {
             validators.add(new ConditionalValidator(column));
         }
-        if(!StringUtils.isEmpty(headerValidator.customTask()) || headerValidator.customTasks().length > 0) {
+        if(!StringUtils.isEmpty(cellValidation.customTask()) || cellValidation.customTasks().length > 0) {
             validators.add(new CustomMethodValidator(column));
         }
         return validators;

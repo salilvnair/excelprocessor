@@ -9,8 +9,8 @@ import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
 @MultiOrientedSheet(
         name = "MultiOrientedSheet",
         value = {
-                CountryStateInfoSheet.class,
-                CollegeSheet.class
+                MultiOrientedCountryStateInfoSheet.class,
+                MultiOrientedCollegeSheet.class
         }
 )
 public class CollegeCountryStateInfoSheet extends BaseExcelSheet {

@@ -9,9 +9,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.github.salilvnair.excelprocessor.v1.test.sheet.*;
-import com.github.salilvnair.excelprocessor.v2.helper.StopWatch;
+import com.github.salilvnair.excelprocessor.util.StopWatch;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.util.IOUtils;
@@ -25,7 +26,7 @@ public class ExcelProcessorTestSuite {
 	public static final String TEST_EXCEL_FOLDER = "excel";
 
 	public static void main(String[] args) {
-		String fileName = "ExcelProcessorTest.xls";
+		String fileName = "ExcelProcessorTest1.xlsx";
 		
 		//generateExcelSheetMappingBeanFromExcel(fileName);
 		
@@ -229,15 +230,15 @@ public class ExcelProcessorTestSuite {
 			ExcelProcessorBuilder excelProcessorBuilder = new ExcelProcessorBuilder();
 			excelProcessorBuilder.clear();
 			StopWatch.start();
-			List<SchoolSheet> sheetData =
+			List<CountryStateInfoSheet> sheetData =
 					excelProcessorBuilder
 								.setExcelfile(excelfile)
-								.setExcelMappingBeanClasses(SchoolSheet.class)
+								.setExcelMappingBeanClasses(CountryStateInfoSheet.class)
 								.validateInDetail()
 								.fromExcel()
-								.toSheetList(SchoolSheet.class);
+								.toSheetList(CountryStateInfoSheet.class);
 			excelProcessorBuilder.clear();
-			System.out.println("excelprocessor v1 took " + StopWatch.stop() + " milliseconds");
+			System.out.println("excelprocessor v1 took " + StopWatch.elapsed(TimeUnit.SECONDS) + " second(s)");
 			
 		}
 		catch (Exception e1) {
