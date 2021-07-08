@@ -12,5 +12,8 @@ public class ExcelSheetReaderFactory {
     public static ExcelSheetReader generate() {
         return ExcelSheetReaderImpl.init();
     }
+    public static ExcelSheetReader generate(boolean concurrent) {
+        return ExcelSheetReaderImpl.init(concurrent);
+    }
 
 }

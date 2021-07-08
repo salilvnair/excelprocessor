@@ -4,6 +4,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetConte
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -14,6 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface ExcelSheetReader {
+
+  default <T extends BaseExcelSheet> ExcelInfo excelInfo(Class<T> clazz, ExcelSheetContext sheetContext)throws Exception { return null;};
+
+  default ExcelInfo excelInfo(String[] fullyQualifiedClassNames, ExcelSheetContext sheetContext) throws Exception { return null;}
+
   default <T extends BaseExcelSheet> List<T> read(Class<T> clazz, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyList();}
 
   default <T extends BaseExcelSheet> Map<String, List<? extends BaseExcelSheet>> read(Class<T> clazz, boolean multiOriented, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyMap();}

@@ -30,6 +30,10 @@ public class ExcelSheetReaderContext {
     private Map<String, List<? extends BaseExcelSheet>> multiOrientedSheetMap;
     private Map<String, List<? extends BaseExcelSheet>> scatteredSheetMap;
     private Map<String, ExcelSheetReaderContext> multiOrientedReaderContexts;
+    private String valueColumnBeginsAt;
+    private String valueColumnEndsAt;
+    private int valueRowBeginsAt=-1;
+    private int valueRowEndsAt=-1;
 
 
     public Map<String, Field> getHeaderKeyFieldMap() {
@@ -126,6 +130,38 @@ public class ExcelSheetReaderContext {
 
     public void setExtractMultiOrientedMap(boolean extractMultiOrientedMap) {
         this.extractMultiOrientedMap = extractMultiOrientedMap;
+    }
+
+    public String valueColumnBeginsAt() {
+        return valueColumnBeginsAt;
+    }
+
+    public void setValueColumnBeginsAt(String valueColumnBeginsAt) {
+        this.valueColumnBeginsAt = valueColumnBeginsAt;
+    }
+
+    public String valueColumnEndsAt() {
+        return valueColumnEndsAt;
+    }
+
+    public void setValueColumnEndsAt(String valueColumnEndsAt) {
+        this.valueColumnEndsAt = valueColumnEndsAt;
+    }
+
+    public int valueRowBeginsAt() {
+        return valueRowBeginsAt;
+    }
+
+    public void setValueRowBeginsAt(int valueRowBeginsAt) {
+        this.valueRowBeginsAt = valueRowBeginsAt;
+    }
+
+    public int valueRowEndsAt() {
+        return valueRowEndsAt;
+    }
+
+    public void setValueRowEndsAt(int valueRowEndsAt) {
+        this.valueRowEndsAt = valueRowEndsAt;
     }
 
     public String sheetName() {

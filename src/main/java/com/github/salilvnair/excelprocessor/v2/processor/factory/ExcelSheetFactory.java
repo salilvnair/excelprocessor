@@ -15,22 +15,22 @@ public class ExcelSheetFactory {
     private ExcelSheetFactory(){}
 
 
-    public static BaseExcelSheetReader generateReader(Sheet sheet) {
+    public static BaseExcelSheetReader generateReader(Sheet sheet, boolean concurrent) {
         if(sheet.isVertical()) {
-            return new VerticalSheetReader();
+            return new VerticalSheetReader(concurrent);
         }
         else {
-            return new HorizontalSheetReader();
+            return new HorizontalSheetReader(concurrent);
         }
     }
 
-    public static BaseExcelSheetReader generateReader(Class<? extends BaseExcelSheet> clazz) {
+    public static BaseExcelSheetReader generateReader(Class<? extends BaseExcelSheet> clazz, boolean concurrent) {
         MultiOrientedSheet multiOrientedSheet = clazz.getAnnotation(MultiOrientedSheet.class);
         if(multiOrientedSheet!=null) {
-            return new MultiOrientedSheetReader();
+            return new MultiOrientedSheetReader(concurrent);
         }
         Sheet sheet = clazz.getAnnotation(Sheet.class);
-        return sheet != null ? generateReader(sheet) : null;
+        return sheet != null ? generateReader(sheet, concurrent) : null;
     }
 
 }

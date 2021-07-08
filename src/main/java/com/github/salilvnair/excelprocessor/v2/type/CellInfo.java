@@ -8,7 +8,7 @@ public class CellInfo {
     private int columnIndex;
     private Type cellType;
 
-    public Object getValue() {
+    public Object value() {
         return value;
     }
 
@@ -16,7 +16,7 @@ public class CellInfo {
         this.value = value;
     }
 
-    public int getRowIndex() {
+    public int rowIndex() {
         return rowIndex;
     }
 
@@ -24,7 +24,7 @@ public class CellInfo {
         this.rowIndex = rowIndex;
     }
 
-    public int getColumnIndex() {
+    public int columnIndex() {
         return columnIndex;
     }
 
@@ -32,7 +32,7 @@ public class CellInfo {
         this.columnIndex = columnIndex;
     }
 
-    public Type getCellType() {
+    public Type cellType() {
         return cellType;
     }
 

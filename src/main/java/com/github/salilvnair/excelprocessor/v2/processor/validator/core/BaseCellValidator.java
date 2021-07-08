@@ -86,8 +86,8 @@ public abstract class BaseCellValidator extends AbstractExcelValidator {
         String headerKey = cell.value();
         CellInfo cellInfo = cellInfoMap.get(headerKey);
         validationMessage.setHeader(headerKey);
-        validationMessage.setRow(cellInfo.getRowIndex() + 1);
-        validationMessage.setColumn(ExcelSheetReader.toIndentName(cellInfo.getColumnIndex()+1));
+        validationMessage.setRow(cellInfo.rowIndex() + 1);
+        validationMessage.setColumn(ExcelSheetReader.toIndentName(cellInfo.columnIndex()+1));
         validationMessage.setMappedFieldName(field.getName());
     }
 }
