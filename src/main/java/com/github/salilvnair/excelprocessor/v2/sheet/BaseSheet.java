@@ -1,11 +1,10 @@
 package com.github.salilvnair.excelprocessor.v2.sheet;
 
-public abstract class BaseExcelSheet implements IExcelSheet {
+public abstract class BaseSheet implements ExcelSheet {
     private int rowIndex;
     private int columnIndex;
     private int row;
     private String column;
-
     public int getRowIndex() {
         return rowIndex;
     }

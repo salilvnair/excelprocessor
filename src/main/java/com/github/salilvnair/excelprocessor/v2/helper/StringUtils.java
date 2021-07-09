@@ -10,6 +10,10 @@ public abstract class StringUtils {
         return val == null || "".equals(val);
     }
 
+    public static boolean isNotEmpty(String val) {
+        return !isEmpty(val);
+    }
+
     public static String trimAllWhitespace(String str) {
         if (!hasLength(str)) {
             return str;

@@ -1,6 +1,6 @@
 package com.github.salilvnair.excelprocessor.v2.annotation;
 
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -14,5 +14,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface MultiOrientedSheet {
     String name();
-    Class<? extends BaseExcelSheet>[] value();
+    Class<? extends BaseSheet>[] value();
 }

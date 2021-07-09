@@ -2,10 +2,9 @@ package com.github.salilvnair.excelprocessor.v2.processor.provider;
 
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.core.ExcelSheetReader;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
-import com.github.salilvnair.excelprocessor.v2.type.SheetInfo;
 import org.apache.poi.ss.usermodel.*;
 
 import java.util.Date;
@@ -14,8 +13,8 @@ import java.util.Date;
  * @author Salil V Nair
  */
 public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements ExcelSheetReader {
-    abstract void read(Class<? extends BaseExcelSheet> clazz, ExcelSheetReaderContext context);
-    abstract ExcelInfo excelInfo(Class<? extends BaseExcelSheet> clazz, ExcelSheetReaderContext context);
+    abstract void read(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context);
+    abstract ExcelInfo excelInfo(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context);
 
     protected Object extractValueBasedOnCellType(Workbook workbook, Cell cell, CellInfo cellInfo) {
         Object cellValue = null;

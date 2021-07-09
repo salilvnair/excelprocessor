@@ -21,35 +21,37 @@ import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetFacto
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.helper.ExcelValidator;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
 
 public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelSheetReader {
     private boolean concurrent = false;
+    private int batchSize = 0;
     protected ExcelSheetReaderImpl() {}
-    protected ExcelSheetReaderImpl(boolean concurrent) {
+    protected ExcelSheetReaderImpl(boolean concurrent, int batchSize) {
         this.concurrent = concurrent;
+        this.batchSize = batchSize;
     }
 
     public static ExcelSheetReaderImpl init() {
-        return new ExcelSheetReaderImpl(false);
+        return new ExcelSheetReaderImpl(false, 0);
     }
-    public static ExcelSheetReaderImpl init(boolean concurrent) {
-        return new ExcelSheetReaderImpl(concurrent);
+    public static ExcelSheetReaderImpl init(boolean concurrent, int batchSize) {
+        return new ExcelSheetReaderImpl(concurrent, batchSize);
     }
 
     @Override
-    public Map<String, List<? extends BaseExcelSheet>> read(String[] fullyQualifiedClassNames, ExcelSheetContext context) throws Exception {
-        Map<String, List<? extends BaseExcelSheet>> excelSheets = new HashMap<>();
+    public Map<String, List<? extends BaseSheet>> read(String[] fullyQualifiedClassNames, ExcelSheetContext context) throws Exception {
+        Map<String, List<? extends BaseSheet>> excelSheets = new HashMap<>();
         _readAndResolve(fullyQualifiedClassNames, context, excelSheets);
         return excelSheets;
     }
 
 
     @Override
-    public Map<String, List<? extends BaseExcelSheet>> read(Class<? extends BaseExcelSheet>[] classes, ExcelSheetContext context) throws Exception {
-        Map<String, List<? extends BaseExcelSheet>> excelSheets = new HashMap<>();
-        for (Class<? extends BaseExcelSheet> clazz : classes) {
+    public Map<String, List<? extends BaseSheet>> read(Class<? extends BaseSheet>[] classes, ExcelSheetContext context) throws Exception {
+        Map<String, List<? extends BaseSheet>> excelSheets = new HashMap<>();
+        for (Class<? extends BaseSheet> clazz : classes) {
             ExcelSheetReaderContext readerContext = _read(context, clazz);
             _resolve(readerContext, context, excelSheets);
         }
@@ -57,19 +59,19 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
     }
 
     @Override
-    public final <T extends BaseExcelSheet> List<T> read(Class<T> clazz, ExcelSheetContext context) throws Exception {
+    public final <T extends BaseSheet> List<T> read(Class<T> clazz, ExcelSheetContext context) throws Exception {
         ExcelSheetReaderContext readerContext = _read(clazz, context, false);
         return typedList(readerContext.getSheetData(), clazz);
     }
 
     @Override
-    public <T extends BaseExcelSheet> Map<String, List<? extends BaseExcelSheet>> read(Class<T> clazz, boolean multiOriented, ExcelSheetContext context) throws Exception {
+    public <T extends BaseSheet> Map<String, List<? extends BaseSheet>> read(Class<T> clazz, boolean multiOriented, ExcelSheetContext context) throws Exception {
         ExcelSheetReaderContext readerContext = _read(clazz, context, multiOriented);
         return readerContext.getMultiOrientedSheetMap();
     }
 
     @Override
-    public List<CellValidationMessage> validate(List<? extends BaseExcelSheet> sheetData, ExcelSheetContext sheetContext) throws Exception {
+    public List<CellValidationMessage> validate(List<? extends BaseSheet> sheetData, ExcelSheetContext sheetContext) throws Exception {
         if(sheetData!=null && !sheetData.isEmpty()) {
             return _validate(sheetData.get(0).getClass(), sheetContext.readerContext(), sheetContext);
         }
@@ -77,22 +79,22 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
     }
 
     @Override
-    public Map<String, List<CellValidationMessage>> validate(Map<String, List<? extends BaseExcelSheet>> excelData, ExcelSheetContext sheetContext) throws Exception {
+    public Map<String, List<CellValidationMessage>> validate(Map<String, List<? extends BaseSheet>> excelData, ExcelSheetContext sheetContext) throws Exception {
         return _validate(null, excelData, sheetContext);
     }
 
     @Override
-    public void readAndValidate(Class<? extends BaseExcelSheet> clazz, ExcelSheetContext sheetContext) throws Exception {
+    public void readAndValidate(Class<? extends BaseSheet> clazz, ExcelSheetContext sheetContext) throws Exception {
         List<CellValidationMessage> validationMessages = _readAndValidate(clazz, sheetContext);
         sheetContext.setSheetValidationMessages(validationMessages);
     }
 
     @Override
     public void readAndValidate(String[] fullyQualifiedClassNames, ExcelSheetContext sheetContext) throws Exception {
-        Map<String, List<? extends BaseExcelSheet>> excelSheets = new HashMap<>();
+        Map<String, List<? extends BaseSheet>> excelSheets = new HashMap<>();
         Map<String, List<CellValidationMessage>> excelValidationMessages = new HashMap<>();
         for (String clazzName : fullyQualifiedClassNames) {
-            Class<? extends BaseExcelSheet> clazz = Class.forName(clazzName).asSubclass(BaseExcelSheet.class);
+            Class<? extends BaseSheet> clazz = Class.forName(clazzName).asSubclass(BaseSheet.class);
             _readAndValidate(sheetContext, excelSheets, excelValidationMessages, clazz);
         }
         sheetContext.setExcelSheets(excelSheets);
@@ -100,10 +102,10 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
     }
 
     @Override
-    public void readAndValidate(Class<? extends BaseExcelSheet>[] classes, ExcelSheetContext sheetContext) throws Exception {
-        Map<String, List<? extends BaseExcelSheet>> excelSheets = new HashMap<>();
+    public void readAndValidate(Class<? extends BaseSheet>[] classes, ExcelSheetContext sheetContext) throws Exception {
+        Map<String, List<? extends BaseSheet>> excelSheets = new HashMap<>();
         Map<String, List<CellValidationMessage>> excelValidationMessages = new HashMap<>();
-        for (Class<? extends BaseExcelSheet> clazz: classes) {
+        for (Class<? extends BaseSheet> clazz: classes) {
             _readAndValidate(sheetContext, excelSheets, excelValidationMessages, clazz);
         }
         sheetContext.setExcelSheets(excelSheets);
@@ -111,7 +113,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
     }
 
     @Override
-    public <T extends BaseExcelSheet> ExcelInfo excelInfo(Class<T> clazz, ExcelSheetContext sheetContext) throws Exception {
+    public <T extends BaseSheet> ExcelInfo excelInfo(Class<T> clazz, ExcelSheetContext sheetContext) throws Exception {
         return _excelInfo(clazz, sheetContext);
     }
 
@@ -119,7 +121,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
     public ExcelInfo excelInfo(String[] fullyQualifiedClassNames, ExcelSheetContext sheetContext) throws Exception {
         ExcelInfo excelInfo = new ExcelInfo();
         for (String clazzName : fullyQualifiedClassNames) {
-            Class<? extends BaseExcelSheet> clazz = Class.forName(clazzName).asSubclass(BaseExcelSheet.class);
+            Class<? extends BaseSheet> clazz = Class.forName(clazzName).asSubclass(BaseSheet.class);
             ExcelInfo excelInfoItr = _excelInfo(clazz, sheetContext);
             excelInfo.sheets().addAll(excelInfoItr.sheets());
         }
@@ -127,7 +129,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
     }
 
 
-    public <T extends BaseExcelSheet> ExcelInfo _excelInfo(Class<T> clazz, ExcelSheetContext context) throws Exception {
+    public <T extends BaseSheet> ExcelInfo _excelInfo(Class<T> clazz, ExcelSheetContext context) throws Exception {
         ExcelSheetReaderContext readerContext =  new ExcelSheetReaderContext();
         MultiOrientedSheet multiOrientedSheet = clazz.getAnnotation(MultiOrientedSheet.class);
         BaseExcelSheetReader sheetReader = _sheetReader(readerContext, clazz, context, multiOrientedSheet!=null);
@@ -136,13 +138,13 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         }
         return null;
     }
-    private void _resolve(ExcelSheetReaderContext readerContext, ExcelSheetContext context, Map<String, List<? extends BaseExcelSheet>> excelSheets) {
+    private void _resolve(ExcelSheetReaderContext readerContext, ExcelSheetContext context, Map<String, List<? extends BaseSheet>> excelSheets) {
         String sheetName = readerContext.sheetName();
         boolean multiOriented = readerContext.extractMultiOrientedMap();
         context.readerContexts().put(sheetName, readerContext);
         if(multiOriented) {
-            Map<String, List<? extends BaseExcelSheet>> multiOrientedSheetMap = readerContext.getMultiOrientedSheetMap();
-            List<? extends BaseExcelSheet> multiOrientedSheetData = multiOrientedSheetMap.entrySet().stream().flatMap(e-> e.getValue().stream()).collect(Collectors.toList());
+            Map<String, List<? extends BaseSheet>> multiOrientedSheetMap = readerContext.getMultiOrientedSheetMap();
+            List<? extends BaseSheet> multiOrientedSheetData = multiOrientedSheetMap.entrySet().stream().flatMap(e-> e.getValue().stream()).collect(Collectors.toList());
             excelSheets.put(sheetName, multiOrientedSheetData);
         }
         else {
@@ -150,26 +152,26 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         }
     }
 
-    private void _readAndResolve(String[] fullyQualifiedClassNames, ExcelSheetContext context, Map<String, List<? extends BaseExcelSheet>> excelSheets) throws Exception {
+    private void _readAndResolve(String[] fullyQualifiedClassNames, ExcelSheetContext context, Map<String, List<? extends BaseSheet>> excelSheets) throws Exception {
         if(concurrent) {
             _concurrentRead(fullyQualifiedClassNames, context, excelSheets);
         }
         else {
             for (String clazzName : fullyQualifiedClassNames) {
-                Class<? extends BaseExcelSheet> clazz = Class.forName(clazzName).asSubclass(BaseExcelSheet.class);
+                Class<? extends BaseSheet> clazz = Class.forName(clazzName).asSubclass(BaseSheet.class);
                 ExcelSheetReaderContext readerContext = _read(context, clazz);
                 _resolve(readerContext, context, excelSheets);
             }
         }
     }
 
-    private void _concurrentRead(String[] fullyQualifiedClassNames, ExcelSheetContext context, Map<String, List<? extends BaseExcelSheet>> excelSheets) throws Exception {
+    private void _concurrentRead(String[] fullyQualifiedClassNames, ExcelSheetContext context, Map<String, List<? extends BaseSheet>> excelSheets) throws Exception {
         List<Callable<ExcelSheetReaderContext>> taskCallables = new ArrayList<>();
         List<Future<ExcelSheetReaderContext>> futureList = null;
         ExecutorService executor = Executors.newCachedThreadPool();
         ExcelSheetReaderTaskService service = new ExcelSheetReaderTaskService();
         for (String clazzName : fullyQualifiedClassNames) {
-            Class<? extends BaseExcelSheet> clazz = Class.forName(clazzName).asSubclass(BaseExcelSheet.class);
+            Class<? extends BaseSheet> clazz = Class.forName(clazzName).asSubclass(BaseSheet.class);
             ExcelSheetReaderTask task = new ExcelSheetReaderTask(TaskType.READ_MULTIPLE_SHEETS.name(), null, service, context, clazz);
             taskCallables.add(task);
         }
@@ -188,7 +190,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         executor.shutdown();
     }
 
-    protected ExcelSheetReaderContext _read(ExcelSheetContext context, Class<? extends BaseExcelSheet> clazz) throws Exception {
+    protected ExcelSheetReaderContext _read(ExcelSheetContext context, Class<? extends BaseSheet> clazz) throws Exception {
         Sheet sheet = clazz.getAnnotation(Sheet.class);
         String sheetName = null;
         if(sheet !=null) {
@@ -206,7 +208,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         return readerContext;
     }
 
-    private  <T extends BaseExcelSheet> ExcelSheetReaderContext _read(Class<T> clazz, ExcelSheetContext context, boolean multiOriented) throws Exception {
+    private  <T extends BaseSheet> ExcelSheetReaderContext _read(Class<T> clazz, ExcelSheetContext context, boolean multiOriented) throws Exception {
         ExcelSheetReaderContext readerContext =  new ExcelSheetReaderContext();
         BaseExcelSheetReader sheetReader = _sheetReader(readerContext, clazz, context, multiOriented);
         if (sheetReader != null) {
@@ -215,7 +217,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         return readerContext;
     }
 
-    private  <T extends BaseExcelSheet> BaseExcelSheetReader _sheetReader(ExcelSheetReaderContext readerContext, Class<T> clazz, ExcelSheetContext context, boolean multiOriented) throws Exception {
+    private  <T extends BaseSheet> BaseExcelSheetReader _sheetReader(ExcelSheetReaderContext readerContext, Class<T> clazz, ExcelSheetContext context, boolean multiOriented) throws Exception {
         File excelFile = context.getExcelFile();
         readerContext.setWorkbook(context.getWorkbook());
         if(excelFile !=null && context.getWorkbook() == null) {
@@ -224,59 +226,69 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         }
         readerContext.setFileName(context.getFileName());
         readerContext.setExtractMultiOrientedMap(multiOriented);
-        return ExcelSheetFactory.generateReader(clazz, concurrent);
+        return ExcelSheetFactory.generateReader(clazz, concurrent, batchSize);
     }
 
-    private List<CellValidationMessage> _readAndValidate(Class<? extends BaseExcelSheet> clazz, ExcelSheetContext sheetContext) throws Exception {
+    private List<CellValidationMessage> _readAndValidate(Class<? extends BaseSheet> clazz, ExcelSheetContext sheetContext) throws Exception {
         ExcelSheetReaderContext readerContext = _read(clazz, sheetContext, false);
         sheetContext.setSheet(readerContext.getSheetData());
         return _validate(clazz, readerContext, sheetContext);
     }
 
-    private void _readAndValidate(ExcelSheetContext sheetContext, Map<String, List<? extends BaseExcelSheet>> excelSheets, Map<String, List<CellValidationMessage>> excelValidationMessages, Class<? extends BaseExcelSheet> clazz) throws Exception {
+    private void _readAndValidate(ExcelSheetContext sheetContext, Map<String, List<? extends BaseSheet>> excelSheets, Map<String, List<CellValidationMessage>> excelValidationMessages, Class<? extends BaseSheet> clazz) throws Exception {
         Sheet sheet = clazz.getAnnotation(Sheet.class);
         MultiOrientedSheet multiOrientedSheet = clazz.getAnnotation(MultiOrientedSheet.class);
         boolean multiOriented = multiOrientedSheet != null;
         ExcelSheetReaderContext readerContext = _read(clazz, sheetContext, multiOriented);
         if(multiOriented) {
-            Map<String, List<? extends BaseExcelSheet>> multiOrientedSheetMap = readerContext.getMultiOrientedSheetMap();
-            List<? extends BaseExcelSheet> multiOrientedSheetData = multiOrientedSheetMap.entrySet().stream().flatMap(e-> e.getValue().stream()).collect(Collectors.toList());
+            Map<String, List<? extends BaseSheet>> multiOrientedSheetMap = readerContext.getMultiOrientedSheetMap();
+            List<? extends BaseSheet> multiOrientedSheetData = multiOrientedSheetMap.entrySet().stream().flatMap(e-> e.getValue().stream()).collect(Collectors.toList());
             excelSheets.put(multiOrientedSheet.name(), multiOrientedSheetData);
             sheetContext.setReaderContexts(readerContext.multiOrientedReaderContexts());
             Map<String, List<CellValidationMessage>> validationMessageMap = _validate(multiOrientedSheet, multiOrientedSheetMap, sheetContext);
             List<CellValidationMessage> validationMessages = validationMessageMap.entrySet().stream().flatMap(e -> e.getValue().stream()).collect(Collectors.toList());
-            excelValidationMessages.put(multiOrientedSheet.name(), validationMessages);
+            if(!validationMessages.isEmpty()) {
+                excelValidationMessages.put(multiOrientedSheet.name(), validationMessages);
+            }
         }
         else {
-            List<? extends BaseExcelSheet> sheetData = readerContext.getSheetData();
+            List<? extends BaseSheet> sheetData = readerContext.getSheetData();
             excelSheets.put(sheet.value(), sheetData);
             List<CellValidationMessage> validationMessages = _validate(clazz, readerContext, sheetContext);
-            excelValidationMessages.put(sheet.value(), validationMessages);
+            if(!validationMessages.isEmpty()) {
+                excelValidationMessages.put(sheet.value(), validationMessages);
+            }
         }
     }
 
-    private Map<String, List<CellValidationMessage>> _validate(MultiOrientedSheet multiOrientedSheet, Map<String, List<? extends BaseExcelSheet>> excelData, ExcelSheetContext sheetContext) throws Exception {
+    private Map<String, List<CellValidationMessage>> _validate(MultiOrientedSheet multiOrientedSheet, Map<String, List<? extends BaseSheet>> excelData, ExcelSheetContext sheetContext) throws Exception {
         Map<String, List<CellValidationMessage>> excelValidationMessages = new HashMap<>();
         excelData.forEach((headerKey, excelSheet) -> {
             ExcelSheetReaderContext readerContext = sheetContext.readerContexts().get(headerKey);
             readerContext.setSheetData(excelSheet);
             List<CellValidationMessage> validationMessages = _validate(multiOrientedSheet, excelSheet.get(0).getClass(), readerContext, sheetContext);
-            excelValidationMessages.put(headerKey, validationMessages);
+            if(!validationMessages.isEmpty()) {
+                excelValidationMessages.put(headerKey, validationMessages);
+            }
         });
         return excelValidationMessages;
     }
 
-    private  <T extends BaseExcelSheet> List<CellValidationMessage> _validate(Class<? extends BaseExcelSheet> clazz, ExcelSheetReaderContext readerContext, ExcelSheetContext sheetContext) {
+    private  <T extends BaseSheet> List<CellValidationMessage> _validate(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext readerContext, ExcelSheetContext sheetContext) {
         return _validate(null, clazz, readerContext, sheetContext);
     }
 
-    private  <T extends BaseExcelSheet> List<CellValidationMessage> _validate(MultiOrientedSheet multiOrientedSheet, Class<? extends BaseExcelSheet> clazz, ExcelSheetReaderContext readerContext, ExcelSheetContext sheetContext) {
+    private  <T extends BaseSheet> List<CellValidationMessage> _validate(MultiOrientedSheet multiOrientedSheet, Class<? extends BaseSheet> clazz, ExcelSheetReaderContext readerContext, ExcelSheetContext sheetContext) {
         CellValidatorContext validatorContext = new CellValidatorContext();
         validatorContext.setReaderContext(readerContext);
         if(multiOrientedSheet!=null) {
             validatorContext.setSheetName(multiOrientedSheet.name());
         }
-        List<? extends BaseExcelSheet> rows = readerContext.getSheetData();
+        Sheet sheet = clazz.getAnnotation(Sheet.class);
+        List<? extends BaseSheet> rows = readerContext.getSheetData();
+        if(sheet.dynamicHeaders()) {
+            return Collections.emptyList();
+        }
         return ExcelValidator
                 .init(validatorContext)
                 .setUserValidatorMap(sheetContext.userValidatorMap())

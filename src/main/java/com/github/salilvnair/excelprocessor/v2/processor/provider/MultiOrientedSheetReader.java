@@ -4,7 +4,7 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.annotation.MultiOrientedSheet;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetFactory;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
 
 import java.util.*;
@@ -14,25 +14,27 @@ import java.util.*;
  */
 public class MultiOrientedSheetReader extends  BaseExcelSheetReader {
     private final boolean concurrent;
-    public MultiOrientedSheetReader(boolean concurrent) {
+    private final int batchSize;
+    public MultiOrientedSheetReader(boolean concurrent, int batchSize) {
         this.concurrent = concurrent;
+        this.batchSize = batchSize;
     }
     @Override
-    public void read(Class<? extends BaseExcelSheet> clazz, ExcelSheetReaderContext context) {
+    public void read(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context) {
         if(!clazz.isAnnotationPresent(MultiOrientedSheet.class)) {
             return;//add error later
         }
         MultiOrientedSheet multiOrientedSheet = clazz.getAnnotation(MultiOrientedSheet.class);
-        Map<String, List<? extends BaseExcelSheet>> multiOrientedSheetMap = new HashMap<>();
-        for (Class<? extends BaseExcelSheet> sheetClass : multiOrientedSheet.value()) {
+        Map<String, List<? extends BaseSheet>> multiOrientedSheetMap = new HashMap<>();
+        for (Class<? extends BaseSheet> sheetClass : multiOrientedSheet.value()) {
             ExcelSheetReaderContext multiOrientedReaderContext = copyReaderContextAndGenerateMultiOrientedReaderContext(multiOrientedSheet, clazz, context);
 
-            BaseExcelSheetReader excelSheetReader = ExcelSheetFactory.generateReader(sheetClass, concurrent);
+            BaseExcelSheetReader excelSheetReader = ExcelSheetFactory.generateReader(sheetClass, concurrent, batchSize);
             if (excelSheetReader != null) {
                 excelSheetReader.read(sheetClass, multiOrientedReaderContext);
             }
 
-            List<? extends BaseExcelSheet> sheetData = multiOrientedReaderContext.getSheetData();
+            List<? extends BaseSheet> sheetData = multiOrientedReaderContext.getSheetData();
             Sheet sheet = multiOrientedReaderContext.sheet();
             context.multiOrientedReaderContexts().put(sheet.value(), multiOrientedReaderContext);
             multiOrientedSheetMap.put(sheet.value(), sheetData);
@@ -41,16 +43,16 @@ public class MultiOrientedSheetReader extends  BaseExcelSheetReader {
     }
 
     @Override
-    ExcelInfo excelInfo(Class<? extends BaseExcelSheet> clazz, ExcelSheetReaderContext context) {
+    ExcelInfo excelInfo(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context) {
         if(!clazz.isAnnotationPresent(MultiOrientedSheet.class)) {
             return null;//add error later
         }
         MultiOrientedSheet multiOrientedSheet = clazz.getAnnotation(MultiOrientedSheet.class);
         ExcelInfo excelInfo = new ExcelInfo();
-        for (Class<? extends BaseExcelSheet> sheetClass : multiOrientedSheet.value()) {
+        for (Class<? extends BaseSheet> sheetClass : multiOrientedSheet.value()) {
             ExcelSheetReaderContext multiOrientedReaderContext = copyReaderContextAndGenerateMultiOrientedReaderContext(multiOrientedSheet, clazz, context);
 
-            BaseExcelSheetReader excelSheetReader = ExcelSheetFactory.generateReader(sheetClass, concurrent);
+            BaseExcelSheetReader excelSheetReader = ExcelSheetFactory.generateReader(sheetClass, concurrent, batchSize);
             if (excelSheetReader != null) {
                 ExcelInfo excelInfoItr = excelSheetReader.excelInfo(sheetClass, multiOrientedReaderContext);
                 excelInfo.sheets().addAll(excelInfoItr.sheets());
@@ -59,7 +61,7 @@ public class MultiOrientedSheetReader extends  BaseExcelSheetReader {
         return excelInfo;
     }
 
-    private ExcelSheetReaderContext copyReaderContextAndGenerateMultiOrientedReaderContext(MultiOrientedSheet multiOrientedSheet, Class<? extends BaseExcelSheet> clazz, ExcelSheetReaderContext context) {
+    private ExcelSheetReaderContext copyReaderContextAndGenerateMultiOrientedReaderContext(MultiOrientedSheet multiOrientedSheet, Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context) {
         ExcelSheetReaderContext multiOrientedReaderContext = new ExcelSheetReaderContext();
         multiOrientedReaderContext.setSheetName(multiOrientedSheet.name());
         multiOrientedReaderContext.setFileName(context.getFileName());

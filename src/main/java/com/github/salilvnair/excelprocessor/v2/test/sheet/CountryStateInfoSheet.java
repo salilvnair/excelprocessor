@@ -2,23 +2,24 @@ package com.github.salilvnair.excelprocessor.v2.test.sheet;
 
 
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
+import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 
 @Sheet(
         value="CountryStateInfo",
         isVertical=true,
         headerRowAt=2,
-        headerColumnAt="B",
+        hasDuplicateHeaders = true,
         ignoreHeaders = {
                 "General",
                 "Info"
-        },
-        valueRowEndsAt = 8
+        }
 )
-public class CountryStateInfoSheet extends BaseExcelSheet {
+public class CountryStateInfoSheet extends BaseSheet {
     @Cell("Country")
     private String country;
+    @CellValidation(required = true, messageId = "2000")
     @Cell("State")
     private String state;
     @Cell("Number of schools")
@@ -27,6 +28,8 @@ public class CountryStateInfoSheet extends BaseExcelSheet {
     private Long stateGovt;
     @Cell("Private")
     private Long privateCount;
+    @Cell(value = "Private", row = 9)
+    private Long duplicatePrivateCount;
 
     //getters and setters
     public String getCountry() {
@@ -59,5 +62,13 @@ public class CountryStateInfoSheet extends BaseExcelSheet {
 
     public void setPrivateCount(Long privateCount) {
         this.privateCount = privateCount;
+    }
+
+    public Long getDuplicatePrivateCount() {
+        return duplicatePrivateCount;
+    }
+
+    public void setDuplicatePrivateCount(Long duplicatePrivateCount) {
+        this.duplicatePrivateCount = duplicatePrivateCount;
     }
 }

@@ -21,19 +21,24 @@ public @interface Sheet {
 	String customTask() default "";
 	String[] customTasks() default {};
 	String[] ignoreHeaders() default {};
-	String ignoreHeaderKey() default "";
+	int[] ignoreRows() default {};
 	String headerColumnAt() default "A";
 	String valueColumnAt() default "";
 	String valueColumnBeginsAt() default "";
 	String valueColumnEndsAt() default "";
+	String valueColumnBeginsText() default "";
+	String valueColumnEndsText() default "";
 	int headerRowAt() default 1;
 	int valueRowAt() default -1;
 	int valueRowBeginsAt() default -1;
 	int valueRowEndsAt() default -1;
+	int valueSectionRowBeginsAt() default -1;
+	int valueSectionRowEndsAt() default -1;
+	String valueSectionBeginsText() default "";
+	String valueSectionEndsText() default "";
 	String messageDelimiter() default ",";
 	boolean hasDuplicateHeaders() default false;
+	boolean dynamicHeaders() default false;
 	String userDefinedMessage() default "";
-	boolean containsPicture() default false;
-
 	final static class DefaultTaskValidator extends AbstractExcelTaskValidator {}
 }

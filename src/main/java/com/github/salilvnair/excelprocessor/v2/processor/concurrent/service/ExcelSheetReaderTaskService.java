@@ -5,11 +5,10 @@ import com.github.salilvnair.excelprocessor.v2.concurrent.ConcurrentTaskService;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.type.TaskType;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +35,7 @@ public class ExcelSheetReaderTaskService implements ConcurrentTaskService<ExcelS
         Object oClazz = args[1];
         try {
             String class_ = oClazz.toString().replace("class ","");
-            Class<? extends BaseExcelSheet> clazz = Class.forName(class_).asSubclass(BaseExcelSheet.class);
+            Class<? extends BaseSheet> clazz = Class.forName(class_).asSubclass(BaseSheet.class);
             return excelSheetReaderConcurrentService.read(context, clazz);
         }
         catch (Exception e) {
@@ -50,14 +49,13 @@ public class ExcelSheetReaderTaskService implements ConcurrentTaskService<ExcelS
         Object oClazz = args[0];
         try {
             String class_ = oClazz.toString().replace("class ","");
-            Class<? extends BaseExcelSheet> clazz = Class.forName(class_).asSubclass(BaseExcelSheet.class);
+            Class<? extends BaseSheet> clazz = Class.forName(class_).asSubclass(BaseSheet.class);
             ExcelSheetReaderContext context = (ExcelSheetReaderContext) args[1];
             Workbook workbook = (Workbook) args[2];
-            List<BaseExcelSheet> baseSheetList = (List<BaseExcelSheet>) args[3];
+            List<BaseSheet> baseSheetList = (List<BaseSheet>) args[3];
             Map<Integer, String> headerColumnIndexKeyedHeaderValueMap = (Map<Integer, String>) args[4];
             Map<Integer, Map<String, CellInfo >> rowIndexKeyedHeaderKeyCellInfoMap = (Map<Integer, Map<String, CellInfo>>) args[5];
-            Map<String, Field > headerKeyFieldMap = (Map<String, Field>) args[6];
-            sheetReaderConcurrentService(clazz).read(clazz, context, workbook, baseSheetList, headerColumnIndexKeyedHeaderValueMap, rowIndexKeyedHeaderKeyCellInfoMap, headerKeyFieldMap);
+            sheetReaderConcurrentService(clazz).read(clazz, context, workbook, baseSheetList, headerColumnIndexKeyedHeaderValueMap, rowIndexKeyedHeaderKeyCellInfoMap, args[6]);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -66,19 +64,22 @@ public class ExcelSheetReaderTaskService implements ConcurrentTaskService<ExcelS
     }
 
     public ExcelSheetReaderConcurrentService getExcelSheetReaderConcurrentService() {
-        return new ExcelSheetReaderConcurrentServiceImpl(true);
+        return new ExcelSheetReaderConcurrentServiceImpl(true, 100);
     }
 
     public void setExcelSheetReaderConcurrentService(ExcelSheetReaderConcurrentService excelSheetReaderConcurrentService) {
         this.excelSheetReaderConcurrentService = excelSheetReaderConcurrentService;
     }
 
-    public SheetReaderConcurrentService sheetReaderConcurrentService(Class<? extends BaseExcelSheet> clazz) {
+    public SheetReaderConcurrentService sheetReaderConcurrentService(Class<? extends BaseSheet> clazz) {
         Sheet sheet = clazz.getAnnotation(Sheet.class);
-        if(sheet.isVertical()) {
-            return new VerticalSheetReaderConcurrentServiceImpl(true);
+        if(sheet.dynamicHeaders()) {
+            return new DynamicHeaderHorizontalSheetReaderConcurrentServiceImpl(true, 100);
         }
-        return new HorizontalSheetReaderConcurrentServiceImpl(true);
+        if(sheet.isVertical()) {
+            return new VerticalSheetReaderConcurrentServiceImpl(true, 100);
+        }
+        return new HorizontalSheetReaderConcurrentServiceImpl(true, 100);
     }
 
     public void setSheetReaderConcurrentService(SheetReaderConcurrentService sheetReaderConcurrentService) {

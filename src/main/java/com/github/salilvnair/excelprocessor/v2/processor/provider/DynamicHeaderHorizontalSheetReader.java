@@ -29,29 +29,36 @@ import java.util.stream.Stream;
 /**
  * @author Salil V Nair
  */
-public class HorizontalSheetReader extends BaseHorizontalSheetReader {
-    public HorizontalSheetReader(boolean concurrent, int batchSize) {
+public class DynamicHeaderHorizontalSheetReader extends BaseHorizontalSheetReader {
+    public DynamicHeaderHorizontalSheetReader(boolean concurrent, int batchSize) {
         super(concurrent, batchSize);
     }
 
-    protected Map<Cell, Field> headerCellFieldMap(ExcelSheetReaderContext context, Sheet sheet, Set<Field> excelHeaders) {
-        return excelHeaders.stream().collect(Collectors.toMap(excelHeader -> excelHeader.getAnnotation(Cell.class), excelHeader -> excelHeader, (o, n) -> n));
+    @Override
+    protected Field dynamicCellField(Class<? extends BaseSheet> clazz) {
+        Set<Field> headers = AnnotationUtil.getAnnotatedFields(clazz, DynamicCell.class);
+        boolean hasUserDefinedDynamicCell = !headers.isEmpty() && headers.size() > 1;
+        List<Field> fields = headers
+                .stream()
+                .filter(field -> hasUserDefinedDynamicCell && field.getAnnotation(DynamicCell.class).priority() > -1 || field.getAnnotation(DynamicCell.class).priority() == -1)
+                .collect(Collectors.toList());
+        return fields.get(0);
     }
 
-    protected BaseSheet cellValueResolver(Class<? extends BaseSheet> clazz, Map<String, CellInfo> excelCellInfoMap, int key, Map<Cell, Field> headerCellFieldMap) throws InstantiationException, IllegalAccessException {
+    @Override
+    protected BaseSheet dynamicCellValueResolver(Class<? extends BaseSheet> clazz, List<String> headerStringList, Map<String, CellInfo> excelCellInfoMap, int key, Field headerDynamicCellField) throws InstantiationException, IllegalAccessException {
         BaseSheet classObject = clazz.asSubclass(BaseSheet.class).newInstance();
         classObject.setRowIndex(key);
         classObject.setRow(key+1);
-        headerCellFieldMap.forEach((cell, field) -> {
-            String headerString = cell.value();
-            headerString = cleanAndProcessSimilarHeaderString(headerString, clazz, cell);
+        Map<String, Object> dynamicHeaderKeyedCellValueMap = new LinkedHashMap<>();
+        headerStringList.forEach(headerString -> {
             CellInfo cellInfo = excelCellInfoMap.get(headerString);
             if(cellInfo!=null) {
-                Object fieldValue = TypeConvertor.convert(cellInfo.value(), cellInfo.cellType(), field.getType());
-                ReflectionUtil.setField(classObject, field, fieldValue);
+                Object fieldValue = cellInfo.value();
+                dynamicHeaderKeyedCellValueMap.put(headerString, fieldValue);
             }
         });
+        ReflectionUtil.setField(classObject, headerDynamicCellField, dynamicHeaderKeyedCellValueMap);
         return classObject;
     }
-
 }

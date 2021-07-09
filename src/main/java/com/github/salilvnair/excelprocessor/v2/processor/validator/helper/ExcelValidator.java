@@ -2,7 +2,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.validator.helper;
 
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,8 +16,8 @@ public class ExcelValidator {
         this.validatorContext = validatorContext;
     }
     private CellValidatorContext validatorContext;
-    private BaseExcelSheet row;
-    private List<? extends BaseExcelSheet> rows;
+    private BaseSheet row;
+    private List<? extends BaseSheet> rows;
 
     public static ExcelValidator init(CellValidatorContext validatorContext) {
         return new ExcelValidator(validatorContext);
@@ -47,13 +47,13 @@ public class ExcelValidator {
         return this;
     }
 
-    public ExcelValidator row(BaseExcelSheet row) {
+    public ExcelValidator row(BaseSheet row) {
         this.row = row;
         return this;
     }
 
 
-    public ExcelValidator rows(List<? extends BaseExcelSheet> rows) {
+    public ExcelValidator rows(List<? extends BaseSheet> rows) {
         this.rows = rows;
         return this;
     }

@@ -3,7 +3,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.validator.context;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.IExcelValidator;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -13,9 +13,9 @@ import java.util.Map;
 public class CellValidatorContext {
     private Sheet sheet;
     private String sheetName;
-    private BaseExcelSheet currentRow;
-    private List<? extends BaseExcelSheet> currentSheet;
-    private Map<String, List<? extends BaseExcelSheet>> excelSheets;
+    private BaseSheet currentRow;
+    private List<? extends BaseSheet> currentSheet;
+    private Map<String, List<? extends BaseSheet>> excelSheets;
     private Field field;
     private ExcelSheetReaderContext readerContext;
     private IExcelValidator validator;
@@ -24,19 +24,19 @@ public class CellValidatorContext {
     private Map<String,String> userDefinedMessageDataSet;
 
 
-    public List<? extends BaseExcelSheet> getCurrentSheet() {
+    public List<? extends BaseSheet> getCurrentSheet() {
         return currentSheet;
     }
 
-    public void setCurrentSheet(List<? extends BaseExcelSheet> currentSheet) {
+    public void setCurrentSheet(List<? extends BaseSheet> currentSheet) {
         this.currentSheet = currentSheet;
     }
 
-    public Map<String, List<? extends BaseExcelSheet>> getExcelSheets() {
+    public Map<String, List<? extends BaseSheet>> getExcelSheets() {
         return excelSheets;
     }
 
-    public void setExcelSheets(Map<String, List<? extends BaseExcelSheet>> excelSheets) {
+    public void setExcelSheets(Map<String, List<? extends BaseSheet>> excelSheets) {
         this.excelSheets = excelSheets;
     }
 
@@ -105,7 +105,7 @@ public class CellValidatorContext {
         this.readerContext = readerContext;
     }
 
-    public BaseExcelSheet currentRow() {
+    public BaseSheet currentRow() {
         return currentRow;
     }
 
@@ -116,7 +116,7 @@ public class CellValidatorContext {
         return null;
     }
 
-    public void setCurrentRow(BaseExcelSheet currentRow) {
+    public void setCurrentRow(BaseSheet currentRow) {
         this.currentRow = currentRow;
     }
 

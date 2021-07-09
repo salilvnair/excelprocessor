@@ -8,7 +8,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellV
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.ExcelSheetValidatorType;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.IExcelValidator;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.factory.ExcelValidatorFactory;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 
 
 /**
@@ -27,13 +27,13 @@ public class ExcelValidatorUtil {
         this.setRowValidators(ExcelValidatorFactory.generate(object,sheetValidatorType));
     }
 
-    public List<CellValidationMessage> validate(BaseExcelSheet row) {
+    public List<CellValidationMessage> validate(BaseSheet row) {
         this.init(row,ExcelSheetValidatorType.ROW);
         validatorContext.setCurrentRow(row);
         return this.validate(row,validatorContext);
     }
 
-    public List<CellValidationMessage> validate(List<? extends BaseExcelSheet> rows) {
+    public List<CellValidationMessage> validate(List<? extends BaseSheet> rows) {
         this.init(rows,ExcelSheetValidatorType.SHEET);
         validatorContext.setCurrentSheet(rows);
         return this.validate(rows,validatorContext);

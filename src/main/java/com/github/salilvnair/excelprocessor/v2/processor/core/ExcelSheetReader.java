@@ -3,7 +3,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.core;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -16,27 +16,27 @@ import java.util.Map;
 
 public interface ExcelSheetReader {
 
-  default <T extends BaseExcelSheet> ExcelInfo excelInfo(Class<T> clazz, ExcelSheetContext sheetContext)throws Exception { return null;};
+  default <T extends BaseSheet> ExcelInfo excelInfo(Class<T> clazz, ExcelSheetContext sheetContext)throws Exception { return null;};
 
   default ExcelInfo excelInfo(String[] fullyQualifiedClassNames, ExcelSheetContext sheetContext) throws Exception { return null;}
 
-  default <T extends BaseExcelSheet> List<T> read(Class<T> clazz, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyList();}
+  default <T extends BaseSheet> List<T> read(Class<T> clazz, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyList();}
 
-  default <T extends BaseExcelSheet> Map<String, List<? extends BaseExcelSheet>> read(Class<T> clazz, boolean multiOriented, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyMap();}
+  default <T extends BaseSheet> Map<String, List<? extends BaseSheet>> read(Class<T> clazz, boolean multiOriented, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyMap();}
 
-  default Map<String, List<? extends BaseExcelSheet>> read(String[] fullyQualifiedClassNames, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyMap();}
+  default Map<String, List<? extends BaseSheet>> read(String[] fullyQualifiedClassNames, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyMap();}
 
-  default Map<String, List<? extends BaseExcelSheet>> read(Class<? extends BaseExcelSheet>[] classes, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyMap();}
+  default Map<String, List<? extends BaseSheet>> read(Class<? extends BaseSheet>[] classes, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyMap();}
 
-  default List<CellValidationMessage> validate(List<? extends BaseExcelSheet> sheetData, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyList();}
+  default List<CellValidationMessage> validate(List<? extends BaseSheet> sheetData, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyList();}
 
-  default Map<String, List<CellValidationMessage>> validate(Map<String, List<? extends BaseExcelSheet>> excelData, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyMap();}
+  default Map<String, List<CellValidationMessage>> validate(Map<String, List<? extends BaseSheet>> excelData, ExcelSheetContext sheetContext) throws Exception { return Collections.emptyMap();}
 
-  default void readAndValidate(Class<? extends BaseExcelSheet> clazz, ExcelSheetContext sheetContext) throws Exception {}
+  default void readAndValidate(Class<? extends BaseSheet> clazz, ExcelSheetContext sheetContext) throws Exception {}
 
   default void readAndValidate(String[] fullyQualifiedClassNames, ExcelSheetContext sheetContext) throws Exception {}
 
-  default void readAndValidate(Class<? extends BaseExcelSheet>[] classes, ExcelSheetContext sheetContext) throws Exception {}
+  default void readAndValidate(Class<? extends BaseSheet>[] classes, ExcelSheetContext sheetContext) throws Exception {}
 
 
   static Workbook extractWorkbook(ExcelSheetReaderContext context) {

@@ -13,7 +13,11 @@ public class ExcelSheetReaderFactory {
         return ExcelSheetReaderImpl.init();
     }
     public static ExcelSheetReader generate(boolean concurrent) {
-        return ExcelSheetReaderImpl.init(concurrent);
+        return ExcelSheetReaderImpl.init(concurrent, 100);
+    }
+
+    public static ExcelSheetReader generate(boolean concurrent, int batchSize) {
+        return ExcelSheetReaderImpl.init(concurrent, batchSize);
     }
 
 }

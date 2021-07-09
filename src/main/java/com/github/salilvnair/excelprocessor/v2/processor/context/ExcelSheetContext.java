@@ -1,7 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.processor.context;
 
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.File;
@@ -16,9 +16,9 @@ public class ExcelSheetContext {
     private File excelFile;
     private String fileName;
     private Workbook workbook;
-    private List<? extends BaseExcelSheet> sheet;
+    private List<? extends BaseSheet> sheet;
     private List<CellValidationMessage> sheetValidationMessages;
-    private Map<String, List<? extends BaseExcelSheet>> excelSheets;
+    private Map<String, List<? extends BaseSheet>> excelSheets;
     private Map<String, List<CellValidationMessage>> excelValidationMessages;
     private ExcelSheetReaderContext readerContext;
     private Map<String, ExcelSheetReaderContext> readerContexts;
@@ -50,19 +50,19 @@ public class ExcelSheetContext {
         this.excelFile = excelFile;
     }
 
-    public Map<String, List<? extends BaseExcelSheet>> excelSheets() {
+    public Map<String, List<? extends BaseSheet>> excelSheets() {
         return excelSheets;
     }
 
-    public void setExcelSheets(Map<String, List<? extends BaseExcelSheet>> excelSheets) {
+    public void setExcelSheets(Map<String, List<? extends BaseSheet>> excelSheets) {
         this.excelSheets = excelSheets;
     }
 
-    public List<? extends BaseExcelSheet> sheet() {
+    public List<? extends BaseSheet> sheet() {
         return sheet;
     }
 
-    public void setSheet(List<? extends BaseExcelSheet> sheet) {
+    public void setSheet(List<? extends BaseSheet> sheet) {
         this.sheet = sheet;
     }
 

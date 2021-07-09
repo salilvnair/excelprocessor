@@ -1,7 +1,8 @@
 package com.github.salilvnair.excelprocessor.v2.processor.context;
 
+import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -20,29 +21,20 @@ public class ExcelSheetReaderContext {
     private Workbook workbook;
     private Sheet sheet;
     private String sheetName;
-    private Map<String, Field> headerKeyFieldMap;
+    private Map<Cell, Field> headerCellFieldMap;
     private Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap;
     private Map<Integer, Map<String, CellInfo>> colIndexKeyedHeaderKeyCellInfoMap;
     private Map<Integer, String> headerColumnIndexKeyedHeaderValueMap;
     private Map<Integer, String> headerRowIndexKeyedHeaderValueMap;
-    private List<? extends BaseExcelSheet> sheetData;
+    private List<? extends BaseSheet> sheetData;
     private boolean extractMultiOrientedMap;
-    private Map<String, List<? extends BaseExcelSheet>> multiOrientedSheetMap;
-    private Map<String, List<? extends BaseExcelSheet>> scatteredSheetMap;
+    private Map<String, List<? extends BaseSheet>> multiOrientedSheetMap;
+    private Map<String, List<? extends BaseSheet>> scatteredSheetMap;
     private Map<String, ExcelSheetReaderContext> multiOrientedReaderContexts;
     private String valueColumnBeginsAt;
     private String valueColumnEndsAt;
     private int valueRowBeginsAt=-1;
     private int valueRowEndsAt=-1;
-
-
-    public Map<String, Field> getHeaderKeyFieldMap() {
-        return headerKeyFieldMap;
-    }
-
-    public void setHeaderKeyFieldMap(Map<String, Field> headerKeyFieldMap) {
-        this.headerKeyFieldMap = headerKeyFieldMap;
-    }
 
     public Map<Integer, Map<String, CellInfo>> getRowIndexKeyedHeaderKeyCellInfoMap() {
         return rowIndexKeyedHeaderKeyCellInfoMap;
@@ -92,11 +84,11 @@ public class ExcelSheetReaderContext {
         this.sheet = sheet;
     }
 
-    public List<? extends BaseExcelSheet> getSheetData() {
+    public List<? extends BaseSheet> getSheetData() {
         return sheetData;
     }
 
-    public void setSheetData(List<? extends BaseExcelSheet> sheetData) {
+    public void setSheetData(List<? extends BaseSheet> sheetData) {
         this.sheetData = sheetData;
     }
 
@@ -116,11 +108,11 @@ public class ExcelSheetReaderContext {
         this.colIndexKeyedHeaderKeyCellInfoMap = colIndexKeyedHeaderKeyCellInfoMap;
     }
 
-    public Map<String, List<? extends BaseExcelSheet>> getMultiOrientedSheetMap() {
+    public Map<String, List<? extends BaseSheet>> getMultiOrientedSheetMap() {
         return multiOrientedSheetMap;
     }
 
-    public void setMultiOrientedSheetMap(Map<String, List<? extends BaseExcelSheet>> multiOrientedSheetMap) {
+    public void setMultiOrientedSheetMap(Map<String, List<? extends BaseSheet>> multiOrientedSheetMap) {
         this.multiOrientedSheetMap = multiOrientedSheetMap;
     }
 
@@ -172,11 +164,11 @@ public class ExcelSheetReaderContext {
         this.sheetName = sheetName;
     }
 
-    public Map<String, List<? extends BaseExcelSheet>> getScatteredSheetMap() {
+    public Map<String, List<? extends BaseSheet>> getScatteredSheetMap() {
         return scatteredSheetMap;
     }
 
-    public void setScatteredSheetMap(Map<String, List<? extends BaseExcelSheet>> scatteredSheetMap) {
+    public void setScatteredSheetMap(Map<String, List<? extends BaseSheet>> scatteredSheetMap) {
         this.scatteredSheetMap = scatteredSheetMap;
     }
 
@@ -185,5 +177,13 @@ public class ExcelSheetReaderContext {
             multiOrientedReaderContexts =  new HashMap<>();
         }
         return multiOrientedReaderContexts;
+    }
+
+    public Map<Cell, Field> headerCellFieldMap() {
+        return headerCellFieldMap;
+    }
+
+    public void setHeaderCellFieldMap(Map<Cell, Field> headerCellFieldMap) {
+        this.headerCellFieldMap = headerCellFieldMap;
     }
 }

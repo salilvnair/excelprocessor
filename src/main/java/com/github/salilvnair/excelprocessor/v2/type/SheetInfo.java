@@ -9,6 +9,8 @@ public class SheetInfo {
     private String name;
     private int totalRows;
     private int totalColumns;
+    private int valueRowIndex;
+    private int valueColumnIndex;
     private List<CellInfo> cells;
 
     public String name() {
@@ -41,5 +43,21 @@ public class SheetInfo {
 
     public void setCells(List<CellInfo> cells) {
         this.cells = cells;
+    }
+
+    public int valueRowIndex() {
+        return valueRowIndex;
+    }
+
+    public void setValueRowIndex(int valueRowIndex) {
+        this.valueRowIndex = valueRowIndex;
+    }
+
+    public int valueColumnIndex() {
+        return valueColumnIndex;
+    }
+
+    public void setValueColumnIndex(int valueColumnIndex) {
+        this.valueColumnIndex = valueColumnIndex;
     }
 }

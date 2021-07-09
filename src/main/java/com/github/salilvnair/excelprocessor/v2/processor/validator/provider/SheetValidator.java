@@ -8,7 +8,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellV
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.AbstractExcelValidator;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.ExcelSheetValidatorType;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.helper.ExcelValidatorUtil;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseExcelSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 
 /**
  * @author Salil V Nair
@@ -23,7 +23,7 @@ public class SheetValidator extends AbstractExcelValidator {
         List<CellValidationMessage> errors = new ArrayList<>();
         for (Object row: rows) {
             ExcelValidatorUtil validatorUtil = new ExcelValidatorUtil(row, ExcelSheetValidatorType.ROW);
-            validatorContext.setCurrentRow((BaseExcelSheet) row);
+            validatorContext.setCurrentRow((BaseSheet) row);
             errors.addAll(validatorUtil.validate(row, validatorContext));
         }
         return errors;
