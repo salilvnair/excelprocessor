@@ -11,10 +11,12 @@ import com.github.salilvnair.excelprocessor.v2.processor.concurrent.service.Exce
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.type.TaskType;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.core.ExcelSheetReader;
+import com.github.salilvnair.excelprocessor.v2.processor.service.DynamicHeaderSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
 import com.github.salilvnair.excelprocessor.v2.type.SheetInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -29,8 +31,8 @@ import java.util.stream.Stream;
 /**
  * @author Salil V Nair
  */
-public class HorizontalSheetReader extends BaseHorizontalSheetReader {
-    public HorizontalSheetReader(boolean concurrent, int batchSize) {
+public class DynamicHeaderVerticalSheetReader extends BaseVerticalSheetReader implements DynamicHeaderSheetReader {
+    public DynamicHeaderVerticalSheetReader(boolean concurrent, int batchSize) {
         super(concurrent, batchSize);
     }
 }

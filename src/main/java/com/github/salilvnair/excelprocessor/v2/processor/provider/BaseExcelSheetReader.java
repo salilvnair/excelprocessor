@@ -41,7 +41,29 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
                 break;
             case Cell.CELL_TYPE_FORMULA:
                 FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
-                CellValue formulaEvaluatedCellValue = formulaEvaluator.evaluate(cell);
+                CellValue formulaEvaluatedCellValue = null;
+                try {
+                    formulaEvaluatedCellValue = formulaEvaluator.evaluate(cell);
+                }
+                catch (Exception ex) {
+                    switch (cell.getCachedFormulaResultType()) {
+                        case Cell.CELL_TYPE_NUMERIC:
+                            numericCellValue = cell.getNumericCellValue();
+                            if (DateUtil.isValidExcelDate(numericCellValue)) {
+                                cellValue = DateUtil.getJavaDate(numericCellValue);
+                                cellInfo.setCellType(Date.class);
+                            } else {
+                                cellValue = numericCellValue;
+                                cellInfo.setCellType(Double.class);
+                            }
+                            break;
+                        case Cell.CELL_TYPE_STRING:
+                            cellValue = cell.getStringCellValue().replaceAll("'", "");
+                            cellInfo.setCellType(String.class);
+                            break;
+                    }
+                    break;
+                }
                 switch (cell.getCachedFormulaResultType()) {
                     case Cell.CELL_TYPE_NUMERIC:
                         numericCellValue = formulaEvaluatedCellValue.getNumberValue();

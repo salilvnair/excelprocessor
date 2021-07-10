@@ -57,7 +57,7 @@ public interface ExcelSheetReader {
 
   static Workbook generateWorkbook(InputStream inputStream, String excelFilePath) throws Exception {
     Workbook workbook;
-    if (excelFilePath.endsWith("xlsx")) {
+    if (excelFilePath.endsWith("xlsx") || excelFilePath.endsWith("xlsm")) {
       workbook = new XSSFWorkbook(inputStream);
     }
     else if (excelFilePath.endsWith("xls")) {

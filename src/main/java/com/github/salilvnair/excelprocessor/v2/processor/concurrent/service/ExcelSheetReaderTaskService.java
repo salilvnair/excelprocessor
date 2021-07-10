@@ -73,13 +73,18 @@ public class ExcelSheetReaderTaskService implements ConcurrentTaskService<ExcelS
 
     public SheetReaderConcurrentService sheetReaderConcurrentService(Class<? extends BaseSheet> clazz) {
         Sheet sheet = clazz.getAnnotation(Sheet.class);
-        if(sheet.dynamicHeaders()) {
-            return new DynamicHeaderHorizontalSheetReaderConcurrentServiceImpl(true, 100);
-        }
         if(sheet.isVertical()) {
+            if(sheet.dynamicHeaders()) {
+                return new DynamicHeaderVerticalSheetReaderConcurrentServiceImpl(true, 100);
+            }
             return new VerticalSheetReaderConcurrentServiceImpl(true, 100);
         }
-        return new HorizontalSheetReaderConcurrentServiceImpl(true, 100);
+        else {
+            if(sheet.dynamicHeaders()) {
+                return new DynamicHeaderHorizontalSheetReaderConcurrentServiceImpl(true, 100);
+            }
+            return new HorizontalSheetReaderConcurrentServiceImpl(true, 100);
+        }
     }
 
     public void setSheetReaderConcurrentService(SheetReaderConcurrentService sheetReaderConcurrentService) {

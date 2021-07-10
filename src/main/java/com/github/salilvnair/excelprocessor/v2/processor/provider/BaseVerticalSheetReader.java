@@ -3,7 +3,6 @@ package com.github.salilvnair.excelprocessor.v2.processor.provider;
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
 import com.github.salilvnair.excelprocessor.util.ReflectionUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
-import com.github.salilvnair.excelprocessor.v2.annotation.DynamicCell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.helper.ConcurrentUtil;
 import com.github.salilvnair.excelprocessor.v2.helper.TypeConvertor;
@@ -33,13 +32,16 @@ import java.util.stream.Stream;
 /**
  * @author Salil V Nair
  */
-public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
+public class BaseVerticalSheetReader extends BaseExcelSheetReader {
     private final boolean concurrent;
     private final int batchSize;
-    public BaseHorizontalSheetReader(boolean concurrent, int batchSize) {
+    public BaseVerticalSheetReader(boolean concurrent, int batchSize) {
         this.concurrent = concurrent;
         this.batchSize = batchSize;
     }
+
+
+
     @Override
     public void read(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context) {
         if(!validateWorkbook(context)) {
@@ -49,7 +51,12 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         if (workbook == null) {
             return;//change it to exception later on
         }
+
+
+
         Sheet sheet = clazz.getAnnotation(Sheet.class);
+        Map<Integer, String> headerRowIndexKeyedHeaderValueMap = orderedOrUnorderedMap(sheet);
+        Map<Integer, Map<String, CellInfo>> colIndexKeyedHeaderKeyCellInfoMap = orderedOrUnorderedMap(sheet);
         Set<Field> excelHeaders = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
         Object headerCellFieldMapOrDynamicCellField = null;
         if(!sheet.dynamicHeaders()) {
@@ -60,18 +67,15 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         else {
             headerCellFieldMapOrDynamicCellField = DynamicHeaderSheetReader.dynamicCellField(clazz);
         }
-        Map<Integer, String> headerColumnIndexKeyedHeaderValueMap = orderedOrUnorderedMap(sheet);
-        Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap = orderedOrUnorderedMap(sheet);
         List<BaseSheet> baseSheetList = new ArrayList<>();
         if(concurrent) {
-            _concurrentRead(clazz, context, workbook, baseSheetList, headerColumnIndexKeyedHeaderValueMap, rowIndexKeyedHeaderKeyCellInfoMap, headerCellFieldMapOrDynamicCellField);
+            _concurrentRead(clazz, context, workbook, baseSheetList, headerRowIndexKeyedHeaderValueMap, colIndexKeyedHeaderKeyCellInfoMap, headerCellFieldMapOrDynamicCellField);
         }
         else {
-            _read(clazz, context, workbook, baseSheetList, headerColumnIndexKeyedHeaderValueMap, rowIndexKeyedHeaderKeyCellInfoMap, headerCellFieldMapOrDynamicCellField);
+            _read(clazz, context, workbook, baseSheetList, headerRowIndexKeyedHeaderValueMap, colIndexKeyedHeaderKeyCellInfoMap, headerCellFieldMapOrDynamicCellField);
         }
-
-        context.setHeaderColumnIndexKeyedHeaderValueMap(headerColumnIndexKeyedHeaderValueMap);
-        context.setRowIndexKeyedHeaderKeyCellInfoMap(rowIndexKeyedHeaderKeyCellInfoMap);
+        context.setHeaderRowIndexKeyedHeaderValueMap(headerRowIndexKeyedHeaderValueMap);
+        context.setColIndexKeyedHeaderKeyCellInfoMap(colIndexKeyedHeaderKeyCellInfoMap);
         context.setSheetData(Collections.unmodifiableList(baseSheetList));
     }
 
@@ -87,16 +91,18 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         ExcelInfo excelInfo = new ExcelInfo();
         Sheet excelSheet = clazz.getAnnotation(Sheet.class);
         int headerRowIndex = excelSheet.headerRowAt() - 1;
-        int valueRowBeginsAt = excelSheet.valueRowBeginsAt();
-        int valueRowIndex = valueRowBeginsAt!=-1 ? valueRowBeginsAt: excelSheet.valueRowAt()!=-1 ? excelSheet.valueRowAt() : headerRowIndex+1;
+        int headerColumnIndex = ExcelSheetReader.toIndentNumber(excelSheet.headerColumnAt())  - 1;
+        String valueColumnAt = excelSheet.valueColumnAt();
+        int valueColumnIndex = ExcelSheetReader.toIndentNumber(valueColumnAt)  - 1;
+        valueColumnIndex = valueColumnIndex!= -1 ? valueColumnIndex : headerColumnIndex + 1;
         String sheetName = context.sheetName() == null ? excelSheet.value(): context.sheetName();
         org.apache.poi.ss.usermodel.Sheet sheet = workbook.getSheet(sheetName);
         SheetInfo sheetInfo = new SheetInfo();
         int totalRows = sheet.getLastRowNum();
         sheetInfo.setTotalRows(totalRows);
         sheetInfo.setName(sheetName);
-        sheetInfo.setValueRowIndex(valueRowIndex);
-        Row row = sheet.getRow(0);
+        sheetInfo.setValueColumnIndex(valueColumnIndex);
+        Row row = sheet.getRow(headerRowIndex);
         if(row !=null) {
             int totalColumns = row.getLastCellNum();
             sheetInfo.setTotalColumns(totalColumns);
@@ -106,7 +112,7 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
     }
 
     @SuppressWarnings("unchecked")
-    protected void _read(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context, Workbook workbook, List<BaseSheet> baseSheetList, Map<Integer, String> headerColumnIndexKeyedHeaderValueMap, Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap, Object headerCellFieldMapOrDynamicCellField) {
+    protected void _read(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context, Workbook workbook, List<BaseSheet> baseSheetList, Map<Integer, String> headerRowIndexKeyedHeaderValueMap, Map<Integer, Map<String, CellInfo>> columnIndexKeyedHeaderKeyCellInfoMap, Object headerCellFieldMapOrDynamicCellField) {
         Map<Cell, Field> headerCellFieldMap = null;
         Field dynamicCellField = null;
         Sheet sheet = clazz.getAnnotation(Sheet.class);
@@ -118,56 +124,76 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
             headerCellFieldMap = (Map<Cell, Field>) headerCellFieldMapOrDynamicCellField;
         }
         int headerRowIndex = sheet.headerRowAt() - 1;
-        int headerColumnIndex = ExcelSheetReader.toIndentNumber(sheet.headerColumnAt())  - 1;
         String sheetName = context.sheetName() == null ? sheet.value(): context.sheetName();
         org.apache.poi.ss.usermodel.Sheet workbookSheet = workbook.getSheet(sheetName);
         int totalRows = workbookSheet.getLastRowNum();
-        Row headerRow = workbookSheet.getRow(headerRowIndex);
+        totalRows = sheet.valueRowEndsAt()!=-1 ? sheet.valueRowEndsAt() - 1 : totalRows;
+        int headerColumnIndex = ExcelSheetReader.toIndentNumber(sheet.headerColumnAt())  - 1;
+        String valueColumnAt = !StringUtils.isEmpty(context.valueColumnBeginsAt()) ? context.valueColumnBeginsAt() : sheet.valueColumnAt();
+        int valueColumnIndex = ExcelSheetReader.toIndentNumber(valueColumnAt)  - 1;
+        int maxColumnC = 0;
         List<String> headerStringList = orderedOrUnorderedList(sheet);
-        for (int i = headerColumnIndex; i < headerRow.getLastCellNum(); i++) {
-            String headerString = headerRow.getCell(i).getStringCellValue();
-            headerString = ExcelSheetReaderUtil.cleanAndProcessSimilarHeaderString(headerString, clazz, i, headerRowIndex, headerStringList);
-            headerColumnIndexKeyedHeaderValueMap.put(i, headerString);
-            headerStringList.add(headerString);
-        }
-        int valueRowBeginsAt = context.valueRowBeginsAt()!=-1 ? context.valueRowBeginsAt() : sheet.valueRowBeginsAt();
-        int valueRowIndex = valueRowBeginsAt!=-1 ? valueRowBeginsAt: sheet.valueRowAt()!=-1 ? sheet.valueRowAt() : headerRowIndex+1;
-        int valueEndsAt = context.valueRowEndsAt()!=-1 ? context.valueRowEndsAt() : sheet.valueRowBeginsAt();
-        totalRows = valueEndsAt!=-1 ? valueEndsAt : totalRows;
-        for (int r = valueRowIndex ; r <= totalRows; r++) {
-            Map<String, CellInfo> headerKeyCellInfoMap = new HashMap<>();
+        for (int r = headerRowIndex; r <= totalRows; r++) {
             Row row = workbookSheet.getRow(r);
             if(row == null){
                 continue;
             }
             int pnC = row.getLastCellNum();
-            for (int c = headerColumnIndex; c < pnC; c++) {
-                CellInfo cellInfo = new CellInfo();
-                cellInfo.setRowIndex(r);
-                cellInfo.setColumnIndex(c);
-                String headerString = headerColumnIndexKeyedHeaderValueMap.get(c);
+            if(maxColumnC < pnC ) {
+                maxColumnC = pnC;
+            }
+            String valueColumnEndsAt = context.valueColumnEndsAt() != null ? context.valueColumnEndsAt() : sheet.valueColumnEndsAt();
+            if(!StringUtils.isEmpty(valueColumnEndsAt)) {
+                maxColumnC = ExcelSheetReader.toIndentNumber(valueColumnEndsAt);
+            }
+            org.apache.poi.ss.usermodel.Cell headerCell = row.getCell(headerColumnIndex);
+            if(headerCell == null){
+                continue;
+            }
+            String headerString = headerCell.getStringCellValue();
+            headerString = ExcelSheetReaderUtil.cleanAndProcessSimilarHeaderString(headerString, clazz, headerColumnIndex, r);
+            headerRowIndexKeyedHeaderValueMap.put(r, headerString);
+            headerStringList.add(headerString);
+        }
+
+        int valueColumnBeginsAt = valueColumnIndex!= -1 ? valueColumnIndex : headerColumnIndex + 1;
+        int cIndex = valueColumnBeginsAt;
+        while(cIndex < maxColumnC) {
+            Map<String, CellInfo> headerKeyCellInfoMap = orderedOrUnorderedMap(sheet);
+            for (int r = headerRowIndex; r <= totalRows; r++) {
+                Row row = workbookSheet.getRow(r);
+                if(row == null){
+                    continue;
+                }
+                String headerString = headerRowIndexKeyedHeaderValueMap.get(r);
                 if(StringUtils.isEmpty(headerString)){
                     continue;
                 }
-                org.apache.poi.ss.usermodel.Cell cell = row.getCell(c);
-                if(cell == null){
-                    cellInfo.setValue(null);
+                for (int c = cIndex ; c < cIndex + 1; c++) {
+                    org.apache.poi.ss.usermodel.Cell cell = row.getCell(c);
+                    CellInfo cellInfo = new CellInfo();
+                    cellInfo.setRowIndex(r);
+                    cellInfo.setColumnIndex(c);
+                    if(cell == null){
+                        cellInfo.setValue(null);
+                        headerKeyCellInfoMap.put(headerString, cellInfo);
+                        continue;
+                    }
+                    Object cellValue = extractValueBasedOnCellType(workbook, cell, cellInfo);
+                    cellInfo.setValue(cellValue);
                     headerKeyCellInfoMap.put(headerString, cellInfo);
-                    continue;
                 }
-                Object cellValue = extractValueBasedOnCellType(workbook, cell, cellInfo);
-                cellInfo.setValue(cellValue);
-                headerKeyCellInfoMap.put(headerString, cellInfo);
             }
-            rowIndexKeyedHeaderKeyCellInfoMap.put(r, headerKeyCellInfoMap);
+            columnIndexKeyedHeaderKeyCellInfoMap.put(cIndex, headerKeyCellInfoMap);
+            cIndex++;
         }
 
         Field finalDynamicCellField = dynamicCellField;
         Map<Cell, Field> finalHeaderCellFieldMap = headerCellFieldMap;
-        rowIndexKeyedHeaderKeyCellInfoMap
+        columnIndexKeyedHeaderKeyCellInfoMap
                 .entrySet()
                 .stream()
-                .filter(entry -> entry.getKey() >= valueRowBeginsAt)
+                .filter(entry -> entry.getKey() >= valueColumnBeginsAt)
                 .forEach(entry -> {
                     try {
                         int key = entry.getKey();
@@ -181,32 +207,31 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
                         }
                         baseSheetList.add(classObject);
                     }
-                    catch (Exception ignored) {}
+                    catch (Exception ignored) {
+
+                    }
                 });
     }
 
-    private void _concurrentRead(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context, Workbook workbook, List<BaseSheet> baseSheetList, Map<Integer, String> headerColumnIndexKeyedHeaderValueMap, Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap, Object headerFieldOrFieldMap) {
+    private void _concurrentRead(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context, Workbook workbook, List<BaseSheet> baseSheetList, Map<Integer, String> headerRowIndexKeyedHeaderValueMap, Map<Integer, Map<String, CellInfo>> columnIndexKeyedHeaderKeyCellInfoMap, Object headerKeyFieldMap) {
         ExcelInfo excelInfo = excelInfo(clazz, context);
         SheetInfo sheetInfo = excelInfo.sheets().get(0);
-        int totalRows = sheetInfo.totalRows();
-        Stream<List<Integer>> rowListStream = ConcurrentUtil.split(totalRows, batchSize);
+        int totalColumns = sheetInfo.totalColumns();
+        Stream<List<Integer>> rowListStream = ConcurrentUtil.split(totalColumns, batchSize);
         List<List<Integer>> rowBatchList = rowListStream.collect(Collectors.toList());
         List<Callable<ExcelSheetReaderContext>> taskCallables = new ArrayList<>();
         ExecutorService executor = Executors.newCachedThreadPool();
         ExcelSheetReaderTaskService service = new ExcelSheetReaderTaskService();
         for (List<Integer> rowList : rowBatchList) {
             Integer from = rowList.get(0);
-            int valueRowIndex = sheetInfo.valueRowIndex();
-            if(valueRowIndex > from ) {
-                from = valueRowIndex;
-            }
-            else {
-                from = from + 1;
-            }
             Integer to = rowList.get(rowList.size() - 1);
-            context.setValueRowBeginsAt(from);
-            context.setValueRowEndsAt(to+1);
-            service.toContext(TaskType.READ_MULTIPLE_ROWS_OR_COLUMNS.name(), null, clazz, context, workbook, baseSheetList, headerColumnIndexKeyedHeaderValueMap, rowIndexKeyedHeaderKeyCellInfoMap, headerFieldOrFieldMap);
+            int valueColumnIndex = sheetInfo.valueColumnIndex();
+            if(valueColumnIndex > from ) {
+                from = valueColumnIndex;
+            }
+            context.setValueColumnBeginsAt(ExcelSheetReader.toIndentName(from + 1));
+            context.setValueColumnEndsAt(ExcelSheetReader.toIndentName(to + 1));
+            service.toContext(TaskType.READ_MULTIPLE_ROWS_OR_COLUMNS.name(), null, clazz, context, workbook, baseSheetList, headerRowIndexKeyedHeaderValueMap, columnIndexKeyedHeaderKeyCellInfoMap, headerKeyFieldMap);
         }
         try {
             executor.invokeAll(taskCallables);
