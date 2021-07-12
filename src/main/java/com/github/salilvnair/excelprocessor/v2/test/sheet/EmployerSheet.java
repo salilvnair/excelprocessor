@@ -7,7 +7,6 @@ import com.github.salilvnair.excelprocessor.v2.sheet.DynamicHeaderSheet;
 
 @Sheet(
         value="Employer",
-        hasValidation=true,
         dynamicHeaders = true
 )
 public class EmployerSheet extends DynamicHeaderSheet {

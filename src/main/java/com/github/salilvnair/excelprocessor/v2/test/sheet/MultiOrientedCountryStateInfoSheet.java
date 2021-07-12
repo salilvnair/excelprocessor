@@ -8,7 +8,7 @@ import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 
 @Sheet(
         value="CountryStateInfo",
-        isVertical=true,
+        vertical =true,
         headerRowAt=2,
         headerColumnAt="B",
         ignoreHeaders = {

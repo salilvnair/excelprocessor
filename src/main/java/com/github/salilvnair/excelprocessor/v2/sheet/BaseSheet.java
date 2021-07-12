@@ -1,10 +1,17 @@
 package com.github.salilvnair.excelprocessor.v2.sheet;
 
+import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
+
+import java.util.List;
+import java.util.Map;
+
 public abstract class BaseSheet implements ExcelSheet {
     private int rowIndex;
     private int columnIndex;
     private int row;
     private String column;
+    private Map<String, CellInfo> cells;
+    private List<String> sheetHeaders;
     public int getRowIndex() {
         return rowIndex;
     }
@@ -35,5 +42,21 @@ public abstract class BaseSheet implements ExcelSheet {
 
     public void setColumn(String column) {
         this.column = column;
+    }
+
+    public Map<String, CellInfo> cells() {
+        return cells;
+    }
+
+    public void setCells(Map<String, CellInfo> cells) {
+        this.cells = cells;
+    }
+
+    public List<String> sheetHeaders() {
+        return sheetHeaders;
+    }
+
+    public void setSheetHeaders(List<String> sheetHeaders) {
+        this.sheetHeaders = sheetHeaders;
     }
 }

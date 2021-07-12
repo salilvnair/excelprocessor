@@ -6,7 +6,7 @@ import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.annotation.UserDefinedMessage;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
-import com.github.salilvnair.excelprocessor.v2.processor.core.ExcelSheetReader;
+import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.type.ValidatorType;
@@ -78,7 +78,7 @@ public abstract class BaseCellValidator extends AbstractExcelValidator {
         Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap = validatorContext.readerContext().getRowIndexKeyedHeaderKeyCellInfoMap();
         Map<Integer, Map<String, CellInfo>> colIndexKeyedHeaderKeyCellInfoMap = validatorContext.readerContext().getColIndexKeyedHeaderKeyCellInfoMap();
 
-        return validatorContext.sheet().isVertical() ? colIndexKeyedHeaderKeyCellInfoMap.get(validatorContext.currentRow().getColumnIndex()) : rowIndexKeyedHeaderKeyCellInfoMap.get(validatorContext.currentRow().getRowIndex());
+        return validatorContext.sheet().vertical() ? colIndexKeyedHeaderKeyCellInfoMap.get(validatorContext.currentRow().getColumnIndex()) : rowIndexKeyedHeaderKeyCellInfoMap.get(validatorContext.currentRow().getRowIndex());
     }
 
     protected void addValidationMessageMetadataUsingCellInfo(CellValidationMessage validationMessage, Map<String, CellInfo> cellInfoMap) {

@@ -1,15 +1,13 @@
 package com.github.salilvnair.excelprocessor.v2.processor.provider;
 
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
-import com.github.salilvnair.excelprocessor.util.ReflectionUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.helper.ConcurrentUtil;
-import com.github.salilvnair.excelprocessor.v2.helper.TypeConvertor;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.service.ExcelSheetReaderTaskService;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.type.TaskType;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
-import com.github.salilvnair.excelprocessor.v2.processor.core.ExcelSheetReader;
+import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.service.DynamicHeaderSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.service.StaticHeaderSheetReader;
@@ -47,7 +45,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         if(!validateWorkbook(context)) {
             return;//change it to exception later on
         }
-        Workbook workbook = ExcelSheetReader.extractWorkbook(context);
+        Workbook workbook = ExcelSheetReaderUtil.extractWorkbook(context);
         if (workbook == null) {
             return;//change it to exception later on
         }
@@ -84,7 +82,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         if(!validateWorkbook(context)) {
             return null;//change it to exception later on
         }
-        Workbook workbook = ExcelSheetReader.extractWorkbook(context);
+        Workbook workbook = ExcelSheetReaderUtil.extractWorkbook(context);
         if (workbook == null) {
             return null;//change it to exception later on
         }
@@ -133,6 +131,11 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         int valueColumnIndex = ExcelSheetReader.toIndentNumber(valueColumnAt)  - 1;
         int maxColumnC = 0;
         List<String> headerStringList = orderedOrUnorderedList(sheet);
+        List<String> sheetHeaders = orderedOrUnorderedList(sheet);
+        List<String> ignoreHeaders = sheet.ignoreHeaders().length > 0 ? Arrays.stream(sheet.ignoreHeaders()).collect(Collectors.toList()) : context.ignoreHeaders();
+        List<Integer> ignoreHeaderRows = context.ignoreHeaderRows().stream().map(r -> r+1).collect(Collectors.toList());
+        Set<Field> sheetCells = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
+        List<String> classCellHeaders = sheetCells.stream().map(cellField -> cellField.getAnnotation(Cell.class).value()).collect(Collectors.toList());
         for (int r = headerRowIndex; r <= totalRows; r++) {
             Row row = workbookSheet.getRow(r);
             if(row == null){
@@ -151,7 +154,17 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
                 continue;
             }
             String headerString = headerCell.getStringCellValue();
-            headerString = ExcelSheetReaderUtil.cleanAndProcessSimilarHeaderString(headerString, clazz, headerColumnIndex, r);
+            headerString = ExcelSheetReaderUtil.cleanHeaderString(headerString);
+            if(!classCellHeaders.contains(headerString) && !sheet.dynamicHeaders()) {
+                ignoreHeaderRows.add(r);
+                continue;
+            }
+            if(ignoreHeaders.contains(headerString)) {
+                ignoreHeaderRows.add(r);
+                continue;
+            }
+            sheetHeaders.add(headerString);
+            headerString = ExcelSheetReaderUtil.processSimilarHeaderString(headerString, clazz, headerColumnIndex, r, headerStringList);
             headerRowIndexKeyedHeaderValueMap.put(r, headerString);
             headerStringList.add(headerString);
         }
@@ -161,6 +174,9 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         while(cIndex < maxColumnC) {
             Map<String, CellInfo> headerKeyCellInfoMap = orderedOrUnorderedMap(sheet);
             for (int r = headerRowIndex; r <= totalRows; r++) {
+                if (ignoreHeaderRows.contains(r)) {
+                    continue;
+                }
                 Row row = workbookSheet.getRow(r);
                 if(row == null){
                     continue;
@@ -205,6 +221,8 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
                         else {
                             classObject = StaticHeaderSheetReader.cellValueResolver(clazz, value, key, finalHeaderCellFieldMap);
                         }
+                        classObject.setSheetHeaders(sheetHeaders);
+                        classObject.setCells(value);
                         baseSheetList.add(classObject);
                     }
                     catch (Exception ignored) {

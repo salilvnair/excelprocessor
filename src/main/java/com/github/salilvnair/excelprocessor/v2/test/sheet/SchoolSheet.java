@@ -9,8 +9,7 @@ import com.github.salilvnair.excelprocessor.v2.test.sheet.task.SchoolSheetTaskVa
 
 @Sheet(
         value = "School",
-        hasValidation = true,
-        hasDuplicateHeaders = true,
+        duplicateHeaders = true,
         excelTaskValidator = SchoolSheetTaskValidator.class
 )
 public class SchoolSheet extends BaseSheet {

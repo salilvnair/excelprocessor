@@ -130,14 +130,16 @@ public class AnnotationUtil {
 	    Field f;
 	    try {
 	        f = handler.getClass().getDeclaredField("memberValues");
-	    } catch (NoSuchFieldException | SecurityException e) {
+	    }
+	    catch (NoSuchFieldException | SecurityException e) {
 	        throw new IllegalStateException(e);
 	    }
 	    f.setAccessible(true);
 	    Map<String, Object> memberValues;
 	    try {
 	        memberValues = (Map<String, Object>) f.get(handler);
-	    } catch (IllegalArgumentException | IllegalAccessException e) {
+	    }
+	    catch (IllegalArgumentException | IllegalAccessException e) {
 	        throw new IllegalStateException(e);
 	    }
 	    Object oldValue = memberValues.get(annotationKey);

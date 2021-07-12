@@ -8,9 +8,9 @@ import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 
 @Sheet(
         value="CountryStateInfo",
-        isVertical=true,
+        vertical =true,
         headerRowAt=2,
-        hasDuplicateHeaders = true,
+        duplicateHeaders = true,
         ignoreHeaders = {
                 "General",
                 "Info"
@@ -22,13 +22,13 @@ public class CountryStateInfoSheet extends BaseSheet {
     @CellValidation(required = true, messageId = "2000")
     @Cell("State")
     private String state;
-    @Cell("Number of schools")
+    //@Cell("Number of schools")
     private Long numberOfSchools;
-    @Cell("State Govt")
+    //@Cell("State Govt")
     private Long stateGovt;
-    @Cell("Private")
+    //@Cell("Private")
     private Long privateCount;
-    @Cell(value = "Private", row = 9)
+    //@Cell(value = "Private", row = 9)
     private Long duplicatePrivateCount;
 
     //getters and setters

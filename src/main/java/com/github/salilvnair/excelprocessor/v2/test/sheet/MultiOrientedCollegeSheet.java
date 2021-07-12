@@ -9,7 +9,6 @@ import com.github.salilvnair.excelprocessor.v2.test.sheet.task.CollegeSheetTaskV
 
 @Sheet(
         value="College",
-        hasValidation=true,
         headerRowAt = 10,
         headerColumnAt = "B",
         excelTaskValidator = CollegeSheetTaskValidator.class

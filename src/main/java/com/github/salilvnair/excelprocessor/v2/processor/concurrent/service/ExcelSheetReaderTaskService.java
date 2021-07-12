@@ -3,7 +3,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.concurrent.service;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.concurrent.ConcurrentTaskService;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.type.TaskType;
-import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetContext;
+import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
@@ -73,7 +73,7 @@ public class ExcelSheetReaderTaskService implements ConcurrentTaskService<ExcelS
 
     public SheetReaderConcurrentService sheetReaderConcurrentService(Class<? extends BaseSheet> clazz) {
         Sheet sheet = clazz.getAnnotation(Sheet.class);
-        if(sheet.isVertical()) {
+        if(sheet.vertical()) {
             if(sheet.dynamicHeaders()) {
                 return new DynamicHeaderVerticalSheetReaderConcurrentServiceImpl(true, 100);
             }

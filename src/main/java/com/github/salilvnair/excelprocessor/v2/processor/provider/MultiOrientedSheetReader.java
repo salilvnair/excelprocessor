@@ -64,6 +64,9 @@ public class MultiOrientedSheetReader extends  BaseExcelSheetReader {
     private ExcelSheetReaderContext copyReaderContextAndGenerateMultiOrientedReaderContext(MultiOrientedSheet multiOrientedSheet, Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context) {
         ExcelSheetReaderContext multiOrientedReaderContext = new ExcelSheetReaderContext();
         multiOrientedReaderContext.setSheetName(multiOrientedSheet.name());
+        multiOrientedReaderContext.setIgnoreHeaders(context.ignoreHeaders());
+        multiOrientedReaderContext.setIgnoreHeaderRows(context.ignoreHeaderRows());
+        multiOrientedReaderContext.setIgnoreHeaderColumns(context.ignoreHeaderColumns());
         multiOrientedReaderContext.setFileName(context.getFileName());
         multiOrientedReaderContext.setWorkbook(context.getWorkbook());
         multiOrientedReaderContext.setExtractMultiOrientedMap(context.extractMultiOrientedMap());

@@ -13,7 +13,7 @@ public class ExcelSheetFactory {
 
 
     public static BaseExcelSheetReader generateReader(Sheet sheet, boolean concurrent, int batchSize) {
-        if(sheet.isVertical()) {
+        if(sheet.vertical()) {
             if(sheet.dynamicHeaders()) {
                 return new DynamicHeaderVerticalSheetReader(concurrent, batchSize);
             }

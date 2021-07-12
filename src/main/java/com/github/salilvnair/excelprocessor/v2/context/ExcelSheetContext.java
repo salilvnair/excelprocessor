@@ -1,10 +1,12 @@
-package com.github.salilvnair.excelprocessor.v2.processor.context;
+package com.github.salilvnair.excelprocessor.v2.context;
 
+import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,10 @@ public class ExcelSheetContext {
     private File excelFile;
     private String fileName;
     private Workbook workbook;
+    private String sheetName;
+    private List<String> ignoreHeaders;
+    private List<Integer> ignoreHeaderRows;
+    private List<String> ignoreHeaderColumns;
     private List<? extends BaseSheet> sheet;
     private List<CellValidationMessage> sheetValidationMessages;
     private Map<String, List<? extends BaseSheet>> excelSheets;
@@ -42,7 +48,7 @@ public class ExcelSheetContext {
         this.workbook = workbook;
     }
 
-    public File getExcelFile() {
+    public File excelFile() {
         return excelFile;
     }
 
@@ -138,16 +144,83 @@ public class ExcelSheetContext {
         return new ExcelSheetContextBuilder();
     }
 
+    public String sheetName() {
+        return sheetName;
+    }
+
+    public void setSheetName(String sheetName) {
+        this.sheetName = sheetName;
+    }
+
+    public List<String> ignoreHeaders() {
+        if(ignoreHeaders == null) {
+            ignoreHeaders = new ArrayList<>();
+        }
+        return ignoreHeaders;
+    }
+
+    public void setIgnoreHeaders(List<String> ignoreHeaders) {
+        this.ignoreHeaders = ignoreHeaders;
+    }
+
+    public List<Integer> ignoreHeaderRows() {
+        return ignoreHeaderRows;
+    }
+
+    public void setIgnoreHeaderRows(List<Integer> ignoreHeaderRows) {
+        this.ignoreHeaderRows = ignoreHeaderRows;
+    }
+
+    public List<String> ignoreHeaderColumns() {
+        return ignoreHeaderColumns;
+    }
+
+    public void setIgnoreHeaderColumns(List<String> ignoreHeaderColumns) {
+        this.ignoreHeaderColumns = ignoreHeaderColumns;
+    }
+
     public static class ExcelSheetContextBuilder {
         private ExcelSheetContext excelSheetContext =  new ExcelSheetContext();
         public ExcelSheetContextBuilder fileName(String fileName) {
             excelSheetContext.setFileName(fileName);
             return this;
         }
+
         public ExcelSheetContextBuilder workbook(Workbook workbook) {
             excelSheetContext.setWorkbook(workbook);
             return this;
         }
+
+        public ExcelSheetContextBuilder excelFile(File excelFile) {
+            excelSheetContext.setExcelFile(excelFile);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder sheetName(String sheetName) {
+            excelSheetContext.setSheetName(sheetName);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder ignoreHeaders(List<String> ignoreHeaders) {
+            excelSheetContext.setIgnoreHeaders(ignoreHeaders);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder ignoreHeader(String ignoreHeader) {
+            excelSheetContext.ignoreHeaders.add(ignoreHeader);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder ignoreHeaderRows(List<Integer> rows) {
+            excelSheetContext.setIgnoreHeaderRows(rows);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder ignoreHeaderColumns(List<String> columns) {
+            excelSheetContext.setIgnoreHeaderColumns(columns);
+            return this;
+        }
+
 
         public ExcelSheetContextBuilder userValidatorMap(Map<String,Object> userValidatorMap) {
             excelSheetContext.setUserValidatorMap(userValidatorMap);

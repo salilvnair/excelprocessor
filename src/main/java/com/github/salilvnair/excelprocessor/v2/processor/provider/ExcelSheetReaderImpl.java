@@ -14,9 +14,10 @@ import com.github.salilvnair.excelprocessor.v2.annotation.MultiOrientedSheet;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.service.ExcelSheetReaderTaskService;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.task.ExcelSheetReaderTask;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.type.TaskType;
-import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetContext;
+import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
-import com.github.salilvnair.excelprocessor.v2.processor.core.ExcelSheetReader;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
+import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetFactory;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
@@ -131,6 +132,10 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
 
     public <T extends BaseSheet> ExcelInfo _excelInfo(Class<T> clazz, ExcelSheetContext context) throws Exception {
         ExcelSheetReaderContext readerContext =  new ExcelSheetReaderContext();
+        readerContext.setSheetName(context.sheetName());
+        readerContext.setIgnoreHeaders(context.ignoreHeaders());
+        readerContext.setIgnoreHeaderRows(context.ignoreHeaderRows());
+        readerContext.setIgnoreHeaderColumns(context.ignoreHeaderColumns());
         MultiOrientedSheet multiOrientedSheet = clazz.getAnnotation(MultiOrientedSheet.class);
         BaseExcelSheetReader sheetReader = _sheetReader(readerContext, clazz, context, multiOrientedSheet!=null);
         if (sheetReader != null) {
@@ -210,6 +215,10 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
 
     private  <T extends BaseSheet> ExcelSheetReaderContext _read(Class<T> clazz, ExcelSheetContext context, boolean multiOriented) throws Exception {
         ExcelSheetReaderContext readerContext =  new ExcelSheetReaderContext();
+        readerContext.setSheetName(context.sheetName());
+        readerContext.setIgnoreHeaders(context.ignoreHeaders());
+        readerContext.setIgnoreHeaderRows(context.ignoreHeaderRows());
+        readerContext.setIgnoreHeaderColumns(context.ignoreHeaderColumns());
         BaseExcelSheetReader sheetReader = _sheetReader(readerContext, clazz, context, multiOriented);
         if (sheetReader != null) {
             sheetReader.read(clazz, readerContext);
@@ -218,11 +227,11 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
     }
 
     private  <T extends BaseSheet> BaseExcelSheetReader _sheetReader(ExcelSheetReaderContext readerContext, Class<T> clazz, ExcelSheetContext context, boolean multiOriented) throws Exception {
-        File excelFile = context.getExcelFile();
+        File excelFile = context.excelFile();
         readerContext.setWorkbook(context.getWorkbook());
         if(excelFile !=null && context.getWorkbook() == null) {
             FileInputStream inputS = new FileInputStream(excelFile);
-            readerContext.setWorkbook(ExcelSheetReader.generateWorkbook(inputS, excelFile.getAbsolutePath()));
+            readerContext.setWorkbook(ExcelSheetReaderUtil.generateWorkbook(inputS, excelFile.getAbsolutePath()));
         }
         readerContext.setFileName(context.getFileName());
         readerContext.setExtractMultiOrientedMap(multiOriented);

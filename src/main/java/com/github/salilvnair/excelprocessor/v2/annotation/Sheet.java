@@ -14,8 +14,7 @@ public @interface Sheet {
 	String value() default "";
 	String type() default ExcelSheetConstant.EXCEL_FILE_TYPE_XLS;
 	Class<? extends AbstractExcelTaskValidator> excelTaskValidator() default DefaultTaskValidator.class;
-	boolean hasValidation() default false;
-	boolean isVertical() default false;
+	boolean vertical() default false;
 	boolean ignoreUnknown() default true;
 	String customTask() default "";
 	String[] customTasks() default {};
@@ -34,7 +33,7 @@ public @interface Sheet {
 	int valueRowBeginsAt() default -1;
 	int valueRowEndsAt() default -1;
 	String messageDelimiter() default ",";
-	boolean hasDuplicateHeaders() default false;
+	boolean duplicateHeaders() default false;
 	boolean dynamicHeaders() default false;
 	String userDefinedMessage() default "";
 	final static class DefaultTaskValidator extends AbstractExcelTaskValidator {}

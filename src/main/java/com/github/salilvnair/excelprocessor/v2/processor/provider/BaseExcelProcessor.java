@@ -1,16 +1,8 @@
 package com.github.salilvnair.excelprocessor.v2.processor.provider;
 
-import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
-import com.github.salilvnair.excelprocessor.v1.reflect.constant.ExcelValidatorConstant;
-import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
-import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
-import com.github.salilvnair.excelprocessor.v2.processor.constant.SheetProcessingCommonConstant;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
-import com.github.salilvnair.excelprocessor.v2.processor.core.ExcelSheetReader;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -50,5 +42,16 @@ abstract class BaseExcelProcessor {
             list = new ArrayList<>();
         }
         return list;
+    }
+
+    protected <T> Set<T> orderedOrUnorderedSet(Sheet excelSheet) {
+        Set<T> set;
+        if(excelSheet.dynamicHeaders()) {
+            set = new LinkedHashSet<>();
+        }
+        else {
+            set = new HashSet<>();
+        }
+        return set;
     }
 }

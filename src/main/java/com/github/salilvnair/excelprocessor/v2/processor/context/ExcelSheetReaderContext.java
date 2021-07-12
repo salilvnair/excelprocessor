@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,9 @@ public class ExcelSheetReaderContext {
     private Workbook workbook;
     private Sheet sheet;
     private String sheetName;
+    private List<String> ignoreHeaders;
+    private List<Integer> ignoreHeaderRows;
+    private List<String> ignoreHeaderColumns;
     private Map<Cell, Field> headerCellFieldMap;
     private Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap;
     private Map<Integer, Map<String, CellInfo>> colIndexKeyedHeaderKeyCellInfoMap;
@@ -185,5 +189,38 @@ public class ExcelSheetReaderContext {
 
     public void setHeaderCellFieldMap(Map<Cell, Field> headerCellFieldMap) {
         this.headerCellFieldMap = headerCellFieldMap;
+    }
+
+    public List<String> ignoreHeaders() {
+        if(ignoreHeaders == null) {
+            ignoreHeaders = new ArrayList<>();
+        }
+        return ignoreHeaders;
+    }
+
+    public void setIgnoreHeaders(List<String> ignoreHeaders) {
+        this.ignoreHeaders = ignoreHeaders;
+    }
+
+    public List<Integer> ignoreHeaderRows() {
+        if(ignoreHeaderRows == null) {
+            ignoreHeaderRows = new ArrayList<>();
+        }
+        return ignoreHeaderRows;
+    }
+
+    public void setIgnoreHeaderRows(List<Integer> ignoreHeaderRows) {
+        this.ignoreHeaderRows = ignoreHeaderRows;
+    }
+
+    public List<String> ignoreHeaderColumns() {
+        if(ignoreHeaderColumns == null) {
+            ignoreHeaderColumns = new ArrayList<>();
+        }
+        return ignoreHeaderColumns;
+    }
+
+    public void setIgnoreHeaderColumns(List<String> ignoreHeaderColumns) {
+        this.ignoreHeaderColumns = ignoreHeaderColumns;
     }
 }
