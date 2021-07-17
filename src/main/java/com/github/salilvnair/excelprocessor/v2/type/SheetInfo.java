@@ -7,7 +7,7 @@ import java.util.List;
  */
 public class SheetInfo {
     private String name;
-    private int headerRowAt=0;
+    private int headerRowAt=1;
     private String headerColumnAt="A";
     private int totalRows;
     private int totalColumns;

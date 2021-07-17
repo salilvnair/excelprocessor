@@ -11,6 +11,16 @@ import java.util.Date;
  */
 public class TypeConvertor {
 
+    @SuppressWarnings("unchecked")
+    public static <T> T convert(Object value, Class<T> sourceType) {
+         return (T)convert(value, sourceType, sourceType);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T convert(Class<?> sourceType, Class<T> destinationType, Object value) {
+        return (T)convert(value, sourceType, destinationType);
+    }
+
     public static Object convert(Object value, Type sourceType, Type destinationType) {
         Object convertedValue = value;
         if(value instanceof Double && destinationType==Date.class) {

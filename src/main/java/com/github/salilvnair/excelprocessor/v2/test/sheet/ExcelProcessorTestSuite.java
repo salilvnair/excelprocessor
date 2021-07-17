@@ -3,19 +3,29 @@ package com.github.salilvnair.excelprocessor.v2.test.sheet;
 import com.github.salilvnair.excelprocessor.util.StopWatch;
 import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.generator.service.ExcelSheetClassGenerator;
+import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetWriterFactory;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetReaderFactory;
+import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.SheetInfo;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ExcelProcessorTestSuite {
     public static void main(String[] args) throws Exception {
-        sheetReader();
+        List<? extends BaseSheet> sheetData = sheetReader();
+        sheetWriter(sheetData, new ExcelSheetContext());
         //generateClassTemplate();
+    }
+
+    private static void sheetWriter(List<? extends BaseSheet> sheetData, ExcelSheetContext context) throws Exception {
+        ExcelSheetWriter writer = ExcelSheetWriterFactory.generate();
+        writer.write(sheetData, context);
     }
 
     private static void generateClassTemplate() throws Exception {
@@ -34,21 +44,17 @@ public class ExcelProcessorTestSuite {
         ExcelSheetClassGenerator.generate(sheetContext, sheetInfoBuilder.build());
     }
 
-    private static void sheetReader() throws Exception {
+    private static List<? extends BaseSheet> sheetReader() throws Exception {
         ExcelSheetReader reader = ExcelSheetReaderFactory.generate(true);
-        String[] classes = {
-              "com.github.salilvnair.excelprocessor.v2.test.sheet.CountryStateInfoSheet",
-        };
         ExcelSheetContext.ExcelSheetContextBuilder builder = ExcelSheetContext.builder();
-        builder.fileName("ExcelProcessorTest1.xlsx");
-        InputStream inputS = ExcelSheetReaderUtil.resourceStream(com.github.salilvnair.excelprocessor.v1.test.ExcelProcessorTestSuite.TEST_EXCEL_FOLDER, "ExcelProcessorTest1.xlsx");
-        Workbook workbook = ExcelSheetReaderUtil.generateWorkbook(inputS, "ExcelProcessorTest1.xlsx");
+        builder.fileName("ExcelProcessorTest.xls");
+        InputStream inputS = ExcelSheetReaderUtil.resourceStream(com.github.salilvnair.excelprocessor.v1.test.ExcelProcessorTestSuite.TEST_EXCEL_FOLDER, "ExcelProcessorTest.xls");
+        Workbook workbook = ExcelSheetReaderUtil.generateWorkbook(inputS, "ExcelProcessorTest1.xls");
         builder.workbook(workbook);
         //List<CountryStateInfoSheet> countryStateInfoSheets = excelProcessor.read(CountryStateInfoSheet.class, context);
         StopWatch.start();
         ExcelSheetContext sheetContext = builder.build();
 //        reader.readAndValidate(classes, sheetContext);
-        reader.read(classes, sheetContext);
-        System.out.println("That took " + StopWatch.elapsed(TimeUnit.MILLISECONDS) + " millisecond(s)");
+        return reader.read(CollegeSheet.class, sheetContext);
     }
 }

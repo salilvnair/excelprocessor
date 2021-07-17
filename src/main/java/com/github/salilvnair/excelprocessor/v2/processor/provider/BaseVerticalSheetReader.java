@@ -133,7 +133,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         List<String> headerStringList = orderedOrUnorderedList(sheet);
         List<String> sheetHeaders = orderedOrUnorderedList(sheet);
         List<String> ignoreHeaders = sheet.ignoreHeaders().length > 0 ? Arrays.stream(sheet.ignoreHeaders()).collect(Collectors.toList()) : context.ignoreHeaders();
-        List<Integer> ignoreHeaderRows = context.ignoreHeaderRows().stream().map(r -> r+1).collect(Collectors.toList());
+        List<Integer> ignoreHeaderRows = context.ignoreHeaderRows().stream().map(r -> r-1).collect(Collectors.toList());
         Set<Field> sheetCells = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
         List<String> classCellHeaders = sheetCells.stream().map(cellField -> cellField.getAnnotation(Cell.class).value()).collect(Collectors.toList());
         for (int r = headerRowIndex; r <= totalRows; r++) {

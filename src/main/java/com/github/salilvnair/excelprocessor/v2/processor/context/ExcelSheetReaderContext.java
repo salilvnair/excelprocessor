@@ -16,10 +16,7 @@ import java.util.Map;
 /**
  * @author Salil V Nair
  */
-public class ExcelSheetReaderContext {
-    private InputStream excelFileInputStream;
-    private String fileName;
-    private Workbook workbook;
+public class ExcelSheetReaderContext extends BaseExcelSheetContext {
     private Sheet sheet;
     private String sheetName;
     private List<String> ignoreHeaders;
@@ -54,30 +51,6 @@ public class ExcelSheetReaderContext {
 
     public void setHeaderColumnIndexKeyedHeaderValueMap(Map<Integer, String> headerColumnIndexKeyedHeaderValueMap) {
         this.headerColumnIndexKeyedHeaderValueMap = headerColumnIndexKeyedHeaderValueMap;
-    }
-
-    public InputStream getExcelFileInputStream() {
-        return excelFileInputStream;
-    }
-
-    public void setExcelFileInputStream(InputStream excelFileInputStream) {
-        this.excelFileInputStream = excelFileInputStream;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public Workbook getWorkbook() {
-        return workbook;
-    }
-
-    public void setWorkbook(Workbook workbook) {
-        this.workbook = workbook;
     }
 
     public Sheet sheet() {

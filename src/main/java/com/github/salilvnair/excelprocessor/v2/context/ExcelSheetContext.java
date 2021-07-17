@@ -1,6 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.context;
 
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
+import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -27,6 +28,7 @@ public class ExcelSheetContext {
     private Map<String, List<? extends BaseSheet>> excelSheets;
     private Map<String, List<CellValidationMessage>> excelValidationMessages;
     private ExcelSheetReaderContext readerContext;
+    private ExcelSheetWriterContext writerContext;
     private Map<String, ExcelSheetReaderContext> readerContexts;
     private Map<String,Object> userValidatorMap;
     private Map<String,List<String>> validValuesDataSet;
@@ -94,6 +96,14 @@ public class ExcelSheetContext {
 
     public void setReaderContext(ExcelSheetReaderContext readerContext) {
         this.readerContext = readerContext;
+    }
+
+    public ExcelSheetWriterContext writerContext() {
+        return writerContext;
+    }
+
+    public void setWriterContext(ExcelSheetWriterContext writerContext) {
+        this.writerContext = writerContext;
     }
 
     public Map<String, ExcelSheetReaderContext> readerContexts() {

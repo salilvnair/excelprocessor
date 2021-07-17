@@ -1,7 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.annotation;
 
-import com.github.salilvnair.excelprocessor.v1.reflect.constant.ExcelSheetConstant;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.task.core.AbstractExcelTaskValidator;
+import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Sheet {
 	String value() default "";
-	String type() default ExcelSheetConstant.EXCEL_FILE_TYPE_XLS;
+	String type() default ExcelFileType.Extension.XLS;
 	Class<? extends AbstractExcelTaskValidator> excelTaskValidator() default DefaultTaskValidator.class;
 	boolean vertical() default false;
 	boolean ignoreUnknown() default true;

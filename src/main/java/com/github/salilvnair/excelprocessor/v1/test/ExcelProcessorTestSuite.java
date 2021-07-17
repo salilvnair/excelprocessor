@@ -26,7 +26,7 @@ public class ExcelProcessorTestSuite {
 	public static final String TEST_EXCEL_FOLDER = "excel";
 
 	public static void main(String[] args) {
-		String fileName = "ExcelProcessorTest1.xlsx";
+		String fileName = "ExcelProcessorTest.xls";
 		
 		//generateExcelSheetMappingBeanFromExcel(fileName);
 		
@@ -233,7 +233,7 @@ public class ExcelProcessorTestSuite {
 
 			Map<String, List<? extends BaseExcelSheet>> sheetMap = excelProcessorBuilder
 					.setExcelfile(excelfile)
-					.setExcelMappingBeanClasses(CountryStateInfoSheet.class, SchoolSheet.class)
+					.setExcelMappingBeanClasses(SchoolSheet.class)
 					.validateInDetail()
 					.fromExcel()
 					.toSheetMap();

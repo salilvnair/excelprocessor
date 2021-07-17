@@ -1,6 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.processor.provider;
 
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
+import com.github.salilvnair.excelprocessor.v2.processor.context.BaseExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 
 import java.util.*;
@@ -18,7 +19,7 @@ abstract class BaseExcelProcessor {
         return list;
     }
 
-    protected boolean validateWorkbook(ExcelSheetReaderContext context) {
+    protected boolean validateWorkbook(BaseExcelSheetContext context) {
         return context != null && (context.getWorkbook() != null || context.getExcelFileInputStream() != null);
     }
 
