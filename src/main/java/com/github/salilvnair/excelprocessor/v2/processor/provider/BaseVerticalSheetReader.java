@@ -54,7 +54,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
 
         Sheet sheet = clazz.getAnnotation(Sheet.class);
         Map<Integer, String> headerRowIndexKeyedHeaderValueMap = orderedOrUnorderedMap(sheet);
-        Map<Integer, Map<String, CellInfo>> colIndexKeyedHeaderKeyCellInfoMap = orderedOrUnorderedMap(sheet);
+        Map<Integer, Map<String, CellInfo>> colIndexKeyedHeaderKeyCellInfoMap = new LinkedHashMap<>();
         Set<Field> excelHeaders = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
         Object headerCellFieldMapOrDynamicCellField = null;
         if(!sheet.dynamicHeaders()) {

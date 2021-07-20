@@ -190,7 +190,7 @@ public class ExcelSheetContext {
     }
 
     public static class ExcelSheetContextBuilder {
-        private ExcelSheetContext excelSheetContext =  new ExcelSheetContext();
+        private final ExcelSheetContext excelSheetContext =  new ExcelSheetContext();
         public ExcelSheetContextBuilder fileName(String fileName) {
             excelSheetContext.setFileName(fileName);
             return this;
@@ -217,7 +217,7 @@ public class ExcelSheetContext {
         }
 
         public ExcelSheetContextBuilder ignoreHeader(String ignoreHeader) {
-            excelSheetContext.ignoreHeaders.add(ignoreHeader);
+            excelSheetContext.ignoreHeaders().add(ignoreHeader);
             return this;
         }
 

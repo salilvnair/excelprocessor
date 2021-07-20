@@ -71,4 +71,16 @@ public class CountryStateInfoSheet extends BaseSheet {
     public void setDuplicatePrivateCount(Long duplicatePrivateCount) {
         this.duplicatePrivateCount = duplicatePrivateCount;
     }
+
+    @Override
+    public String toString() {
+        return "CountryStateInfoSheet{" +
+                "country='" + country + '\'' +
+                ", state='" + state + '\'' +
+                ", numberOfSchools=" + numberOfSchools +
+                ", stateGovt=" + stateGovt +
+                ", privateCount=" + privateCount +
+                ", duplicatePrivateCount=" + duplicatePrivateCount +
+                '}';
+    }
 }

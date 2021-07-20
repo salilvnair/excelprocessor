@@ -58,7 +58,7 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
             headerCellFieldMapOrDynamicCellField = DynamicHeaderSheetReader.dynamicCellField(clazz);
         }
         Map<Integer, String> headerColumnIndexKeyedHeaderValueMap = orderedOrUnorderedMap(sheet);
-        Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap = orderedOrUnorderedMap(sheet);
+        Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap = new LinkedHashMap<>();
         List<BaseSheet> baseSheetList = new ArrayList<>();
         if(concurrent) {
             _concurrentRead(clazz, context, workbook, baseSheetList, headerColumnIndexKeyedHeaderValueMap, rowIndexKeyedHeaderKeyCellInfoMap, headerCellFieldMapOrDynamicCellField);

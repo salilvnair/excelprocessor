@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class ExcelProcessorTestSuite {
     public static void main(String[] args) throws Exception {
         List<? extends BaseSheet> sheetData = sheetReader();
-        sheetWriter(sheetData, new ExcelSheetContext());
+        //sheetWriter(sheetData, new ExcelSheetContext());
         //generateClassTemplate();
     }
 
@@ -47,14 +47,14 @@ public class ExcelProcessorTestSuite {
     private static List<? extends BaseSheet> sheetReader() throws Exception {
         ExcelSheetReader reader = ExcelSheetReaderFactory.generate(true);
         ExcelSheetContext.ExcelSheetContextBuilder builder = ExcelSheetContext.builder();
-        builder.fileName("ExcelProcessorTest.xls");
-        InputStream inputS = ExcelSheetReaderUtil.resourceStream(com.github.salilvnair.excelprocessor.v1.test.ExcelProcessorTestSuite.TEST_EXCEL_FOLDER, "ExcelProcessorTest.xls");
-        Workbook workbook = ExcelSheetReaderUtil.generateWorkbook(inputS, "ExcelProcessorTest1.xls");
+        builder.fileName("ExcelProcessorTest1.xlsx");
+        InputStream inputS = ExcelSheetReaderUtil.resourceStream(com.github.salilvnair.excelprocessor.v1.test.ExcelProcessorTestSuite.TEST_EXCEL_FOLDER, "ExcelProcessorTest1.xlsx");
+        Workbook workbook = ExcelSheetReaderUtil.generateWorkbook(inputS, "ExcelProcessorTest1.xlsx");
         builder.workbook(workbook);
         //List<CountryStateInfoSheet> countryStateInfoSheets = excelProcessor.read(CountryStateInfoSheet.class, context);
         StopWatch.start();
         ExcelSheetContext sheetContext = builder.build();
 //        reader.readAndValidate(classes, sheetContext);
-        return reader.read(CollegeSheet.class, sheetContext);
+        return reader.read(CountryStateInfoSheet.class, sheetContext);
     }
 }
