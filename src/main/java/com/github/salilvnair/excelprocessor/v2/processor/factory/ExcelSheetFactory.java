@@ -23,6 +23,9 @@ public class ExcelSheetFactory {
             if(sheet.dynamicHeaders()) {
                 return new DynamicHeaderHorizontalSheetReader(concurrent, batchSize);
             }
+            else if(sheet.mergedHeaders()) {
+                return new MergedHeaderHorizontalSheetReader(concurrent, batchSize);
+            }
             return new HorizontalSheetReader(concurrent, batchSize);
         }
     }

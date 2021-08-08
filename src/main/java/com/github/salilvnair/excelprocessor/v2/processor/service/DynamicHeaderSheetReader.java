@@ -28,10 +28,10 @@ public interface DynamicHeaderSheetReader {
         return fields.get(0);
     }
 
-    static BaseSheet dynamicCellValueResolver(Class<? extends BaseSheet> clazz, List<String> headerStringList, Map<String, CellInfo> excelCellInfoMap, int key, Field headerDynamicCellField) throws InstantiationException, IllegalAccessException {
+    static BaseSheet dynamicCellValueResolver(Class<? extends BaseSheet> clazz, List<String> headerStringList, Map<String, CellInfo> excelCellInfoMap, int rowIndexKey, Field headerDynamicCellField) throws InstantiationException, IllegalAccessException {
         BaseSheet classObject = clazz.asSubclass(BaseSheet.class).newInstance();
-        classObject.setRowIndex(key);
-        classObject.setRow(key+1);
+        classObject.setRowIndex(rowIndexKey);
+        classObject.setRow(rowIndexKey+1);
         Map<String, Object> dynamicHeaderKeyedCellValueMap = new LinkedHashMap<>();
         headerStringList.forEach(headerString -> {
             if(!ExcelSheetReaderUtil.oneOfTheIgnoreHeaders(headerString, clazz)) {

@@ -104,7 +104,7 @@ public class ExcelSheetReaderUtil {
         return headerString;
     }
 
-    public static String processSimilarHeaderString(String headerString, Class<? extends BaseSheet> clazz, Cell cell) {
+    public static String processSimilarHeaderString(String headerString, Class<?> clazz, Cell cell) {
         if(clazz.isAnnotationPresent(Sheet.class)) {
             Sheet sheet = clazz.getAnnotation(Sheet.class);
             if(sheet.duplicateHeaders()) {
@@ -127,7 +127,7 @@ public class ExcelSheetReaderUtil {
         return cleanAndProcessSimilarHeaderString(headerString, clazz, c, r, null);
     }
 
-    public static String cleanAndProcessSimilarHeaderString(String headerString, Class<? extends BaseSheet> clazz, Cell cell) {
+    public static String cleanAndProcessSimilarHeaderString(String headerString, Class<?> clazz, Cell cell) {
         headerString = cleanHeaderString(headerString);
         headerString = processSimilarHeaderString(headerString, clazz, cell);
         return headerString;

@@ -27,6 +27,8 @@ public @interface Sheet {
 	String valueColumnBeginsAt() default "";
 	String valueColumnEndsAt() default "";
 	int headerRowAt() default 1;
+	boolean mergedHeaders() default false;
+	int mergedHeaderRowAt() default -1;
 	String headerRowBeginsAtText() default "";
 	String headerRowEndsAtText() default "";
 	int valueRowAt() default -1;

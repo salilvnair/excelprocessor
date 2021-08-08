@@ -48,7 +48,7 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         }
         Sheet sheet = clazz.getAnnotation(Sheet.class);
         Set<Field> excelHeaders = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
-        Object headerCellFieldMapOrDynamicCellField = null;
+        Object headerCellFieldMapOrDynamicCellField;
         if(!sheet.dynamicHeaders()) {
             Map<Cell, Field> cellFieldMap = StaticHeaderSheetReader.headerCellFieldMap(context, sheet, excelHeaders);
             headerCellFieldMapOrDynamicCellField = cellFieldMap;
@@ -183,17 +183,17 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
                 .filter(entry -> entry.getKey() >= valueRowBeginsAt)
                 .forEach(entry -> {
                     try {
-                        int key = entry.getKey();
-                        Map<String, CellInfo> value = entry.getValue();
-                        BaseSheet classObject = null;
+                        int  rowIndexKey = entry.getKey();
+                        Map<String, CellInfo> excelCellInfoMap = entry.getValue();
+                        BaseSheet classObject;
                         if(sheet.dynamicHeaders()) {
-                            classObject = DynamicHeaderSheetReader.dynamicCellValueResolver(clazz, headerStringList, value, key, finalDynamicCellField);
+                            classObject = DynamicHeaderSheetReader.dynamicCellValueResolver(clazz, headerStringList, excelCellInfoMap, rowIndexKey, finalDynamicCellField);
                         }
                         else {
-                            classObject = StaticHeaderSheetReader.cellValueResolver(clazz, value, key, finalHeaderCellFieldMap);
+                            classObject = StaticHeaderSheetReader.cellValueResolver(clazz, excelCellInfoMap,  rowIndexKey, finalHeaderCellFieldMap);
                         }
                         classObject.setSheetHeaders(sheetHeaders);
-                        classObject.setCells(value);
+                        classObject.setCells(excelCellInfoMap);
                         baseSheetList.add(classObject);
                     }
                     catch (Exception ignored) {}
