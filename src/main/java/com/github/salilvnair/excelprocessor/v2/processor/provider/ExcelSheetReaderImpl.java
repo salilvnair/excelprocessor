@@ -62,13 +62,25 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
     @Override
     public final <T extends BaseSheet> List<T> read(Class<T> clazz, ExcelSheetContext context) throws Exception {
         ExcelSheetReaderContext readerContext = _read(clazz, context, false);
-        return typedList(readerContext.getSheetData(), clazz);
+        List<T> sheetData = typedList(readerContext.getSheetData(), clazz);
+        context.setSheet(sheetData);
+        context.setReaderContext(readerContext);
+        return sheetData;
     }
 
     @Override
     public <T extends BaseSheet> Map<String, List<? extends BaseSheet>> read(Class<T> clazz, boolean multiOriented, ExcelSheetContext context) throws Exception {
         ExcelSheetReaderContext readerContext = _read(clazz, context, multiOriented);
-        return readerContext.getMultiOrientedSheetMap();
+        Map<String, List<? extends BaseSheet>> excelSheetMap = new HashMap<>();
+        if(!multiOriented) {
+            List<? extends BaseSheet> sheetData = readerContext.getSheetData();
+            Sheet sheet = clazz.getAnnotation(Sheet.class);
+            excelSheetMap.put(sheet.value(), sheetData);
+        }
+        else {
+            excelSheetMap = readerContext.getMultiOrientedSheetMap();
+        }
+        return excelSheetMap;
     }
 
     @Override
@@ -155,6 +167,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         else {
             excelSheets.put(sheetName, readerContext.getSheetData());
         }
+        context.setExcelSheets(excelSheets);
     }
 
     private void _readAndResolve(String[] fullyQualifiedClassNames, ExcelSheetContext context, Map<String, List<? extends BaseSheet>> excelSheets) throws Exception {
@@ -289,6 +302,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
 
     private  <T extends BaseSheet> List<CellValidationMessage> _validate(MultiOrientedSheet multiOrientedSheet, Class<? extends BaseSheet> clazz, ExcelSheetReaderContext readerContext, ExcelSheetContext sheetContext) {
         CellValidatorContext validatorContext = new CellValidatorContext();
+        validatorContext.setSheetContext(sheetContext);
         validatorContext.setReaderContext(readerContext);
         if(multiOrientedSheet!=null) {
             validatorContext.setSheetName(multiOrientedSheet.name());

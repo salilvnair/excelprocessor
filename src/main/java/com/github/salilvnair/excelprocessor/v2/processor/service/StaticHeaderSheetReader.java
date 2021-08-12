@@ -4,6 +4,7 @@ import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
 import com.github.salilvnair.excelprocessor.util.ReflectionUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.MergedCell;
+import com.github.salilvnair.excelprocessor.v2.annotation.Section;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.helper.TypeConvertor;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
@@ -22,8 +23,6 @@ import java.util.stream.IntStream;
  * @author Salil V Nair
  */
 public interface StaticHeaderSheetReader {
-
-
 
     static Map<Cell, Field> headerCellFieldMap(ExcelSheetReaderContext context, Sheet sheet, Set<Field> excelHeaders) {
         return excelHeaders.stream().collect(Collectors.toMap(excelHeader -> excelHeader.getAnnotation(Cell.class), excelHeader -> excelHeader, (o, n) -> n));
@@ -109,4 +108,66 @@ public interface StaticHeaderSheetReader {
         }
         return classObject;
     }
+
+    static BaseSheet cellValueResolver(Class<?> clazz, int rowOrColumnIndexKey, Map<String, CellInfo> excelCellInfoMap)  throws InstantiationException, IllegalAccessException {
+        BaseSheet classObject = clazz.asSubclass(BaseSheet.class).newInstance();
+        Sheet sheet = clazz.getAnnotation(Sheet.class);
+        if(sheet.vertical()) {
+            classObject.setColumnIndex(rowOrColumnIndexKey);
+            classObject.setColumn(ExcelSheetReader.toIndentName(rowOrColumnIndexKey + 1));
+        }
+        else {
+            classObject.setRowIndex(rowOrColumnIndexKey);
+            classObject.setRow(rowOrColumnIndexKey+1);
+        }
+        Set<Field> topLevelCellFields = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
+        Set<Field> sectionFields = AnnotationUtil.getAnnotatedFields(clazz, Section.class);
+        if(!sectionFields.isEmpty()) {
+            for (Field sectionField: sectionFields) {
+                BaseSheet fieldValue = cellValueResolver(sectionField.getType(), rowOrColumnIndexKey, excelCellInfoMap);
+                ReflectionUtil.setField(classObject, sectionField, fieldValue);
+            }
+        }
+        if(!topLevelCellFields.isEmpty()) {
+            for (Field field: topLevelCellFields) {
+                Cell cell = field.getAnnotation(Cell.class);
+                String headerString = cell.value();
+                headerString = ExcelSheetReaderUtil.cleanAndProcessSimilarHeaderString(headerString, clazz, cell);
+                CellInfo cellInfo = excelCellInfoMap.get(headerString);
+                if(cellInfo!=null) {
+                    Object fieldValue = TypeConvertor.convert(cellInfo.value(), cellInfo.cellType(), field.getType());
+                    ReflectionUtil.setField(classObject, field, fieldValue);
+                }
+            }
+        }
+        return classObject;
+    }
+
+    static Set<Field> findAllSectionFields(Class<?> clazz) {
+        Set<Field> allSectionFields = new HashSet<>();
+        Set<Field> sectionFields = AnnotationUtil.getAnnotatedFields(clazz, Section.class);
+        if(!sectionFields.isEmpty()) {
+            sectionFields.forEach(sectionField -> allSectionFields.addAll(findAllSectionFields(sectionField.getType())));
+            allSectionFields.addAll(sectionFields);
+        }
+        return allSectionFields;
+    }
+
+    static Set<Field> findAllCellFields(Class<?> clazz) {
+        Set<Field> cellFields = new HashSet<>();
+        Set<Field> topLevelCellFields = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
+        Set<Field> sectionFields = AnnotationUtil.getAnnotatedFields(clazz, Section.class);
+        if(!sectionFields.isEmpty()) {
+            sectionFields.forEach(sectionField -> cellFields.addAll(findAllCellFields(sectionField.getType())));
+        }
+        if(!topLevelCellFields.isEmpty()) {
+            cellFields.addAll(topLevelCellFields);
+        }
+        return cellFields;
+    }
+
+    static List<Cell> findAllCells(Class<?> clazz) {
+        return findAllCellFields(clazz).stream().map(cellField -> cellField.getAnnotation(Cell.class)).collect(Collectors.toList());
+    }
+
 }

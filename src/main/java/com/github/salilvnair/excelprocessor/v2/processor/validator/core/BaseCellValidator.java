@@ -6,6 +6,7 @@ import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.annotation.UserDefinedMessage;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
@@ -70,7 +71,7 @@ public abstract class BaseCellValidator extends AbstractExcelValidator {
         CellValidationMessage validationMessage = validationMessage(fieldValue, currentInstance, validatorContext);
         String sheetName = validatorContext.sheetName()!=null ? validatorContext.sheetName() : sheet.value();
         validationMessage.setSheet(sheetName);
-        addValidationMessageMetadataUsingCellInfo(validationMessage, cellInfoMap(fieldValue, currentInstance, validatorContext));
+        addValidationMessageMetadataUsingCellInfo(sheet, validationMessage, cellInfoMap(fieldValue, currentInstance, validatorContext));
         messages.add(validationMessage);
         return messages;
     }
@@ -81,11 +82,11 @@ public abstract class BaseCellValidator extends AbstractExcelValidator {
         return validatorContext.sheet().vertical() ? colIndexKeyedHeaderKeyCellInfoMap.get(validatorContext.currentRow().getColumnIndex()) : rowIndexKeyedHeaderKeyCellInfoMap.get(validatorContext.currentRow().getRowIndex());
     }
 
-    protected void addValidationMessageMetadataUsingCellInfo(CellValidationMessage validationMessage, Map<String, CellInfo> cellInfoMap) {
+    protected void addValidationMessageMetadataUsingCellInfo(Sheet sheet, CellValidationMessage validationMessage, Map<String, CellInfo> cellInfoMap) {
         Cell cell = field.getAnnotation(Cell.class);
-        String headerKey = cell.value();
+        String headerKey = ExcelSheetReaderUtil.processSimilarHeaderString(sheet, cell);
         CellInfo cellInfo = cellInfoMap.get(headerKey);
-        validationMessage.setHeader(headerKey);
+        validationMessage.setHeader(cell.value());
         validationMessage.setRow(cellInfo.rowIndex() + 1);
         validationMessage.setColumn(ExcelSheetReader.toIndentName(cellInfo.columnIndex()+1));
         validationMessage.setMappedFieldName(field.getName());

@@ -1,7 +1,9 @@
 package com.github.salilvnair.excelprocessor.v2.processor.validator.provider;
 
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
+import com.github.salilvnair.excelprocessor.util.ReflectionUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
+import com.github.salilvnair.excelprocessor.v2.annotation.Section;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
@@ -20,8 +22,10 @@ import java.util.Set;
  */
 public class RowValidator extends AbstractExcelValidator {
     private Set<Field> columns = new HashSet<>();
+    private Set<Field> sections = new HashSet<>();
     public RowValidator(Object rowInstance) {
         columns = AnnotationUtil.getAnnotatedFields(rowInstance.getClass(), CellValidation.class);
+        sections = AnnotationUtil.getAnnotatedFields(rowInstance.getClass(), Section.class);
     }
     @Override
     public List<CellValidationMessage> validate(Object currentInstance, CellValidatorContext validatorContext) {
@@ -33,6 +37,12 @@ public class RowValidator extends AbstractExcelValidator {
             validatorContext.setField(column);
             validatorUtil.setValidatorContext(validatorContext);
             errors.addAll(validatorUtil.validate(currentInstance, validatorContext));
+        }
+        for (Field section: sections) {
+            ExcelValidatorUtil validatorUtil = new ExcelValidatorUtil(section, ExcelSheetValidatorType.SECTION);
+            validatorUtil.setValidatorContext(validatorContext);
+            Object sectionInstance = ReflectionUtil.getFieldValue(currentInstance, section);
+            errors.addAll(validatorUtil.validate(sectionInstance, validatorContext));
         }
         return errors;
     }

@@ -17,6 +17,9 @@ public class ExcelSheetFactory {
             if(sheet.dynamicHeaders()) {
                 return new DynamicHeaderVerticalSheetReader(concurrent, batchSize);
             }
+            else if(sheet.sectional()) {
+                return new SectionTypeVerticalSheetReader(concurrent, batchSize);
+            }
             return new VerticalSheetReader(concurrent, batchSize);
         }
         else {

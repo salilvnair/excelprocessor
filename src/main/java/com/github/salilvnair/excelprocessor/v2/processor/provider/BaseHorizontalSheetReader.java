@@ -5,8 +5,10 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.helper.ConcurrentUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.service.ExcelSheetReaderTaskService;
+import com.github.salilvnair.excelprocessor.v2.processor.concurrent.task.ExcelSheetReaderTask;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.type.TaskType;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.provider.PatternValidator;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.service.DynamicHeaderSheetReader;
@@ -21,9 +23,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,6 +47,7 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
             return;//change it to exception later on
         }
         Sheet sheet = clazz.getAnnotation(Sheet.class);
+        context.setSheet(sheet);
         Set<Field> excelHeaders = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
         Object headerCellFieldMapOrDynamicCellField;
         if(!sheet.dynamicHeaders()) {
@@ -57,18 +58,15 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         else {
             headerCellFieldMapOrDynamicCellField = DynamicHeaderSheetReader.dynamicCellField(clazz);
         }
-        Map<Integer, String> headerColumnIndexKeyedHeaderValueMap = orderedOrUnorderedMap(sheet);
-        Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap = new LinkedHashMap<>();
-        List<BaseSheet> baseSheetList = new ArrayList<>();
+        Map<Integer, String> headerColumnIndexKeyedHeaderValueMap = context.getHeaderColumnIndexKeyedHeaderValueMap();
+        Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap = context.getRowIndexKeyedHeaderKeyCellInfoMap();
+        List<BaseSheet> baseSheetList = context.getConcurrentSheetData();
         if(concurrent) {
             _concurrentRead(clazz, context, workbook, baseSheetList, headerColumnIndexKeyedHeaderValueMap, rowIndexKeyedHeaderKeyCellInfoMap, headerCellFieldMapOrDynamicCellField);
         }
         else {
             _read(clazz, context, workbook, baseSheetList, headerColumnIndexKeyedHeaderValueMap, rowIndexKeyedHeaderKeyCellInfoMap, headerCellFieldMapOrDynamicCellField);
         }
-
-        context.setHeaderColumnIndexKeyedHeaderValueMap(headerColumnIndexKeyedHeaderValueMap);
-        context.setRowIndexKeyedHeaderKeyCellInfoMap(rowIndexKeyedHeaderKeyCellInfoMap);
         context.setSheetData(Collections.unmodifiableList(baseSheetList));
     }
 
@@ -123,6 +121,7 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         List<String> headerStringList = orderedOrUnorderedList(sheet);
         List<String> sheetHeaders = orderedOrUnorderedList(sheet);
         List<String> ignoreHeaders = sheet.ignoreHeaders().length > 0 ? Arrays.stream(sheet.ignoreHeaders()).collect(Collectors.toList()) : context.ignoreHeaders();
+        List<String> ignoreHeaderPatterns = sheet.ignoreHeaderPatterns().length > 0 ? Arrays.stream(sheet.ignoreHeaderPatterns()).collect(Collectors.toList()) : context.ignoreHeaderPatterns();
         List<Integer> ignoreHeaderColumns = context.ignoreHeaderColumns().stream().map(col -> ExcelSheetReader.toIndentNumber(col) -1 ).collect(Collectors.toList());
         Set<Field> sheetCells = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
         List<String> classCellHeaders = sheetCells.stream().map(cellField -> cellField.getAnnotation(Cell.class).value()).collect(Collectors.toList());
@@ -131,9 +130,15 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
             headerString = ExcelSheetReaderUtil.cleanHeaderString(headerString);
             if(!classCellHeaders.contains(headerString) && !sheet.dynamicHeaders()) {
                 ignoreHeaderColumns.add(c);
+                continue;
+            }
+            if(ignoreHeaderPatternMarchFound(headerString, ignoreHeaderPatterns)) {
+                ignoreHeaderColumns.add(c);
+                continue;
             }
             if(ignoreHeaders.contains(headerString)) {
                 ignoreHeaderColumns.add(c);
+                continue;
             }
             sheetHeaders.add(headerString);
             headerString = ExcelSheetReaderUtil.processSimilarHeaderString(headerString, clazz, c, headerRowIndex, headerStringList);
@@ -169,6 +174,7 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
                     continue;
                 }
                 Object cellValue = extractValueBasedOnCellType(workbook, cell, cellInfo);
+                extractCellPropertiesAndSetCellInfo(workbook, cell, cellInfo);
                 cellInfo.setValue(cellValue);
                 headerKeyCellInfoMap.put(headerString, cellInfo);
             }
@@ -210,6 +216,9 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         ExecutorService executor = Executors.newCachedThreadPool();
         ExcelSheetReaderTaskService service = new ExcelSheetReaderTaskService();
         for (List<Integer> rowList : rowBatchList) {
+            ExcelSheetReaderContext xContext = new ExcelSheetReaderContext();
+            xContext.setSheet(context.sheet());
+            xContext.setSheetName(context.sheetName());
             Integer from = rowList.get(0);
             int valueRowIndex = sheetInfo.valueRowIndex();
             if(valueRowIndex > from ) {
@@ -219,16 +228,28 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
                 from = from + 1;
             }
             Integer to = rowList.get(rowList.size() - 1);
-            context.setValueRowBeginsAt(from);
-            context.setValueRowEndsAt(to+1);
-            service.toContext(TaskType.READ_MULTIPLE_ROWS_OR_COLUMNS.name(), null, clazz, context, workbook, baseSheetList, headerColumnIndexKeyedHeaderValueMap, rowIndexKeyedHeaderKeyCellInfoMap, headerFieldOrFieldMap);
+            xContext.setValueRowBeginsAt(from);
+            xContext.setValueRowEndsAt(to+1);
+            ExcelSheetReaderTask task = new ExcelSheetReaderTask(TaskType.READ_MULTIPLE_ROWS_OR_COLUMNS.name(), null, service, clazz, xContext, workbook, xContext.getConcurrentSheetData(), xContext.getHeaderColumnIndexKeyedHeaderValueMap(), xContext.getRowIndexKeyedHeaderKeyCellInfoMap(), headerFieldOrFieldMap);
+            //service.toContext(TaskType.READ_MULTIPLE_ROWS_OR_COLUMNS.name(), null, clazz, context, workbook, baseSheetList, headerColumnIndexKeyedHeaderValueMap, rowIndexKeyedHeaderKeyCellInfoMap, headerFieldOrFieldMap);
+            taskCallables.add(task);
         }
         try {
-            executor.invokeAll(taskCallables);
+            List<Future<ExcelSheetReaderContext>> futureList = executor.invokeAll(taskCallables);
+            int counter = 0;
+            for(Future<ExcelSheetReaderContext> futureContext : futureList) {
+                ExcelSheetReaderContext readerContext = futureContext.get();
+                headerColumnIndexKeyedHeaderValueMap.putAll(readerContext.getHeaderColumnIndexKeyedHeaderValueMap());
+                rowIndexKeyedHeaderKeyCellInfoMap.putAll(readerContext.getRowIndexKeyedHeaderKeyCellInfoMap());
+                baseSheetList.addAll(readerContext.getConcurrentSheetData());
+                counter++;
+            }
+            if(taskCallables.size() == counter) {
+                executor.shutdown();
+            }
         }
-        catch (InterruptedException e) {
+        catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-        executor.shutdown();
     }
 }

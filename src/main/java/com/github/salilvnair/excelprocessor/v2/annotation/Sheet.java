@@ -19,6 +19,7 @@ public @interface Sheet {
 	String customTask() default "";
 	String[] customTasks() default {};
 	String[] ignoreHeaders() default {};
+	String[] ignoreHeaderPatterns() default {};
 	int[] ignoreRows() default {};
 	String headerColumnAt() default "A";
 	String headerColumnBeginsAtText() default "";
@@ -28,6 +29,7 @@ public @interface Sheet {
 	String valueColumnEndsAt() default "";
 	int headerRowAt() default 1;
 	boolean mergedHeaders() default false;
+	boolean sectional() default false;
 	int mergedHeaderRowAt() default -1;
 	String headerRowBeginsAtText() default "";
 	String headerRowEndsAtText() default "";

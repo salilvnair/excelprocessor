@@ -104,19 +104,51 @@ public class ExcelSheetReaderUtil {
         return headerString;
     }
 
+    public static String processSimilarHeaderString(Sheet sheet, String headerString, List<Cell> cells, int columnIndex, int rowIndex) {
+        if(sheet.sectional()) {
+            for(Cell cell:cells) {
+                if(!ExcelValidatorConstant.EMPTY_STRING.equals(cell.value())
+                        && cell.value().equals(headerString)) {
+                    if(sheet.vertical()) {
+                        if((cell.row()-1) == rowIndex) {
+                            return headerString+ SheetProcessingCommonConstant.UNDERSCORE+cell.row();
+                        }
+                    }
+                    else {
+                        String columnName = ExcelSheetReader.toIndentName(columnIndex+1);
+                        if(cell.column().equals(columnName)) {
+                            return headerString+SheetProcessingCommonConstant.UNDERSCORE+cell.column();
+                        }
+                    }
+                }
+            }
+        }
+        return headerString;
+    }
+
+
     public static String processSimilarHeaderString(String headerString, Class<?> clazz, Cell cell) {
         if(clazz.isAnnotationPresent(Sheet.class)) {
             Sheet sheet = clazz.getAnnotation(Sheet.class);
-            if(sheet.duplicateHeaders()) {
-                if(sheet.vertical()) {
-                    if(cell.row()!=-1) {
-                        return headerString+ SheetProcessingCommonConstant.UNDERSCORE+cell.row();
-                    }
+            return processSimilarHeaderString(sheet, headerString, cell);
+        }
+        return headerString;
+    }
+
+    public static String processSimilarHeaderString(Sheet sheet, Cell cell) {
+        return processSimilarHeaderString(sheet, cell.value(), cell);
+    }
+
+    public static String processSimilarHeaderString(Sheet sheet, String headerString, Cell cell) {
+        if(sheet.duplicateHeaders() || sheet.sectional()) {
+            if(sheet.vertical()) {
+                if(cell.row()!=-1) {
+                    return headerString+ SheetProcessingCommonConstant.UNDERSCORE+cell.row();
                 }
-                else {
-                    if(StringUtils.isNotEmpty(cell.column())) {
-                        return headerString+ SheetProcessingCommonConstant.UNDERSCORE+cell.column();
-                    }
+            }
+            else {
+                if(StringUtils.isNotEmpty(cell.column())) {
+                    return headerString+ SheetProcessingCommonConstant.UNDERSCORE+cell.column();
                 }
             }
         }

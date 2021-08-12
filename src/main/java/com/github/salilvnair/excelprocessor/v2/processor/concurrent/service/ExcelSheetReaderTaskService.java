@@ -56,6 +56,7 @@ public class ExcelSheetReaderTaskService implements ConcurrentTaskService<ExcelS
             Map<Integer, String> headerColumnIndexKeyedHeaderValueMap = (Map<Integer, String>) args[4];
             Map<Integer, Map<String, CellInfo >> rowIndexKeyedHeaderKeyCellInfoMap = (Map<Integer, Map<String, CellInfo>>) args[5];
             sheetReaderConcurrentService(clazz).read(clazz, context, workbook, baseSheetList, headerColumnIndexKeyedHeaderValueMap, rowIndexKeyedHeaderKeyCellInfoMap, args[6]);
+            return context;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -75,15 +76,21 @@ public class ExcelSheetReaderTaskService implements ConcurrentTaskService<ExcelS
         Sheet sheet = clazz.getAnnotation(Sheet.class);
         if(sheet.vertical()) {
             if(sheet.dynamicHeaders()) {
-                return new DynamicHeaderVerticalSheetReaderConcurrentServiceImpl(true, 100);
+                return new DynamicHeaderVerticalSheetReaderConcurrentServiceImpl(false, 100);
             }
-            return new VerticalSheetReaderConcurrentServiceImpl(true, 100);
+            else if(sheet.sectional()) {
+                return new VerticalSectionSheetReaderConcurrentServiceImpl(false, 100);
+            }
+            return new VerticalSheetReaderConcurrentServiceImpl(false, 100);
         }
         else {
             if(sheet.dynamicHeaders()) {
-                return new DynamicHeaderHorizontalSheetReaderConcurrentServiceImpl(true, 100);
+                return new DynamicHeaderHorizontalSheetReaderConcurrentServiceImpl(false, 100);
             }
-            return new HorizontalSheetReaderConcurrentServiceImpl(true, 100);
+            else if (sheet.mergedHeaders()) {
+                return new MergedHeaderHorizontalSheetReaderConcurrentServiceImpl(false, 100);
+            }
+            return new HorizontalSheetReaderConcurrentServiceImpl(false, 100);
         }
     }
 

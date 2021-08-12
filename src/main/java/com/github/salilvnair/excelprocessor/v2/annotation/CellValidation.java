@@ -25,6 +25,8 @@ public @interface CellValidation {
 	boolean nonNull() default true;
 	boolean nonEmpty() default true;
 	String pattern() default "";
+	boolean matchPattern() default false;
+	boolean findPattern() default true;
 	boolean alphaNumeric() default false;
 	boolean numeric() default false;
 	boolean currency() default false;

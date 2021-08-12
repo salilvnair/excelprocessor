@@ -1,5 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.type;
 
+import org.apache.poi.ss.usermodel.Color;
+
 import java.lang.reflect.Type;
 
 public class CellInfo {
@@ -12,44 +14,119 @@ public class CellInfo {
     private int columnIndex;
     private Type cellType;
     private String cellTypeString;
+    private Color backgroundColor;
+    private Color foregroundColor;
+    private String backgroundHexString;
+    private String foregroundHexString;
+    private short[] backgroundRgb;
+    private short[] foregroundRgb;
 
+    //util functions
     public Object value() {
         return value;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
     }
 
     public int rowIndex() {
         return rowIndex;
     }
 
-    public void setRowIndex(int rowIndex) {
-        this.rowIndex = rowIndex;
-    }
-
     public int columnIndex() {
         return columnIndex;
-    }
-
-    public void setColumnIndex(int columnIndex) {
-        this.columnIndex = columnIndex;
     }
 
     public Type cellType() {
         return cellType;
     }
 
-    public void setCellType(Type cellType) {
-        this.cellType = cellType;
-    }
-
     public String cellTypeString() {
         return cellTypeString;
     }
 
+    //getters and setters
+    public void setRowIndex(int rowIndex) {
+        this.rowIndex = rowIndex;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
+    public void setColumnIndex(int columnIndex) {
+        this.columnIndex = columnIndex;
+    }
+
+    public void setCellType(Type cellType) {
+        this.cellType = cellType;
+    }
+
     public void setCellTypeString(String cellTypeString) {
         this.cellTypeString = cellTypeString;
+    }
+    public Color getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(Color backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
+
+    public Color getForegroundColor() {
+        return foregroundColor;
+    }
+
+    public void setForegroundColor(Color foregroundColor) {
+        this.foregroundColor = foregroundColor;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public int getRowIndex() {
+        return rowIndex;
+    }
+
+    public int getColumnIndex() {
+        return columnIndex;
+    }
+
+    public Type getCellType() {
+        return cellType;
+    }
+
+    public String getCellTypeString() {
+        return cellTypeString;
+    }
+
+    public String getBackgroundHexString() {
+        return backgroundHexString;
+    }
+
+    public void setBackgroundHexString(String backgroundHexString) {
+        this.backgroundHexString = backgroundHexString;
+    }
+
+    public String getForegroundHexString() {
+        return foregroundHexString;
+    }
+
+    public void setForegroundHexString(String foregroundHexString) {
+        this.foregroundHexString = foregroundHexString;
+    }
+
+    public short[] getBackgroundRgb() {
+        return backgroundRgb;
+    }
+
+    public void setBackgroundRgb(short[] backgroundRgb) {
+        this.backgroundRgb = backgroundRgb;
+    }
+
+    public short[] getForegroundRgb() {
+        return foregroundRgb;
+    }
+
+    public void setForegroundRgb(short[] foregroundRgb) {
+        this.foregroundRgb = foregroundRgb;
     }
 }

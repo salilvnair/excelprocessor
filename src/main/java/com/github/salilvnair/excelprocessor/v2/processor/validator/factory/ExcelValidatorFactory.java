@@ -27,6 +27,9 @@ public class ExcelValidatorFactory {
         else if(ExcelSheetValidatorType.COLUMN.equals(excelSheetValidatorType)) {
             validators = generateColumnValidators((Field) classInstance);
         }
+        else if(ExcelSheetValidatorType.SECTION.equals(excelSheetValidatorType)) {
+            validators = generateSectionValidators((Field) classInstance);
+        }
         return validators;
     }
 
@@ -57,5 +60,11 @@ public class ExcelValidatorFactory {
         validators.add(new RowValidator(classInstance));
         return validators;
     }
-    
+
+    private static List<IExcelValidator> generateSectionValidators(Field sectionField) {
+        List<IExcelValidator> validators = new ArrayList<>();
+        validators.add(new SectionValidator(sectionField));
+        return validators;
+    }
+
 }

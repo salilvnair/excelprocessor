@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * @author Salil V Nair
  */
-abstract class BaseExcelProcessor {
+public abstract class BaseExcelProcessor {
 
     protected static <T> List<T> typedList(List<?> untypedList, Class<T> itemClass) {
         List<T> list = new ArrayList<T>();
@@ -23,7 +23,7 @@ abstract class BaseExcelProcessor {
         return context != null && (context.getWorkbook() != null || context.getExcelFileInputStream() != null);
     }
 
-    protected <K, V> Map<K, V> orderedOrUnorderedMap(Sheet excelSheet) {
+    public static <K, V> Map<K, V> orderedOrUnorderedMap(Sheet excelSheet) {
         Map<K, V> headerKeyCellInfoMap;
         if(excelSheet.dynamicHeaders()) {
             headerKeyCellInfoMap = new LinkedHashMap<>();
@@ -34,7 +34,7 @@ abstract class BaseExcelProcessor {
         return headerKeyCellInfoMap;
     }
 
-    protected <T> List<T> orderedOrUnorderedList(Sheet excelSheet) {
+    public static <T> List<T> orderedOrUnorderedList(Sheet excelSheet) {
         List<T> list;
         if(excelSheet.dynamicHeaders()) {
             list = new LinkedList<>();
@@ -45,7 +45,7 @@ abstract class BaseExcelProcessor {
         return list;
     }
 
-    protected <T> Set<T> orderedOrUnorderedSet(Sheet excelSheet) {
+    public static <T> Set<T> orderedOrUnorderedSet(Sheet excelSheet) {
         Set<T> set;
         if(excelSheet.dynamicHeaders()) {
             set = new LinkedHashSet<>();

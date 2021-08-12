@@ -6,5 +6,6 @@ package com.github.salilvnair.excelprocessor.v2.processor.validator.core;
 public enum ExcelSheetValidatorType {
     SHEET,
     ROW,
+    SECTION,
     COLUMN
 }

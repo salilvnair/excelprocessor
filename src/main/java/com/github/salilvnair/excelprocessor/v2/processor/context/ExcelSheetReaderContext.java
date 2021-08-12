@@ -2,6 +2,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.context;
 
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
+import com.github.salilvnair.excelprocessor.v2.processor.provider.BaseExcelProcessor;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -20,6 +21,7 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
     private Sheet sheet;
     private String sheetName;
     private List<String> ignoreHeaders;
+    private List<String> ignoreHeaderPatterns;
     private List<Integer> ignoreHeaderRows;
     private List<String> ignoreHeaderColumns;
     private Map<Cell, Field> headerCellFieldMap;
@@ -28,6 +30,7 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
     private Map<Integer, String> headerColumnIndexKeyedHeaderValueMap;
     private Map<Integer, String> headerRowIndexKeyedHeaderValueMap;
     private List<? extends BaseSheet> sheetData;
+    private List<BaseSheet> concurrentSheetData;
     private boolean extractMultiOrientedMap;
     private Map<String, List<? extends BaseSheet>> multiOrientedSheetMap;
     private Map<String, List<? extends BaseSheet>> scatteredSheetMap;
@@ -38,6 +41,9 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
     private int valueRowEndsAt=-1;
 
     public Map<Integer, Map<String, CellInfo>> getRowIndexKeyedHeaderKeyCellInfoMap() {
+        if(rowIndexKeyedHeaderKeyCellInfoMap == null) {
+            rowIndexKeyedHeaderKeyCellInfoMap = BaseExcelProcessor.orderedOrUnorderedMap(sheet);
+        }
         return rowIndexKeyedHeaderKeyCellInfoMap;
     }
 
@@ -46,6 +52,9 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
     }
 
     public Map<Integer, String> getHeaderColumnIndexKeyedHeaderValueMap() {
+        if(headerColumnIndexKeyedHeaderValueMap == null) {
+            headerColumnIndexKeyedHeaderValueMap = BaseExcelProcessor.orderedOrUnorderedMap(sheet);
+        }
         return headerColumnIndexKeyedHeaderValueMap;
     }
 
@@ -70,6 +79,9 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
     }
 
     public Map<Integer, String> getHeaderRowIndexKeyedHeaderValueMap() {
+        if(headerRowIndexKeyedHeaderValueMap == null) {
+            headerRowIndexKeyedHeaderValueMap = BaseExcelProcessor.orderedOrUnorderedMap(sheet);
+        }
         return headerRowIndexKeyedHeaderValueMap;
     }
 
@@ -78,6 +90,9 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
     }
 
     public Map<Integer, Map<String, CellInfo>> getColIndexKeyedHeaderKeyCellInfoMap() {
+        if(colIndexKeyedHeaderKeyCellInfoMap == null) {
+            colIndexKeyedHeaderKeyCellInfoMap = BaseExcelProcessor.orderedOrUnorderedMap(sheet);
+        }
         return colIndexKeyedHeaderKeyCellInfoMap;
     }
 
@@ -186,6 +201,17 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
         this.ignoreHeaderRows = ignoreHeaderRows;
     }
 
+    public List<String> ignoreHeaderPatterns() {
+        if(ignoreHeaderPatterns == null) {
+            ignoreHeaderPatterns = new ArrayList<>();
+        }
+        return ignoreHeaderPatterns;
+    }
+
+    public void setIgnoreHeaderPatterns(List<String> ignoreHeaderPatterns) {
+        this.ignoreHeaderPatterns = ignoreHeaderPatterns;
+    }
+
     public List<String> ignoreHeaderColumns() {
         if(ignoreHeaderColumns == null) {
             ignoreHeaderColumns = new ArrayList<>();
@@ -195,5 +221,16 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
 
     public void setIgnoreHeaderColumns(List<String> ignoreHeaderColumns) {
         this.ignoreHeaderColumns = ignoreHeaderColumns;
+    }
+
+    public List<BaseSheet> getConcurrentSheetData() {
+        if(concurrentSheetData == null) {
+            concurrentSheetData = BaseExcelProcessor.orderedOrUnorderedList(sheet);
+        }
+        return concurrentSheetData;
+    }
+
+    public void setConcurrentSheetData(List<BaseSheet> concurrentSheetData) {
+        this.concurrentSheetData = concurrentSheetData;
     }
 }

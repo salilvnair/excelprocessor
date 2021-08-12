@@ -1,6 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.processor.validator.context;
 
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
+import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.IExcelValidator;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
@@ -17,6 +18,7 @@ public class CellValidatorContext {
     private List<? extends BaseSheet> currentSheet;
     private Map<String, List<? extends BaseSheet>> excelSheets;
     private Field field;
+    private ExcelSheetContext sheetContext;
     private ExcelSheetReaderContext readerContext;
     private IExcelValidator validator;
     private Map<String,Object> userValidatorMap;
@@ -126,5 +128,13 @@ public class CellValidatorContext {
 
     public void setSheetName(String sheetName) {
         this.sheetName = sheetName;
+    }
+
+    public ExcelSheetContext sheetContext() {
+        return sheetContext;
+    }
+
+    public void setSheetContext(ExcelSheetContext sheetContext) {
+        this.sheetContext = sheetContext;
     }
 }

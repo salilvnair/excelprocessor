@@ -2,7 +2,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.concurrent.service;
 
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
-import com.github.salilvnair.excelprocessor.v2.processor.provider.MergedHeaderHorizontalSheetReader;
+import com.github.salilvnair.excelprocessor.v2.processor.provider.HorizontalSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * @author Salil V Nair
  */
-public class HorizontalSheetReaderConcurrentServiceImpl extends MergedHeaderHorizontalSheetReader implements SheetReaderConcurrentService {
+public class HorizontalSheetReaderConcurrentServiceImpl extends HorizontalSheetReader implements SheetReaderConcurrentService {
     public HorizontalSheetReaderConcurrentServiceImpl(boolean concurrent, int batchSize) {
         super(concurrent, batchSize);
     }

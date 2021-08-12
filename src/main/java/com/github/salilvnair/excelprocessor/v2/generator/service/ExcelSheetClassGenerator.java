@@ -30,7 +30,7 @@ public class ExcelSheetClassGenerator {
     }
 
     public static String generate(ExcelSheetContext sheetContext, SheetInfo sheetInfo) throws Exception {
-        ExcelSheetReader reader = ExcelSheetReaderFactory.generate(true);
+        ExcelSheetReader reader = ExcelSheetReaderFactory.generate(false);
         DynamicHeaderSheet dynamicHeaderSheet = new DynamicClassGeneratorSheet();
         Sheet sheet = dynamicHeaderSheet.getClass().getAnnotation(Sheet.class);
         if(sheetInfo.vertical()) {
@@ -39,6 +39,7 @@ public class ExcelSheetClassGenerator {
         AnnotationUtil.changeValue(sheet, "value", sheetInfo.name());
         AnnotationUtil.changeValue(sheet, "headerRowAt", sheetInfo.headerRowAt());
         AnnotationUtil.changeValue(sheet, "headerColumnAt", sheetInfo.headerColumnAt());
+        AnnotationUtil.changeValue(sheet, "ignoreHeaderPatterns", sheetInfo.ignoreHeaderPatterns());
         List<? extends BaseSheet> readList = reader.read(dynamicHeaderSheet.getClass(), sheetContext);
         return classTemplate(sheet.value(), sheet.vertical(), readList.get(0).sheetHeaders(), readList.get(0).cells(), sheet.headerRowAt(), sheet.headerColumnAt());
     }

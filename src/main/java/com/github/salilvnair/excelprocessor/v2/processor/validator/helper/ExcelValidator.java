@@ -69,7 +69,7 @@ public class ExcelValidator {
         }
         initValidatorContext();
         ExcelValidatorUtil validatorUtil = new ExcelValidatorUtil(validatorContext);
-        if(this.rows==null||this.rows.isEmpty()) {
+        if(this.rows==null || this.rows.isEmpty()) {
             return validatorUtil.validate(row);
         }
         else {

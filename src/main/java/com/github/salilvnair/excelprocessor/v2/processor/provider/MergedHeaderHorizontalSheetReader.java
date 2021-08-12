@@ -70,6 +70,7 @@ public class MergedHeaderHorizontalSheetReader extends HorizontalSheetReader {
         List<String> headerStringList = orderedOrUnorderedList(sheet);
         List<String> sheetHeaders = orderedOrUnorderedList(sheet);
         List<String> ignoreHeaders = sheet.ignoreHeaders().length > 0 ? Arrays.stream(sheet.ignoreHeaders()).collect(Collectors.toList()) : context.ignoreHeaders();
+        List<String> ignoreHeaderPatterns = sheet.ignoreHeaderPatterns().length > 0 ? Arrays.stream(sheet.ignoreHeaderPatterns()).collect(Collectors.toList()) : context.ignoreHeaderPatterns();
         List<Integer> ignoreHeaderColumns = context.ignoreHeaderColumns().stream().map(col -> ExcelSheetReader.toIndentNumber(col) -1 ).collect(Collectors.toList());
         Set<Field> sheetCells = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
 
@@ -85,9 +86,15 @@ public class MergedHeaderHorizontalSheetReader extends HorizontalSheetReader {
             headerString = ExcelSheetReaderUtil.cleanHeaderString(headerString);
             if(!classCellHeaders.contains(headerString) && !sheet.dynamicHeaders()) {
                 ignoreHeaderColumns.add(c);
+                continue;
             }
             if(ignoreHeaders.contains(headerString)) {
                 ignoreHeaderColumns.add(c);
+                continue;
+            }
+            if(ignoreHeaderPatternMarchFound(headerString, ignoreHeaderPatterns)) {
+                ignoreHeaderColumns.add(c);
+                continue;
             }
             sheetHeaders.add(headerString);
             headerString = ExcelSheetReaderUtil.processSimilarHeaderString(headerString, clazz, c, headerRowIndex, headerStringList);

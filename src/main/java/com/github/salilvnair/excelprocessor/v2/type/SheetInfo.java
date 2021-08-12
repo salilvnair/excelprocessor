@@ -1,6 +1,8 @@
 package com.github.salilvnair.excelprocessor.v2.type;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Salil V Nair
@@ -15,6 +17,7 @@ public class SheetInfo {
     private int valueColumnIndex;
     private List<CellInfo> cells;
     private boolean vertical;
+    private List<String> ignoreHeaderPatterns;
 
     public String name() {
         return name;
@@ -92,6 +95,14 @@ public class SheetInfo {
         this.vertical = vertical;
     }
 
+    public String[] ignoreHeaderPatterns() {
+        return ignoreHeaderPatterns.toArray(new String[0]);
+    }
+
+    public void setIgnoreHeaderPatterns(List<String> ignoreHeaderPatterns) {
+        this.ignoreHeaderPatterns = ignoreHeaderPatterns;
+    }
+
 
     public static class SheetInfoBuilder {
         private final SheetInfo sheetInfo =  new SheetInfo();
@@ -113,6 +124,12 @@ public class SheetInfo {
 
         public SheetInfo.SheetInfoBuilder vertical(boolean verticalReading) {
             sheetInfo.setVertical(verticalReading);
+            return this;
+        }
+
+        public SheetInfo.SheetInfoBuilder ignoreHeaderPatterns(String... pattern) {
+            List<String> ignoreHeaderPatterns = Arrays.stream(pattern).collect(Collectors.toList());
+            sheetInfo.setIgnoreHeaderPatterns(ignoreHeaderPatterns);
             return this;
         }
 
