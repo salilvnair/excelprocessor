@@ -7,11 +7,9 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.type.Validato
 import java.lang.reflect.Field;
 
 public class RequiredValidator extends BaseCellValidator {
-    private final Field field;
 
     public RequiredValidator(Field field) {
         super(field);
-        this.field = field;
     }
 
     @Override
@@ -25,7 +23,8 @@ public class RequiredValidator extends BaseCellValidator {
     }
 
     @Override
-    protected String defaultMessage() {
-        return "field cannot be null or empty.";
+    protected String defaultMessage(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
+        String headerKey = headerKey(fieldValue, currentInstance, validatorContext);
+        return headerKey+" cannot be null or empty.";
     }
 }

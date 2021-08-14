@@ -11,7 +11,6 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.type.Validato
 import java.lang.reflect.Field;
 
 public class ConditionalValidator extends BaseCellValidator {
-
     private final Field field;
     private String conditionalMessage;
     public ConditionalValidator(Field field) {
@@ -36,7 +35,7 @@ public class ConditionalValidator extends BaseCellValidator {
     }
 
     @Override
-    protected String defaultMessage() {
+    protected String defaultMessage(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
         return conditionalMessage;
     }
 }

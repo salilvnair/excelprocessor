@@ -46,11 +46,32 @@ public class ExcelValidatorFactory {
         if(cellValidation.required()) {
             validators.add(new RequiredValidator(column));
         }
-        if(cellValidation.conditional()) {
+        else if(cellValidation.conditional()) {
             validators.add(new ConditionalValidator(column));
+        }
+        if(cellValidation.date()) {
+            validators.add(new DateValidator(column));
+        }
+        if(cellValidation.unique()) {
+            validators.add(new UniqueValidator(column));
+        }
+        if(cellValidation.alphaNumeric()) {
+            validators.add(new AlphaNumericValidator(column));
+        }
+        if(cellValidation.numeric()) {
+            validators.add(new NumericValidator(column));
+        }
+        if(cellValidation.email()) {
+            validators.add(new EmailValidator(column));
+        }
+        if(cellValidation.length() > -1 || cellValidation.minLength() > -1 || cellValidation.maxLength() > -1) {
+            validators.add(new LengthValidator(column));
         }
         if(!StringUtils.isEmpty(cellValidation.customTask()) || cellValidation.customTasks().length > 0) {
             validators.add(new CustomMethodValidator(column));
+        }
+        if(!StringUtils.isEmpty(cellValidation.pattern()) && (cellValidation.matchPattern() || cellValidation.findPattern())) {
+            validators.add(new PatternValidator(column));
         }
         return validators;
     }

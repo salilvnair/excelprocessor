@@ -1,6 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.annotation;
 
 
+import com.github.salilvnair.excelprocessor.util.DateParsingUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.type.MessageType;
 
 import java.lang.annotation.ElementType;
@@ -18,22 +19,18 @@ public @interface CellValidation {
 	int minLength() default -1;
 	int maxLength() default -1;
 	int length() default -1;
-	String date() default "";
-	String minDate() default "";
-	String maxDate() default "";
+	boolean date() default false;
+	DateParsingUtil.DateFormat datePattern() default DateParsingUtil.DateFormat.SLASH_MM_DD_YYYY;
 	boolean email() default false;
-	boolean nonNull() default true;
-	boolean nonEmpty() default true;
+	boolean allowNull() default true;
+	boolean allowEmpty() default true;
 	String pattern() default "";
 	boolean matchPattern() default false;
 	boolean findPattern() default true;
 	boolean alphaNumeric() default false;
 	boolean numeric() default false;
-	boolean currency() default false;
 	String customTask() default "";
 	String[] customTasks() default {};
-	String[] dependentHeaders() default {};
-	String dependentHeaderKey() default "";	
 	String userDefinedMessage() default "";
 	String messageId()  default "";
 	MessageType messageType() default MessageType.ERROR;

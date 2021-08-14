@@ -15,9 +15,11 @@ import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
  */
 public class SheetValidator extends AbstractExcelValidator {
     private final List<?> rows;
+
     public SheetValidator(List<?> rows) {
         this.rows = rows;
     }
+
     @Override
     public List<CellValidationMessage> validate(Object currentInstance, CellValidatorContext validatorContext) {
         List<CellValidationMessage> errors = new ArrayList<>();

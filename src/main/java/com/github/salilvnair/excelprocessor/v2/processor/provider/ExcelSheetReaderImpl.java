@@ -8,7 +8,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.annotation.MultiOrientedSheet;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.service.ExcelSheetReaderTaskService;
@@ -35,7 +34,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
     }
 
     public static ExcelSheetReaderImpl init() {
-        return new ExcelSheetReaderImpl(false, 0);
+        return new ExcelSheetReaderImpl();
     }
     public static ExcelSheetReaderImpl init(boolean concurrent, int batchSize) {
         return new ExcelSheetReaderImpl(concurrent, batchSize);
@@ -283,7 +282,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         }
     }
 
-    private Map<String, List<CellValidationMessage>> _validate(MultiOrientedSheet multiOrientedSheet, Map<String, List<? extends BaseSheet>> excelData, ExcelSheetContext sheetContext) throws Exception {
+    private Map<String, List<CellValidationMessage>> _validate(MultiOrientedSheet multiOrientedSheet, Map<String, List<? extends BaseSheet>> excelData, ExcelSheetContext sheetContext) {
         Map<String, List<CellValidationMessage>> excelValidationMessages = new HashMap<>();
         excelData.forEach((headerKey, excelSheet) -> {
             ExcelSheetReaderContext readerContext = sheetContext.readerContexts().get(headerKey);
@@ -296,11 +295,11 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         return excelValidationMessages;
     }
 
-    private  <T extends BaseSheet> List<CellValidationMessage> _validate(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext readerContext, ExcelSheetContext sheetContext) {
+    private List<CellValidationMessage> _validate(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext readerContext, ExcelSheetContext sheetContext) {
         return _validate(null, clazz, readerContext, sheetContext);
     }
 
-    private  <T extends BaseSheet> List<CellValidationMessage> _validate(MultiOrientedSheet multiOrientedSheet, Class<? extends BaseSheet> clazz, ExcelSheetReaderContext readerContext, ExcelSheetContext sheetContext) {
+    private List<CellValidationMessage> _validate(MultiOrientedSheet multiOrientedSheet, Class<? extends BaseSheet> clazz, ExcelSheetReaderContext readerContext, ExcelSheetContext sheetContext) {
         CellValidatorContext validatorContext = new CellValidatorContext();
         validatorContext.setSheetContext(sheetContext);
         validatorContext.setReaderContext(readerContext);

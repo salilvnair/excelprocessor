@@ -8,6 +8,7 @@ public enum ValidatorType {
     REQUIRED,
     CONDITIONAL,
     DATE,
+    UNIQUE,
     PATTERN,
     MIN_ITEMS,
     MAX_ITEMS,

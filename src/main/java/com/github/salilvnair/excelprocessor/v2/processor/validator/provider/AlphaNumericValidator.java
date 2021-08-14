@@ -8,19 +8,23 @@ import java.lang.reflect.Field;
 
 
 public class AlphaNumericValidator extends BaseCellValidator {
-    private final Field field;
     public AlphaNumericValidator(Field field) {
         super(field);
-        this.field = field;
     }
 
     @Override
     protected boolean violated(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
-        return false;
+        return !PatternValidator.match("[A-Za-z0-9]+", fieldValue+"");
     }
 
     @Override
     protected ValidatorType validatorType() {
         return ValidatorType.ALPHANUMERIC;
+    }
+
+    @Override
+    protected String defaultMessage(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
+        String headerKey = headerKey(fieldValue, currentInstance, validatorContext);
+        return headerKey+" is not a valid alphanumeric number.";
     }
 }

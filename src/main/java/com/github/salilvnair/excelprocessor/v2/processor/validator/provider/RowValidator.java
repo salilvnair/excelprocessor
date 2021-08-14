@@ -21,12 +21,15 @@ import java.util.Set;
  * @author Salil V Nair
  */
 public class RowValidator extends AbstractExcelValidator {
-    private Set<Field> columns = new HashSet<>();
-    private Set<Field> sections = new HashSet<>();
+    private final Set<Field> columns;
+
+    private final Set<Field> sections;
+
     public RowValidator(Object rowInstance) {
         columns = AnnotationUtil.getAnnotatedFields(rowInstance.getClass(), CellValidation.class);
         sections = AnnotationUtil.getAnnotatedFields(rowInstance.getClass(), Section.class);
     }
+
     @Override
     public List<CellValidationMessage> validate(Object currentInstance, CellValidatorContext validatorContext) {
         List<CellValidationMessage> errors = new ArrayList<>();

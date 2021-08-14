@@ -11,13 +11,17 @@ import java.util.Map;
 /**
  * @author Salil V Nair
  */
-public class ExcelValidator {
+public final class ExcelValidator {
+
+    private CellValidatorContext validatorContext;
+
+    private BaseSheet row;
+
+    private List<? extends BaseSheet> rows;
+
     private ExcelValidator(CellValidatorContext validatorContext) {
         this.validatorContext = validatorContext;
     }
-    private CellValidatorContext validatorContext;
-    private BaseSheet row;
-    private List<? extends BaseSheet> rows;
 
     public static ExcelValidator init(CellValidatorContext validatorContext) {
         return new ExcelValidator(validatorContext);

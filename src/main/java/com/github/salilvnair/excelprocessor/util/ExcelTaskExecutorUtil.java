@@ -8,8 +8,8 @@ import org.apache.commons.logging.LogFactory;
 import com.github.salilvnair.excelprocessor.v1.reflect.context.ValidatorContext;
 import com.github.salilvnair.excelprocessor.v1.reflect.service.ICustomValidatorTask;
 
-public class ExcelValidatorUtil {
-	private static final Log log = LogFactory.getLog(ExcelValidatorUtil.class);
+public class ExcelTaskExecutorUtil {
+	private static final Log log = LogFactory.getLog(ExcelTaskExecutorUtil.class);
 	
 	private String methodName;
 	

@@ -5,7 +5,7 @@ import com.github.salilvnair.excelprocessor.v1.reflect.annotation.ExcelSheet;
 import com.github.salilvnair.excelprocessor.v1.reflect.constant.ExcelHeaderConstant;
 import com.github.salilvnair.excelprocessor.v1.reflect.constant.ExcelValidatorConstant;
 import com.github.salilvnair.excelprocessor.v1.reflect.context.ValidatorContext;
-import com.github.salilvnair.excelprocessor.util.ExcelValidatorUtil;
+import com.github.salilvnair.excelprocessor.util.ExcelTaskExecutorUtil;
 import com.github.salilvnair.excelprocessor.v1.reflect.service.AbstractCustomValidatorTask;
 
 public class CustomMethodValidator extends BaseExcelValidator {
@@ -63,8 +63,8 @@ public class CustomMethodValidator extends BaseExcelValidator {
 		int rowNum = validatorContext.getRowNum();
 		String columnName = validatorContext.getColumnName();
 		validatorTask.setMethodName(methodName);
-		ExcelValidatorUtil excelValidatorUtil = new ExcelValidatorUtil();
-		Object validatedTaskResponse = excelValidatorUtil.executeTask(validatorTask, validatorContext);
+		ExcelTaskExecutorUtil excelTaskExecutorUtil = new ExcelTaskExecutorUtil();
+		Object validatedTaskResponse = excelTaskExecutorUtil.executeTask(validatorTask, validatorContext);
 		boolean hasInvalidData = false;
 			
 		if(validatedTaskResponse instanceof String){

@@ -5,6 +5,7 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.annotation.UserDefinedMessage;
+import com.github.salilvnair.excelprocessor.v2.helper.ObjectUtils;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
@@ -17,20 +18,32 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public abstract class BaseCellValidator extends AbstractExcelValidator {
-    private Field field;
+    private final Field field;
     public BaseCellValidator(Field field) {
         this.field = field;
     }
     protected abstract boolean violated(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext);
     protected abstract ValidatorType validatorType();
-    protected String defaultMessage() {
+    protected String defaultMessage(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
         return null;
+    }
+    protected String headerKey(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
+        Sheet sheet = validatorContext.sheet();
+        Cell cell = field.getAnnotation(Cell.class);
+        return ExcelSheetReaderUtil.processSimilarHeaderString(sheet, cell);
     }
 
     @Override
     public List<CellValidationMessage> validate(Object currentInstance, CellValidatorContext validatorContext) {
         List<CellValidationMessage> messages = new ArrayList<>();
         Object fieldValue = ReflectionUtil.getFieldValue(currentInstance, field.getName());
+        CellValidation cellValidation = field.getAnnotation(CellValidation.class);
+        if(cellValidation.allowNull() && ObjectUtils.isNull(fieldValue)) {
+            return Collections.unmodifiableList(messages);
+        }
+        else if(cellValidation.allowEmpty() && (!ObjectUtils.isNull(fieldValue) && ObjectUtils.isEmptyString(fieldValue))) {
+            return Collections.unmodifiableList(messages);
+        }
         if(violated(fieldValue, currentInstance, validatorContext)) {
             messages = validationMessages(fieldValue, currentInstance, validatorContext);
         }
@@ -39,7 +52,7 @@ public abstract class BaseCellValidator extends AbstractExcelValidator {
 
     protected CellValidationMessage validationMessage(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
         CellValidationMessage validationMessage = new CellValidationMessage();
-        String errorMessage = defaultMessage();
+        String errorMessage = defaultMessage(fieldValue, currentInstance, validatorContext);
         CellValidation cellValidation = field.getAnnotation(CellValidation.class);
         String message = cellValidation.userDefinedMessage();
         if(!StringUtils.isEmpty(message)) {
@@ -51,9 +64,9 @@ public abstract class BaseCellValidator extends AbstractExcelValidator {
         UserDefinedMessage[] userDefinedMessages = cellValidation.userDefinedMessages();
         if(userDefinedMessages.length > 0) {
             Optional<UserDefinedMessage> requiredDefinedMessage = Arrays
-                    .stream(userDefinedMessages)
-                    .filter(userDefinedMessage -> validatorType().equals(userDefinedMessage.validatorType()))
-                    .findFirst();
+                                                                    .stream(userDefinedMessages)
+                                                                    .filter(userDefinedMessage -> validatorType().equals(userDefinedMessage.validatorType()))
+                                                                    .findFirst();
             if(requiredDefinedMessage.isPresent()) {
                 UserDefinedMessage userDefinedMessage = requiredDefinedMessage.get();
                 errorMessage = userDefinedMessage.message();
