@@ -17,7 +17,10 @@ public class SheetInfo {
     private int valueColumnIndex;
     private List<CellInfo> cells;
     private boolean vertical;
+    private boolean sectional;
     private List<String> ignoreHeaderPatterns;
+    private boolean useOriginalHeader;
+    private boolean skipGettersAndSetters;
 
     public String name() {
         return name;
@@ -103,6 +106,30 @@ public class SheetInfo {
         this.ignoreHeaderPatterns = ignoreHeaderPatterns;
     }
 
+    public boolean skipGettersAndSetters() {
+        return skipGettersAndSetters;
+    }
+
+    public void setSkipGettersAndSetters(boolean skipGettersAndSetters) {
+        this.skipGettersAndSetters = skipGettersAndSetters;
+    }
+
+    public boolean useOriginalHeader() {
+        return useOriginalHeader;
+    }
+
+    public void setUseOriginalHeader(boolean useOriginalHeader) {
+        this.useOriginalHeader = useOriginalHeader;
+    }
+
+    public boolean sectional() {
+        return sectional;
+    }
+
+    public void setSectional(boolean sectional) {
+        this.sectional = sectional;
+    }
+
 
     public static class SheetInfoBuilder {
         private final SheetInfo sheetInfo =  new SheetInfo();
@@ -122,8 +149,23 @@ public class SheetInfo {
             return this;
         }
 
-        public SheetInfo.SheetInfoBuilder vertical(boolean verticalReading) {
-            sheetInfo.setVertical(verticalReading);
+        public SheetInfo.SheetInfoBuilder vertical() {
+            sheetInfo.setVertical(true);
+            return this;
+        }
+
+        public SheetInfo.SheetInfoBuilder sectional() {
+            sheetInfo.setSectional(true);
+            return this;
+        }
+
+        public SheetInfo.SheetInfoBuilder useOriginalHeader() {
+            sheetInfo.setUseOriginalHeader(true);
+            return this;
+        }
+
+        public SheetInfo.SheetInfoBuilder skipGettersAndSetters() {
+            sheetInfo.setSkipGettersAndSetters(true);
             return this;
         }
 

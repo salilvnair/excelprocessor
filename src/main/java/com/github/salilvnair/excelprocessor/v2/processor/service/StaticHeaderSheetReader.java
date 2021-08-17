@@ -109,7 +109,7 @@ public interface StaticHeaderSheetReader {
         return classObject;
     }
 
-    static BaseSheet cellValueResolver(Class<?> clazz, int rowOrColumnIndexKey, Map<String, CellInfo> excelCellInfoMap)  throws InstantiationException, IllegalAccessException {
+    static BaseSheet cellValueResolver(Class<?> clazz, int rowOrColumnIndexKey, Map<String, CellInfo> excelCellInfoMap, boolean section)  throws InstantiationException, IllegalAccessException {
         BaseSheet classObject = clazz.asSubclass(BaseSheet.class).newInstance();
         Sheet sheet = clazz.getAnnotation(Sheet.class);
         if(sheet.vertical()) {
@@ -124,10 +124,11 @@ public interface StaticHeaderSheetReader {
         Set<Field> sectionFields = AnnotationUtil.getAnnotatedFields(clazz, Section.class);
         if(!sectionFields.isEmpty()) {
             for (Field sectionField: sectionFields) {
-                BaseSheet fieldValue = cellValueResolver(sectionField.getType(), rowOrColumnIndexKey, excelCellInfoMap);
+                BaseSheet fieldValue = cellValueResolver(sectionField.getType(), rowOrColumnIndexKey, excelCellInfoMap, true);
                 ReflectionUtil.setField(classObject, sectionField, fieldValue);
             }
         }
+        Map<String, CellInfo> sectionHeaderStringKeyedCellInfoMap = new LinkedHashMap<>();
         if(!topLevelCellFields.isEmpty()) {
             for (Field field: topLevelCellFields) {
                 Cell cell = field.getAnnotation(Cell.class);
@@ -138,6 +139,12 @@ public interface StaticHeaderSheetReader {
                     Object fieldValue = TypeConvertor.convert(cellInfo.value(), cellInfo.cellType(), field.getType());
                     ReflectionUtil.setField(classObject, field, fieldValue);
                 }
+                if(section) {
+                    sectionHeaderStringKeyedCellInfoMap.put(headerString, cellInfo);
+                }
+            }
+            if(section) {
+                classObject.setCells(sectionHeaderStringKeyedCellInfoMap);
             }
         }
         return classObject;

@@ -134,6 +134,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         List<String> ignoreHeaderPatterns = sheet.ignoreHeaderPatterns().length > 0 ? Arrays.stream(sheet.ignoreHeaderPatterns()).collect(Collectors.toList()) : context.ignoreHeaderPatterns();
         List<Integer> ignoreHeaderRows = context.ignoreHeaderRows().stream().map(r -> r-1).collect(Collectors.toList());
         Set<Field> sheetCells = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
+        Map<String, String> processedDuplicateHeaderKeyedOriginalHeaderMap = orderedOrUnorderedMap(sheet);
         List<String> classCellHeaders = sheetCells.stream().map(cellField -> cellField.getAnnotation(Cell.class).value()).collect(Collectors.toList());
         for (int r = headerRowIndex; r <= totalRows; r++) {
             Row row = workbookSheet.getRow(r);
@@ -166,10 +167,14 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
                 ignoreHeaderRows.add(r);
                 continue;
             }
+            if(StringUtils.isEmpty(headerString)){
+                continue;
+            }
             sheetHeaders.add(headerString);
-            headerString = ExcelSheetReaderUtil.processSimilarHeaderString(headerString, clazz, headerColumnIndex, r, headerStringList);
-            headerRowIndexKeyedHeaderValueMap.put(r, headerString);
-            headerStringList.add(headerString);
+            String processSimilarHeaderString = ExcelSheetReaderUtil.processSimilarHeaderString(headerString, clazz, headerColumnIndex, r, headerStringList);
+            headerRowIndexKeyedHeaderValueMap.put(r, processSimilarHeaderString);
+            processedDuplicateHeaderKeyedOriginalHeaderMap.put(processSimilarHeaderString, headerString);
+            headerStringList.add(processSimilarHeaderString);
         }
 
         int valueColumnBeginsAt = valueColumnIndex!= -1 ? valueColumnIndex : headerColumnIndex + 1;
@@ -193,6 +198,8 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
                     CellInfo cellInfo = new CellInfo();
                     cellInfo.setRowIndex(r);
                     cellInfo.setColumnIndex(c);
+                    cellInfo.setHeader(headerString);
+                    cellInfo.setOriginalHeader(processedDuplicateHeaderKeyedOriginalHeaderMap.get(headerString));
                     if(cell == null){
                         cellInfo.setValue(null);
                         headerKeyCellInfoMap.put(headerString, cellInfo);

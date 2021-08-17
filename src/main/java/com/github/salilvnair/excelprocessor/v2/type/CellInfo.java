@@ -9,6 +9,8 @@ public class CellInfo {
     public static final String CELL_TYPE_DOUBLE = "Double";
     public static final String CELL_TYPE_DATE = "Date";
     public static final String CELL_TYPE_BOOLEAN = "Boolean";
+    private String originalHeader;
+    private String header;
     private Object value;
     private int rowIndex;
     private int columnIndex;
@@ -40,6 +42,14 @@ public class CellInfo {
 
     public String cellTypeString() {
         return cellTypeString;
+    }
+
+    public String originalHeader() {
+        return originalHeader;
+    }
+
+    public String header() {
+        return header;
     }
 
     //getters and setters
@@ -128,5 +138,21 @@ public class CellInfo {
 
     public void setForegroundRgb(short[] foregroundRgb) {
         this.foregroundRgb = foregroundRgb;
+    }
+
+    public String getOriginalHeader() {
+        return originalHeader;
+    }
+
+    public void setOriginalHeader(String originalHeader) {
+        this.originalHeader = originalHeader;
+    }
+
+    public String getHeader() {
+        return header;
+    }
+
+    public void setHeader(String header) {
+        this.header = header;
     }
 }

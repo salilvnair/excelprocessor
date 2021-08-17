@@ -22,8 +22,8 @@ public @interface CellValidation {
 	boolean date() default false;
 	DateParsingUtil.DateFormat datePattern() default DateParsingUtil.DateFormat.SLASH_MM_DD_YYYY;
 	boolean email() default false;
-	boolean allowNull() default true;
-	boolean allowEmpty() default true;
+	boolean allowNull() default false;
+	boolean allowEmpty() default false;
 	String pattern() default "";
 	boolean matchPattern() default false;
 	boolean findPattern() default true;

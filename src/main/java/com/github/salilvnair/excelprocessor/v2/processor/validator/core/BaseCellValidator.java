@@ -30,7 +30,7 @@ public abstract class BaseCellValidator extends AbstractExcelValidator {
     protected String headerKey(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
         Sheet sheet = validatorContext.sheet();
         Cell cell = field.getAnnotation(Cell.class);
-        return ExcelSheetReaderUtil.processSimilarHeaderString(sheet, cell);
+        return cell.value();
     }
 
     @Override
@@ -99,7 +99,8 @@ public abstract class BaseCellValidator extends AbstractExcelValidator {
         Cell cell = field.getAnnotation(Cell.class);
         String headerKey = ExcelSheetReaderUtil.processSimilarHeaderString(sheet, cell);
         CellInfo cellInfo = cellInfoMap.get(headerKey);
-        validationMessage.setHeader(cell.value());
+        validationMessage.setHeader(cellInfo.header());
+        validationMessage.setOriginalHeader(cellInfo.originalHeader());
         validationMessage.setRow(cellInfo.rowIndex() + 1);
         validationMessage.setColumn(ExcelSheetReader.toIndentName(cellInfo.columnIndex()+1));
         validationMessage.setMappedFieldName(field.getName());

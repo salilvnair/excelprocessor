@@ -120,6 +120,7 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         Row headerRow = workbookSheet.getRow(headerRowIndex);
         List<String> headerStringList = orderedOrUnorderedList(sheet);
         List<String> sheetHeaders = orderedOrUnorderedList(sheet);
+        Map<String, String> processedDuplicateHeaderKeyedOriginalHeaderMap = orderedOrUnorderedMap(sheet);
         List<String> ignoreHeaders = sheet.ignoreHeaders().length > 0 ? Arrays.stream(sheet.ignoreHeaders()).collect(Collectors.toList()) : context.ignoreHeaders();
         List<String> ignoreHeaderPatterns = sheet.ignoreHeaderPatterns().length > 0 ? Arrays.stream(sheet.ignoreHeaderPatterns()).collect(Collectors.toList()) : context.ignoreHeaderPatterns();
         List<Integer> ignoreHeaderColumns = context.ignoreHeaderColumns().stream().map(col -> ExcelSheetReader.toIndentNumber(col) -1 ).collect(Collectors.toList());
@@ -141,9 +142,10 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
                 continue;
             }
             sheetHeaders.add(headerString);
-            headerString = ExcelSheetReaderUtil.processSimilarHeaderString(headerString, clazz, c, headerRowIndex, headerStringList);
-            headerColumnIndexKeyedHeaderValueMap.put(c, headerString);
-            headerStringList.add(headerString);
+            String processSimilarHeaderString = ExcelSheetReaderUtil.processSimilarHeaderString(headerString, clazz, c, headerRowIndex, headerStringList);
+            headerColumnIndexKeyedHeaderValueMap.put(c, processSimilarHeaderString);
+            processedDuplicateHeaderKeyedOriginalHeaderMap.put(processSimilarHeaderString, headerString);
+            headerStringList.add(processSimilarHeaderString);
         }
         int valueRowBeginsAt = context.valueRowBeginsAt()!=-1 ? context.valueRowBeginsAt() : sheet.valueRowBeginsAt();
         int valueRowIndex = valueRowBeginsAt!=-1 ? valueRowBeginsAt: sheet.valueRowAt()!=-1 ? sheet.valueRowAt() : headerRowIndex+1;
@@ -167,6 +169,8 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
                 if(StringUtils.isEmpty(headerString)){
                     continue;
                 }
+                cellInfo.setHeader(headerString);
+                cellInfo.setOriginalHeader(processedDuplicateHeaderKeyedOriginalHeaderMap.get(headerString));
                 org.apache.poi.ss.usermodel.Cell cell = row.getCell(c);
                 if(cell == null){
                     cellInfo.setValue(null);

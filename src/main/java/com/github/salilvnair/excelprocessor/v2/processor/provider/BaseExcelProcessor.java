@@ -25,7 +25,7 @@ public abstract class BaseExcelProcessor {
 
     public static <K, V> Map<K, V> orderedOrUnorderedMap(Sheet excelSheet) {
         Map<K, V> headerKeyCellInfoMap;
-        if(excelSheet.dynamicHeaders()) {
+        if(excelSheet.dynamicHeaders() || excelSheet.sectional()) {
             headerKeyCellInfoMap = new LinkedHashMap<>();
         }
         else {

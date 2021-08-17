@@ -4,6 +4,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.type.Validato
 
 public class CellValidationMessage {
     private String header;
+    private String originalHeader;
     private String mappedFieldName;
     private String message;
     private String messageId;
@@ -83,5 +84,13 @@ public class CellValidationMessage {
 
     public void setValidatorType(ValidatorType validatorType) {
         this.validatorType = validatorType;
+    }
+
+    public String getOriginalHeader() {
+        return originalHeader;
+    }
+
+    public void setOriginalHeader(String originalHeader) {
+        this.originalHeader = originalHeader;
     }
 }

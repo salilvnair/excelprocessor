@@ -55,29 +55,10 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
                     formulaEvaluatedCellValue = formulaEvaluator.evaluate(cell);
                 }
                 catch (Exception ex) {
-                    switch (cell.getCachedFormulaResultType()) {
-                        case Cell.CELL_TYPE_NUMERIC:
-                            numericCellValue = cell.getNumericCellValue();
-                            if (DateUtil.isValidExcelDate(numericCellValue)) {
-                                cellValue = DateUtil.getJavaDate(numericCellValue);
-                                cellInfo.setCellType(Date.class);
-                                cellInfo.setCellTypeString(CellInfo.CELL_TYPE_DATE);
-                            }
-                            else {
-                                cellValue = numericCellValue;
-                                cellInfo.setCellType(Double.class);
-                                cellInfo.setCellTypeString(CellInfo.CELL_TYPE_DOUBLE);
-                            }
-                            break;
-                        case Cell.CELL_TYPE_STRING:
-                            cellValue = cell.getStringCellValue().replaceAll("'", "");
-                            cellInfo.setCellType(String.class);
-                            cellInfo.setCellTypeString(CellInfo.CELL_TYPE_STRING);
-                            break;
-                    }
+                    //add loggers, so we know what was the issue during evaluation
                     break;
                 }
-                switch (cell.getCachedFormulaResultType()) {
+                switch (formulaEvaluatedCellValue.getCellType()) {
                     case Cell.CELL_TYPE_NUMERIC:
                         numericCellValue = formulaEvaluatedCellValue.getNumberValue();
                         if(DateUtil.isValidExcelDate(numericCellValue)) {

@@ -28,17 +28,25 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
         super(concurrent, batchSize);
     }
 
+    public static Set<String> findDuplicates(List<String> list) {
+        Set<String> items = new HashSet<>();
+        return list.stream()
+                .filter(n -> !items.add(n)) // Set.add() returns false if the element was already in the set.
+                .collect(Collectors.toSet());
+
+    }
+
     @Override
     protected void _read(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context, Workbook workbook, List<BaseSheet> baseSheetList, Map<Integer, String> headerRowIndexKeyedHeaderValueMap, Map<Integer, Map<String, CellInfo>> columnIndexKeyedHeaderKeyCellInfoMap, Object headerCellFieldMapOrDynamicCellField) {
-        Map<Cell, Field> headerCellFieldMap = null;
         Field dynamicCellField = null;
         Sheet sheet = clazz.getAnnotation(Sheet.class);
+        if(!sheet.sectional()) {
+            super._read(clazz, context, workbook, baseSheetList, headerRowIndexKeyedHeaderValueMap, columnIndexKeyedHeaderKeyCellInfoMap, headerCellFieldMapOrDynamicCellField);
+            return;
+        }
         context.setSheet(sheet);
         if(sheet.dynamicHeaders()) {
             dynamicCellField = (Field) headerCellFieldMapOrDynamicCellField;
-        }
-        else {
-            headerCellFieldMap = (Map<Cell, Field>) headerCellFieldMapOrDynamicCellField;
         }
         int headerRowIndex = sheet.headerRowAt() - 1;
         String sheetName = context.sheetName() == null ? sheet.value(): context.sheetName();
@@ -54,6 +62,7 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
         List<String> ignoreHeaders = sheet.ignoreHeaders().length > 0 ? Arrays.stream(sheet.ignoreHeaders()).collect(Collectors.toList()) : context.ignoreHeaders();
         List<String> ignoreHeaderPatterns = sheet.ignoreHeaderPatterns().length > 0 ? Arrays.stream(sheet.ignoreHeaderPatterns()).collect(Collectors.toList()) : context.ignoreHeaderPatterns();
         List<Integer> ignoreHeaderRows = context.ignoreHeaderRows().stream().map(r -> r-1).collect(Collectors.toList());
+        Map<String, String> processedDuplicateHeaderKeyedOriginalHeaderMap = orderedOrUnorderedMap(sheet);
         Set<Field> sheetCells = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
         List<String> annotatedHeaders = sheetCells.stream().map(cellField -> cellField.getAnnotation(Cell.class).value()).collect(Collectors.toList());
         extractSectionAnnotatedHeaders(clazz, annotatedHeaders);
@@ -90,9 +99,11 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
                 continue;
             }
             sheetHeaders.add(headerString);
-            headerString = ExcelSheetReaderUtil.processSimilarHeaderString(sheet, headerString, allCells, headerColumnIndex, r);
-            headerRowIndexKeyedHeaderValueMap.put(r, headerString);
-            headerStringList.add(headerString);
+            String processSimilarHeaderString = ExcelSheetReaderUtil.processSimilarHeaderString(sheet, headerString, allCells, headerColumnIndex, r);
+            headerRowIndexKeyedHeaderValueMap.put(r, processSimilarHeaderString);
+            processedDuplicateHeaderKeyedOriginalHeaderMap.put(processSimilarHeaderString, headerString);
+            headerStringList.add(processSimilarHeaderString);
+
         }
 
         int valueColumnBeginsAt = valueColumnIndex!= -1 ? valueColumnIndex : headerColumnIndex + 1;
@@ -116,6 +127,8 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
                     CellInfo cellInfo = new CellInfo();
                     cellInfo.setRowIndex(r);
                     cellInfo.setColumnIndex(c);
+                    cellInfo.setHeader(headerString);
+                    cellInfo.setOriginalHeader(processedDuplicateHeaderKeyedOriginalHeaderMap.get(headerString));
                     if(cell == null){
                         cellInfo.setValue(null);
                         headerKeyCellInfoMap.put(headerString, cellInfo);
@@ -131,7 +144,6 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
         }
 
         Field finalDynamicCellField = dynamicCellField;
-        Map<Cell, Field> finalHeaderCellFieldMap = headerCellFieldMap;
         columnIndexKeyedHeaderKeyCellInfoMap
                 .entrySet()
                 .stream()
@@ -145,7 +157,7 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
                             classObject = DynamicHeaderSheetReader.dynamicCellValueResolver(clazz, headerStringList, value, key, finalDynamicCellField);
                         }
                         else {
-                            classObject = StaticHeaderSheetReader.cellValueResolver(clazz, key, value);
+                            classObject = StaticHeaderSheetReader.cellValueResolver(clazz, key, value, false);
                         }
                         classObject.setSheetHeaders(sheetHeaders);
                         classObject.setCells(value);
@@ -206,15 +218,18 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
     }
 
     private List<SectionRangeAddress> extractSections(Set<Field> sectionFields, Map<String, SectionRangeAddress> sectionTextKeyedSectionRangeAddressMap, Class<?> clazz) {
-        return sectionFields.stream().map(sectionField -> {
-            Section sectionFieldAnnotation = sectionField.getAnnotation(Section.class);
-            SectionRangeAddress sectionRangeAddress1 = sectionTextKeyedSectionRangeAddressMap.get(sectionFieldAnnotation.sectionBeginningRowText());
-            SectionRangeAddress sectionRangeAddress2 = sectionTextKeyedSectionRangeAddressMap.get(sectionFieldAnnotation.sectionEndingRowText());
-            sectionRangeAddress1.setSectionEndingText(sectionRangeAddress2.getSectionEndingText());
-            sectionRangeAddress1.setLastColumn(sectionRangeAddress2.getLastColumn());
-            sectionRangeAddress1.setLastRow(sectionRangeAddress2.getLastRow());
-            return sectionRangeAddress1;
-        }).collect(Collectors.toList());
+        return sectionFields
+                .stream()
+                .map(sectionField -> {
+                    Section sectionFieldAnnotation = sectionField.getAnnotation(Section.class);
+                    SectionRangeAddress sectionRangeAddress1 = sectionTextKeyedSectionRangeAddressMap.get(sectionFieldAnnotation.sectionBeginningRowText());
+                    SectionRangeAddress sectionRangeAddress2 = sectionTextKeyedSectionRangeAddressMap.get(sectionFieldAnnotation.sectionEndingRowText());
+                    sectionRangeAddress1.setSectionEndingText(sectionRangeAddress2.getSectionEndingText());
+                    sectionRangeAddress1.setLastColumn(sectionRangeAddress2.getLastColumn());
+                    sectionRangeAddress1.setLastRow(sectionRangeAddress2.getLastRow());
+                    return sectionRangeAddress1;
+                })
+                .collect(Collectors.toList());
     }
 
     private void extractSectionAnnotatedHeaders(Class<? extends BaseSheet> clazz, List<String> classCellHeaders) {

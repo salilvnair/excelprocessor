@@ -204,12 +204,12 @@ public class ExcelSheetReaderUtil {
         return workbook;
     }
 
-    public static Workbook generateWorkbook(InputStream inputStream, String excelFilePath) throws Exception {
+    public static Workbook generateWorkbook(InputStream inputStream, String excelFile) throws Exception {
         Workbook workbook;
-        if (excelFilePath.endsWith("xlsx") || excelFilePath.endsWith("xlsm")) {
+        if (excelFile.endsWith("xlsx") || excelFile.endsWith("xlsm")) {
             workbook = new XSSFWorkbook(inputStream);
         }
-        else if (excelFilePath.endsWith("xls")) {
+        else if (excelFile.endsWith("xls")) {
             workbook = new HSSFWorkbook(inputStream);
         }
         else {

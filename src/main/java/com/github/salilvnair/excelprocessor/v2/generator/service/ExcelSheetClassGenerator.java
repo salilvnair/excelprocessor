@@ -36,12 +36,15 @@ public class ExcelSheetClassGenerator {
         if(sheetInfo.vertical()) {
             AnnotationUtil.changeValue(sheet, "vertical", true);
         }
+        if(sheetInfo.sectional()) {
+            AnnotationUtil.changeValue(sheet, "sectional", true);
+        }
         AnnotationUtil.changeValue(sheet, "value", sheetInfo.name());
         AnnotationUtil.changeValue(sheet, "headerRowAt", sheetInfo.headerRowAt());
         AnnotationUtil.changeValue(sheet, "headerColumnAt", sheetInfo.headerColumnAt());
         AnnotationUtil.changeValue(sheet, "ignoreHeaderPatterns", sheetInfo.ignoreHeaderPatterns());
         List<? extends BaseSheet> readList = reader.read(dynamicHeaderSheet.getClass(), sheetContext);
-        return classTemplate(sheet.value(), sheet.vertical(), readList.get(0).sheetHeaders(), readList.get(0).cells(), sheet.headerRowAt(), sheet.headerColumnAt());
+        return classTemplate(sheetInfo, sheet.value(), sheet.vertical(), readList.get(0).sheetHeaders(), readList.get(0).cells(), sheet.headerRowAt(), sheet.headerColumnAt());
     }
 
     public static Set<String> findDuplicates(List<String> list) {
@@ -53,60 +56,70 @@ public class ExcelSheetClassGenerator {
     }
 
 
-    private static String classTemplate(String sheetName, boolean isPivotEnabled, List<String> sheetHeaders, Map<String, CellInfo> headerKeyCellInfoMap, int headerRowNumber, String headerColumn) {
-        StringBuilder sb  = new StringBuilder("");
-        List<String> nonEmptyHeaders = new ArrayList<>(headerKeyCellInfoMap.keySet());
-        Set<String> duplicateHeaders = findDuplicates(sheetHeaders);
-        Map<String, String> javaFieldNameKeyedSheetHeaderMap = new HashMap<>();
+    private static String classTemplate(SheetInfo sheetInfo, String sheetName, boolean vertical, List<String> sheetHeaders, Map<String, CellInfo> headerKeyedCellInfoMap, int headerRowNumber, String headerColumn) {
+        StringBuilder sb  = new StringBuilder();
+        boolean containsDuplicateHeaders = containsDuplicateHeaders(headerKeyedCellInfoMap);
+        Set<String> allDuplicateHeaders = findDuplicates(sheetHeaders);
+        Map<String, String> javaFieldNameKeyedSheetHeaderMap = new LinkedHashMap<>();
         List<String> javaFieldNames = new ArrayList<>();
-        nonEmptyHeaders.forEach(header -> {
+        headerKeyedCellInfoMap.forEach((header, cellInfo) -> {
             header = ExcelSheetReaderUtil.cleanHeaderString(header);
-            String pascalCase = ExcelSheetReaderUtil.toPascalCase(header);
-            String javaVar = ExcelSheetReaderUtil.deleteJavaInValidVariables(pascalCase);
+            String javaVar = constructValidJavaVariableNameFromHeader(header);
             javaFieldNames.add(javaVar);
             javaFieldNameKeyedSheetHeaderMap.put(javaVar, header);
         });
         String className = ExcelSheetReaderUtil.toCamelCase(sheetName);
         className = ExcelSheetReaderUtil.deleteJavaInValidVariables(className);
         String hasDuplicateHeaderString = "";
-        if(!duplicateHeaders.isEmpty()) {
+        if(containsDuplicateHeaders) {
             hasDuplicateHeaderString=", duplicateHeaders=true";
         }
-        if(isPivotEnabled) {
+        if(vertical) {
             sb.append("@Sheet(value=\"").append(sheetName).append("\"").append(", vertical=true").append(hasDuplicateHeaderString).append(", headerRowAt=").append(headerRowNumber).append(", headerColumnAt=\"").append(headerColumn).append("\")\n");
         }
         else {
             sb.append("@Sheet(value=\"").append(sheetName).append("\"").append(hasDuplicateHeaderString).append(", headerRowAt=").append(headerRowNumber).append(", headerColumnAt=\"").append(headerColumn).append("\")\n");
         }
         String parentBaseSheet = "BaseSheet";
-        sb.append("public class ").append(className).append("Sheet extends ").append(parentBaseSheet).append("{\n");
+        sb.append("public class ").append(className).append("Sheet extends ").append(parentBaseSheet).append(" {\n");
         for(String field:javaFieldNames) {
             String sheetHeaderKey = javaFieldNameKeyedSheetHeaderMap.get(field);
-            CellInfo cellInfo = headerKeyCellInfoMap.get(sheetHeaderKey);
+            CellInfo cellInfo = headerKeyedCellInfoMap.get(sheetHeaderKey);
             String typeString = cellInfo.cellTypeString();
-            if(duplicateHeaderContainsHeaderKey(duplicateHeaders, sheetHeaderKey)) {
-                String headerKey = duplicateHeaderKey(duplicateHeaders, sheetHeaderKey);
-                if(isPivotEnabled) {
-                    sb.append("    @Cell(value=\"").append(headerKey).append("\", row=").append(cellInfo.rowIndex() + 1).append(")\n");
+            if(containsDuplicateHeader(cellInfo) || allDuplicateHeaders.contains(sheetHeaderKey)) {
+                sheetHeaderKey = cellInfo.originalHeader();
+                if(vertical) {
+                    sb.append("    @Cell(value=\"").append(sheetHeaderKey).append("\", row=").append(cellInfo.rowIndex() + 1).append(")\n");
                 }
                 else {
-                    sb.append("    @Cell(value=\"").append(typeString).append("\", column=\"").append(ExcelSheetReader.toIndentName(cellInfo.columnIndex() + 1)).append("\")\n");
+                    sb.append("    @Cell(value=\"").append(sheetHeaderKey).append("\", column=\"").append(ExcelSheetReader.toIndentName(cellInfo.columnIndex() + 1)).append("\")\n");
                 }
             }
             else {
                 sb.append("    @Cell(\"").append(sheetHeaderKey).append("\")\n");
             }
+            if(sheetInfo.useOriginalHeader()) {
+                field = constructValidJavaVariableNameFromHeader(sheetHeaderKey);
+            }
             sb.append("    private ").append(typeString).append(" ").append(field).append(";");
             sb.append("\n");
+        }
+        if(sheetInfo.skipGettersAndSetters()) {
+            sb.append("}\n");
+            return sb.toString();
         }
         sb.append("\n");
         sb.append("  //getters and setters");
         sb.append("\n");
         for(String field:javaFieldNames) {
-            String upperCaseFieldString = field.substring(0,1).toUpperCase()+field.substring(1);
             String sheetHeaderKey = javaFieldNameKeyedSheetHeaderMap.get(field);
-            CellInfo cellInfo = headerKeyCellInfoMap.get(sheetHeaderKey);
+            CellInfo cellInfo = headerKeyedCellInfoMap.get(sheetHeaderKey);
             String typeString = cellInfo.cellTypeString();
+            if(containsDuplicateHeader(cellInfo) && sheetInfo.useOriginalHeader()) {
+                sheetHeaderKey = cellInfo.originalHeader();
+                field = constructValidJavaVariableNameFromHeader(sheetHeaderKey);
+            }
+            String upperCaseFieldString = field.substring(0,1).toUpperCase()+field.substring(1);
             sb.append("    public ").append(typeString).append(" get").append(upperCaseFieldString).append("() {");
             sb.append("\n       return this.").append(field).append(";");
             sb.append("\n    }\n");
@@ -118,12 +131,18 @@ public class ExcelSheetClassGenerator {
         return sb.toString();
     }
 
-    private static boolean duplicateHeaderContainsHeaderKey(Set<String> duplicateHeaders, String sheetHeaderKey) {
-        return duplicateHeaders.stream().anyMatch(sheetHeaderKey::contains);
+    private static boolean containsDuplicateHeader(CellInfo cellInfo) {
+        return !cellInfo.originalHeader().equals(cellInfo.getHeader());
     }
 
-    private static String duplicateHeaderKey(Set<String> duplicateHeaders, String sheetHeaderKey) {
-        return duplicateHeaders.stream().filter(sheetHeaderKey::contains).findAny().orElse(null);
+    private static boolean containsDuplicateHeaders(Map<String, CellInfo> headerKeyedCellInfoMap) {
+        return headerKeyedCellInfoMap.entrySet().stream().anyMatch(entry -> !entry.getValue().originalHeader().equals(entry.getValue().getHeader()));
     }
+
+    private static String constructValidJavaVariableNameFromHeader(String header) {
+        String pascalCase = ExcelSheetReaderUtil.toPascalCase(header);
+        return ExcelSheetReaderUtil.deleteJavaInValidVariables(pascalCase);
+    }
+
 
 }
