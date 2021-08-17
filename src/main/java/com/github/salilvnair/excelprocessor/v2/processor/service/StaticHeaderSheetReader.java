@@ -121,13 +121,6 @@ public interface StaticHeaderSheetReader {
             classObject.setRow(rowOrColumnIndexKey+1);
         }
         Set<Field> topLevelCellFields = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
-        Set<Field> sectionFields = AnnotationUtil.getAnnotatedFields(clazz, Section.class);
-        if(!sectionFields.isEmpty()) {
-            for (Field sectionField: sectionFields) {
-                BaseSheet fieldValue = cellValueResolver(sectionField.getType(), rowOrColumnIndexKey, excelCellInfoMap, true);
-                ReflectionUtil.setField(classObject, sectionField, fieldValue);
-            }
-        }
         Map<String, CellInfo> sectionHeaderStringKeyedCellInfoMap = new LinkedHashMap<>();
         if(!topLevelCellFields.isEmpty()) {
             for (Field field: topLevelCellFields) {
@@ -144,7 +137,15 @@ public interface StaticHeaderSheetReader {
                 }
             }
             if(section) {
-                classObject.setCells(sectionHeaderStringKeyedCellInfoMap);
+                classObject.cells().putAll(sectionHeaderStringKeyedCellInfoMap);
+            }
+        }
+        Set<Field> sectionFields = AnnotationUtil.getAnnotatedFields(clazz, Section.class);
+        if(!sectionFields.isEmpty()) {
+            for (Field sectionField: sectionFields) {
+                BaseSheet fieldValue = cellValueResolver(sectionField.getType(), rowOrColumnIndexKey, excelCellInfoMap, true);
+                classObject.cells().putAll(fieldValue.cells());
+                ReflectionUtil.setField(classObject, sectionField, fieldValue);
             }
         }
         return classObject;

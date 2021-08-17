@@ -10,7 +10,6 @@ import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -125,7 +124,7 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
         }
     }
 
-    protected boolean ignoreHeaderPatternMarchFound(String headerString, List<String> ignoreHeaderPatterns) {
+    protected boolean ignoreHeaderPatternMatchFound(String headerString, List<String> ignoreHeaderPatterns) {
         return ignoreHeaderPatterns.stream().anyMatch(patternString -> PatternValidator.find(patternString, headerString));
     }
 }

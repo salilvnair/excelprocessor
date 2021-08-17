@@ -14,6 +14,8 @@ public class CellInfo {
     private Object value;
     private int rowIndex;
     private int columnIndex;
+    private int row;
+    private String column;
     private Type cellType;
     private String cellTypeString;
     private Color backgroundColor;
@@ -34,6 +36,14 @@ public class CellInfo {
 
     public int columnIndex() {
         return columnIndex;
+    }
+
+    public int row() {
+        return row;
+    }
+
+    public String column() {
+        return column;
     }
 
     public Type cellType() {
@@ -154,5 +164,21 @@ public class CellInfo {
 
     public void setHeader(String header) {
         this.header = header;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public void setRow(int row) {
+        this.row = row;
+    }
+
+    public String getColumn() {
+        return column;
+    }
+
+    public void setColumn(String column) {
+        this.column = column;
     }
 }

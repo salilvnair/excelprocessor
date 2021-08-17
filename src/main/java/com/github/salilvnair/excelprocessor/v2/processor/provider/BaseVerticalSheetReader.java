@@ -163,7 +163,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
                 ignoreHeaderRows.add(r);
                 continue;
             }
-            if(ignoreHeaderPatternMarchFound(headerString, ignoreHeaderPatterns)) {
+            if(ignoreHeaderPatternMatchFound(headerString, ignoreHeaderPatterns)) {
                 ignoreHeaderRows.add(r);
                 continue;
             }
@@ -197,7 +197,9 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
                     org.apache.poi.ss.usermodel.Cell cell = row.getCell(c);
                     CellInfo cellInfo = new CellInfo();
                     cellInfo.setRowIndex(r);
+                    cellInfo.setRow(r+1);
                     cellInfo.setColumnIndex(c);
+                    cellInfo.setColumn(ExcelSheetReader.toIndentName(c + 1));
                     cellInfo.setHeader(headerString);
                     cellInfo.setOriginalHeader(processedDuplicateHeaderKeyedOriginalHeaderMap.get(headerString));
                     if(cell == null){
@@ -261,7 +263,6 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
             xContext.setValueColumnBeginsAt(ExcelSheetReader.toIndentName(from + 1));
             xContext.setValueColumnEndsAt(ExcelSheetReader.toIndentName(to + 1));
             ExcelSheetReaderTask task = new ExcelSheetReaderTask(TaskType.READ_MULTIPLE_ROWS_OR_COLUMNS.name(), null, service, clazz, xContext, workbook, xContext.getConcurrentSheetData(), xContext.getHeaderRowIndexKeyedHeaderValueMap(), xContext.getColIndexKeyedHeaderKeyCellInfoMap(), headerKeyFieldMap);
-            //service.toContext(TaskType.READ_MULTIPLE_ROWS_OR_COLUMNS.name(), null, clazz, context, workbook, baseSheetList, headerRowIndexKeyedHeaderValueMap, columnIndexKeyedHeaderKeyCellInfoMap, headerKeyFieldMap);
             taskCallables.add(task);
         }
         try {

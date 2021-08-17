@@ -28,14 +28,6 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
         super(concurrent, batchSize);
     }
 
-    public static Set<String> findDuplicates(List<String> list) {
-        Set<String> items = new HashSet<>();
-        return list.stream()
-                .filter(n -> !items.add(n)) // Set.add() returns false if the element was already in the set.
-                .collect(Collectors.toSet());
-
-    }
-
     @Override
     protected void _read(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context, Workbook workbook, List<BaseSheet> baseSheetList, Map<Integer, String> headerRowIndexKeyedHeaderValueMap, Map<Integer, Map<String, CellInfo>> columnIndexKeyedHeaderKeyCellInfoMap, Object headerCellFieldMapOrDynamicCellField) {
         Field dynamicCellField = null;
@@ -94,7 +86,7 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
                 ignoreHeaderRows.add(r);
                 continue;
             }
-            if(ignoreHeaderPatternMarchFound(headerString, ignoreHeaderPatterns)) {
+            if(ignoreHeaderPatternMatchFound(headerString, ignoreHeaderPatterns)) {
                 ignoreHeaderRows.add(r);
                 continue;
             }
@@ -126,7 +118,9 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
                     org.apache.poi.ss.usermodel.Cell cell = row.getCell(c);
                     CellInfo cellInfo = new CellInfo();
                     cellInfo.setRowIndex(r);
+                    cellInfo.setRow(r+1);
                     cellInfo.setColumnIndex(c);
+                    cellInfo.setColumn(ExcelSheetReader.toIndentName(c + 1));
                     cellInfo.setHeader(headerString);
                     cellInfo.setOriginalHeader(processedDuplicateHeaderKeyedOriginalHeaderMap.get(headerString));
                     if(cell == null){

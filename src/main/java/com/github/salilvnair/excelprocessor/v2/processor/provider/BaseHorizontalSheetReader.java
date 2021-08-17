@@ -8,7 +8,6 @@ import com.github.salilvnair.excelprocessor.v2.processor.concurrent.service.Exce
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.task.ExcelSheetReaderTask;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.type.TaskType;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.provider.PatternValidator;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.service.DynamicHeaderSheetReader;
@@ -133,7 +132,7 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
                 ignoreHeaderColumns.add(c);
                 continue;
             }
-            if(ignoreHeaderPatternMarchFound(headerString, ignoreHeaderPatterns)) {
+            if(ignoreHeaderPatternMatchFound(headerString, ignoreHeaderPatterns)) {
                 ignoreHeaderColumns.add(c);
                 continue;
             }
@@ -164,7 +163,9 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
                 }
                 CellInfo cellInfo = new CellInfo();
                 cellInfo.setRowIndex(r);
+                cellInfo.setRow(r+1);
                 cellInfo.setColumnIndex(c);
+                cellInfo.setColumn(ExcelSheetReader.toIndentName(c + 1));
                 String headerString = headerColumnIndexKeyedHeaderValueMap.get(c);
                 if(StringUtils.isEmpty(headerString)){
                     continue;
@@ -235,7 +236,6 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
             xContext.setValueRowBeginsAt(from);
             xContext.setValueRowEndsAt(to+1);
             ExcelSheetReaderTask task = new ExcelSheetReaderTask(TaskType.READ_MULTIPLE_ROWS_OR_COLUMNS.name(), null, service, clazz, xContext, workbook, xContext.getConcurrentSheetData(), xContext.getHeaderColumnIndexKeyedHeaderValueMap(), xContext.getRowIndexKeyedHeaderKeyCellInfoMap(), headerFieldOrFieldMap);
-            //service.toContext(TaskType.READ_MULTIPLE_ROWS_OR_COLUMNS.name(), null, clazz, context, workbook, baseSheetList, headerColumnIndexKeyedHeaderValueMap, rowIndexKeyedHeaderKeyCellInfoMap, headerFieldOrFieldMap);
             taskCallables.add(task);
         }
         try {

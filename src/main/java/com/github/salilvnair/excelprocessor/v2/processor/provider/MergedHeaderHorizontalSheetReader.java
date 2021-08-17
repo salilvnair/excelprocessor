@@ -92,7 +92,7 @@ public class MergedHeaderHorizontalSheetReader extends HorizontalSheetReader {
                 ignoreHeaderColumns.add(c);
                 continue;
             }
-            if(ignoreHeaderPatternMarchFound(headerString, ignoreHeaderPatterns)) {
+            if(ignoreHeaderPatternMatchFound(headerString, ignoreHeaderPatterns)) {
                 ignoreHeaderColumns.add(c);
                 continue;
             }
@@ -119,7 +119,9 @@ public class MergedHeaderHorizontalSheetReader extends HorizontalSheetReader {
                 }
                 CellInfo cellInfo = new CellInfo();
                 cellInfo.setRowIndex(r);
+                cellInfo.setRow(r+1);
                 cellInfo.setColumnIndex(c);
+                cellInfo.setColumn(ExcelSheetReader.toIndentName(c + 1));
                 String headerString = headerColumnIndexKeyedHeaderValueMap.get(c);
                 if(StringUtils.isEmpty(headerString)){
                     continue;

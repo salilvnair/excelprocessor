@@ -57,7 +57,7 @@ public abstract class BaseSheet implements ExcelSheet {
     //util functions
     public Map<String, CellInfo> cells() {
         if(cells == null) {
-            cells = new HashMap<>();
+            cells = new LinkedHashMap<>();
         }
         return cells;
     }
