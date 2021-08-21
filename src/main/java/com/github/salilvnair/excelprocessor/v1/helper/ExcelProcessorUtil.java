@@ -50,7 +50,7 @@ import com.github.salilvnair.excelprocessor.v1.reflect.context.ExcelValidatorCon
 import com.github.salilvnair.excelprocessor.v1.reflect.context.ValidatorContext;
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
 import com.github.salilvnair.excelprocessor.util.DateParsingUtil;
-import com.github.salilvnair.excelprocessor.util.ExcelDateFormat;
+import com.github.salilvnair.excelprocessor.v1.reflect.type.ExcelDateFormat;
 import com.github.salilvnair.excelprocessor.util.ReflectionUtil;
 import com.github.salilvnair.excelprocessor.v1.reflect.service.AbstractCustomValidatorTask;
 import com.github.salilvnair.excelprocessor.v1.reflect.service.ICustomValidatorTask;

@@ -8,7 +8,7 @@ import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.test.sheet.task.CollegeSheetTaskValidator;
 
 @Sheet(
-        value="College",
+        value="College1",
         excelTaskValidator = CollegeSheetTaskValidator.class
 )
 public class CollegeSheet extends BaseSheet {

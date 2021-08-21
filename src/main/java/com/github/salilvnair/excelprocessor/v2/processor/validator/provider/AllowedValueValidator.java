@@ -41,6 +41,9 @@ public class AllowedValueValidator extends BaseCellValidator {
             List<ConditionallyAllowedValues> conditionallyAllowedValueList = Arrays.stream(conditionallyAllowedValuesData).collect(Collectors.toList());
 
             for(ConditionallyAllowedValues conditionallyAllowedValues: conditionallyAllowedValueList) {
+                if(allowNullOrAllowEmptyCheck(fieldValue, conditionallyAllowedValues)) {
+                    return false;
+                }
                 showValuesInMessage = conditionallyAllowedValues.showValuesInMessage();
                 boolean satisfiesValidValueCondition = satisfiesValidValueCondition(conditionallyAllowedValues.condition(), validatorContext);
                 if(satisfiesValidValueCondition) {

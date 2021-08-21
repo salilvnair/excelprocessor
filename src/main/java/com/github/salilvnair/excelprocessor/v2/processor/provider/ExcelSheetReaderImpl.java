@@ -143,7 +143,14 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
             try {
                 clazz = Class.forName(clazzName).asSubclass(BaseSheet.class);
                 ExcelInfo excelInfoItr = _excelInfo(clazz, sheetContext);
-                excelInfo.sheets().addAll(excelInfoItr.sheets());
+                if(excelInfoItr == null) {
+                    if(!sheetContext.suppressExceptions()) {
+                        throw new ExcelSheetReadException("ExcelInfo is null."); //TODO v2: change to a constant
+                    }
+                }
+                else {
+                    excelInfo.sheets().addAll(excelInfoItr.sheets());
+                }
             }
             catch (ClassNotFoundException e) {
                 if(!sheetContext.suppressExceptions()) {

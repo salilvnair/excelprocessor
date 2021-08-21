@@ -109,6 +109,15 @@ public abstract class BaseCellValidator extends AbstractExcelValidator {
         }
     }
 
+    protected boolean allowNullOrAllowEmptyCheck(Object fieldValue, ConditionallyAllowedValues conditionallyAllowedValues) {
+        if(conditionallyAllowedValues.allowNull() && ObjectUtils.isNull(fieldValue)) {
+            return true;
+        }
+        else {
+            return conditionallyAllowedValues.allowEmpty() && (!ObjectUtils.isNull(fieldValue) && ObjectUtils.isEmptyString(fieldValue));
+        }
+    }
+
     protected boolean allowNullOrAllowEmptyCheck(Object fieldValue, CellValidation cellValidation) {
         if(cellValidation.allowNull() && ObjectUtils.isNull(fieldValue)) {
             return true;

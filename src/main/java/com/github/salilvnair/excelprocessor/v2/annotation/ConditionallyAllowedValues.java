@@ -16,6 +16,8 @@ public @interface ConditionallyAllowedValues {
 	int[] range() default {};
 	String[] value() default {};
 	String dataSetKey() default "";
+	boolean allowNull() default false;
+	boolean allowEmpty() default false;
 	boolean showValuesInMessage() default false;
 	String message() default "";
 	String messageId() default "";

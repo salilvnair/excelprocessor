@@ -2,6 +2,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.provider;
 
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.annotation.MultiOrientedSheet;
+import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReadException;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetFactory;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
@@ -55,7 +56,14 @@ public class MultiOrientedSheetReader extends  BaseExcelSheetReader {
             BaseExcelSheetReader excelSheetReader = ExcelSheetFactory.generateReader(sheetClass, concurrent, batchSize);
             if (excelSheetReader != null) {
                 ExcelInfo excelInfoItr = excelSheetReader.excelInfo(sheetClass, multiOrientedReaderContext);
-                excelInfo.sheets().addAll(excelInfoItr.sheets());
+                if(excelInfoItr == null) {
+                    if(!context.suppressExceptions()) {
+                        throw new ExcelSheetReadException("ExcelInfo is null."); //TODO v2: change to a constant
+                    }
+                }
+                else {
+                    excelInfo.sheets().addAll(excelInfoItr.sheets());
+                }
             }
         }
         return excelInfo;

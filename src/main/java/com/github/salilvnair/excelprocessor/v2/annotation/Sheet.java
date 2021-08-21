@@ -42,5 +42,5 @@ public @interface Sheet {
 	boolean duplicateHeaders() default false;
 	boolean dynamicHeaders() default false;
 	String userDefinedMessage() default "";
-	final static class DefaultTaskValidator extends AbstractExcelTaskValidator {}
+	final class DefaultTaskValidator extends AbstractExcelTaskValidator {}
 }

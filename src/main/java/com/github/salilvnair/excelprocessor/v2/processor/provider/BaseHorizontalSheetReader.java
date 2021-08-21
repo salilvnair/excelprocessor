@@ -73,11 +73,17 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
     @Override
     ExcelInfo excelInfo(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context) {
         if(!validateWorkbook(context)) {
-            return null;//change it to exception later on
+            if(!context.suppressExceptions()) {
+                throw new ExcelSheetReadException("Invalid workbook."); //TODO v2: change to a constant
+            }
+            return null;
         }
         Workbook workbook = ExcelSheetReaderUtil.extractWorkbook(context);
         if (workbook == null) {
-            return null;//change it to exception later on
+            if(!context.suppressExceptions()) {
+                throw new ExcelSheetReadException("Workbook is null."); //TODO v2: change to a constant
+            }
+            return null;
         }
         ExcelInfo excelInfo = new ExcelInfo();
         Sheet excelSheet = clazz.getAnnotation(Sheet.class);
@@ -86,6 +92,12 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         int valueRowIndex = valueRowBeginsAt!=-1 ? valueRowBeginsAt: excelSheet.valueRowAt()!=-1 ? excelSheet.valueRowAt() : headerRowIndex+1;
         String sheetName = context.sheetName() == null ? excelSheet.value(): context.sheetName();
         org.apache.poi.ss.usermodel.Sheet sheet = workbook.getSheet(sheetName);
+        if(sheet == null) {
+            if(!context.suppressExceptions()) {
+                throw new ExcelSheetReadException("Sheet '"+sheetName + "' is not present in the excel.");
+            }
+            return null;
+        }
         SheetInfo sheetInfo = new SheetInfo();
         int totalRows = sheet.getLastRowNum();
         sheetInfo.setTotalRows(totalRows);
@@ -116,6 +128,12 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         int headerColumnIndex = ExcelSheetReader.toIndentNumber(sheet.headerColumnAt())  - 1;
         String sheetName = context.sheetName() == null ? sheet.value(): context.sheetName();
         org.apache.poi.ss.usermodel.Sheet workbookSheet = workbook.getSheet(sheetName);
+        if(workbookSheet == null) {
+            if(!context.suppressExceptions()) {
+                throw new ExcelSheetReadException("Sheet '"+sheetName + "' is not present in the excel.");
+            }
+            return;
+        }
         int totalRows = workbookSheet.getLastRowNum();
         Row headerRow = workbookSheet.getRow(headerRowIndex);
         List<String> headerStringList = orderedOrUnorderedList(sheet);
@@ -218,6 +236,12 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
 
     private void _concurrentRead(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context, Workbook workbook, List<BaseSheet> baseSheetList, Map<Integer, String> headerColumnIndexKeyedHeaderValueMap, Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap, Object headerFieldOrFieldMap) {
         ExcelInfo excelInfo = excelInfo(clazz, context);
+        if(excelInfo == null) {
+            if(!context.suppressExceptions()) {
+                throw new ExcelSheetReadException("ExcelInfo is null."); //TODO v2: change to a constant
+            }
+            return;
+        }
         SheetInfo sheetInfo = excelInfo.sheets().get(0);
         int totalRows = sheetInfo.totalRows();
         Stream<List<Integer>> rowListStream = ConcurrentUtil.split(totalRows, batchSize);

@@ -74,8 +74,8 @@ public class ReflectionUtil {
 				Field field = superClass.getDeclaredField(fieldName);
 				makeAccessible(field);
 				return field;
-			} catch (NoSuchFieldException e) {
 			}
+			catch (NoSuchFieldException ignored) {}
 		}
 		return null;
 	}
@@ -110,9 +110,8 @@ public class ReflectionUtil {
 		try {
 			field.setAccessible(true);
 			return (T) field.get(obj);
-		} catch (Exception e) {
-			
 		}
+		catch (Exception ignored) {}
 		return null;
 	}
 
@@ -128,9 +127,8 @@ public class ReflectionUtil {
 		try {
 			makeAccessible(field);
 			field.set(obj, value);
-		} catch (Exception e) {
-			
 		}
+		catch (Exception ignored) {}
 	}
 
 	public static <T> T getProperty(Object obj, String propertyName) {
@@ -179,7 +177,7 @@ public class ReflectionUtil {
 		try {
 			return (T) method.invoke(obj, args);
 		}
-		catch (Exception e) {}
+		catch (Exception ignored) {}
 		return null;
 	}
 
@@ -187,9 +185,7 @@ public class ReflectionUtil {
 		try {
 			return ConstructorUtils.invokeConstructor(cls, args);
 		}
-		catch (Exception e) {
-	
-		}
+		catch (Exception ignored) {}
 		return null;
 	}
 
@@ -209,9 +205,7 @@ public class ReflectionUtil {
 	}
 	
 	public static Set<Field> getFields(Class<?> clazz) {
-		Set<Field> fields = new LinkedHashSet<>();
-		fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
-        return fields;
+		return new LinkedHashSet<>(Arrays.asList(clazz.getDeclaredFields()));
     }
 	
 	public static Set<Field> getAllFields(Class<?> clazz) {

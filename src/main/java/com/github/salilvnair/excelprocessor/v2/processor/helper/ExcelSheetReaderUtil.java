@@ -10,6 +10,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.context.BaseExcelSheetC
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -206,10 +207,10 @@ public class ExcelSheetReaderUtil {
 
     public static Workbook generateWorkbook(InputStream inputStream, String excelFile) throws Exception {
         Workbook workbook;
-        if (excelFile.endsWith("xlsx") || excelFile.endsWith("xlsm")) {
+        if (excelFile.endsWith(ExcelFileType.Extension.XLSX) || excelFile.endsWith(ExcelFileType.Extension.XLSM)) {
             workbook = new XSSFWorkbook(inputStream);
         }
-        else if (excelFile.endsWith("xls")) {
+        else if (excelFile.endsWith(ExcelFileType.Extension.XLS)) {
             workbook = new HSSFWorkbook(inputStream);
         }
         else {
