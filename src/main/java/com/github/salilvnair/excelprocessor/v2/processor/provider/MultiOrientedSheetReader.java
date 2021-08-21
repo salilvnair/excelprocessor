@@ -70,6 +70,7 @@ public class MultiOrientedSheetReader extends  BaseExcelSheetReader {
         multiOrientedReaderContext.setFileName(context.getFileName());
         multiOrientedReaderContext.setWorkbook(context.getWorkbook());
         multiOrientedReaderContext.setExtractMultiOrientedMap(context.extractMultiOrientedMap());
+        multiOrientedReaderContext.setSuppressExceptions(context.suppressExceptions());
         return multiOrientedReaderContext;
     }
 }

@@ -22,12 +22,14 @@ public @interface Sheet {
 	String[] ignoreHeaderPatterns() default {};
 	int[] ignoreRows() default {};
 	String headerColumnAt() default "A";
+	String headerColumnEndsAt() default "";
 	String headerColumnBeginsAtText() default "";
 	String headerColumnEndsAtText() default "";
 	String valueColumnAt() default "";
 	String valueColumnBeginsAt() default "";
 	String valueColumnEndsAt() default "";
 	int headerRowAt() default 1;
+	int headerRowEndsAt() default -1;
 	boolean mergedHeaders() default false;
 	boolean sectional() default false;
 	int mergedHeaderRowAt() default -1;

@@ -20,6 +20,9 @@ public class LengthValidator extends BaseCellValidator {
     protected boolean violated(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
         Sheet sheet = validatorContext.sheet();
         CellValidation cellValidation = field.getAnnotation(CellValidation.class);
+        if(allowNullOrAllowEmptyCheck(fieldValue, cellValidation)) {
+            return false;
+        }
         String headerKey = headerKey(fieldValue, currentInstance, validatorContext);
         if(cellValidation.length() > -1) {
             message = headerKey + " length should be "+cellValidation.length();

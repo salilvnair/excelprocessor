@@ -3,6 +3,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.provider;
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
+import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReadException;
 import com.github.salilvnair.excelprocessor.v2.helper.ConcurrentUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.service.ExcelSheetReaderTaskService;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.task.ExcelSheetReaderTask;
@@ -42,11 +43,17 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
     @Override
     public void read(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context) {
         if(!validateWorkbook(context)) {
-            return;//change it to exception later on
+            if(!context.suppressExceptions()) {
+                throw new ExcelSheetReadException("Validation Failed");//TODO v2: change it to exception later on
+            }
+            return;
         }
         Workbook workbook = ExcelSheetReaderUtil.extractWorkbook(context);
         if (workbook == null) {
-            return;//change it to exception later on
+            if(!context.suppressExceptions()) {
+                throw new ExcelSheetReadException("Workbook Null");//TODO v2: change it to exception later on
+            }
+            return;
         }
 
 
@@ -63,9 +70,9 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         else {
             headerCellFieldMapOrDynamicCellField = DynamicHeaderSheetReader.dynamicCellField(clazz);
         }
-        List<BaseSheet> baseSheetList = context.getConcurrentSheetData();
-        Map<Integer, String> headerRowIndexKeyedHeaderValueMap = context.getHeaderRowIndexKeyedHeaderValueMap();
-        Map<Integer, Map<String, CellInfo>> colIndexKeyedHeaderKeyCellInfoMap = context.getColIndexKeyedHeaderKeyCellInfoMap();
+        List<BaseSheet> baseSheetList = context.concurrentSheetData();
+        Map<Integer, String> headerRowIndexKeyedHeaderValueMap = context.headerRowIndexKeyedHeaderValueMap();
+        Map<Integer, Map<String, CellInfo>> colIndexKeyedHeaderKeyCellInfoMap = context.colIndexKeyedHeaderKeyCellInfoMap();
         if(concurrent) {
             _concurrentRead(clazz, context, workbook, baseSheetList, headerRowIndexKeyedHeaderValueMap, colIndexKeyedHeaderKeyCellInfoMap, headerCellFieldMapOrDynamicCellField);
         }
@@ -123,7 +130,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         String sheetName = context.sheetName() == null ? sheet.value(): context.sheetName();
         org.apache.poi.ss.usermodel.Sheet workbookSheet = workbook.getSheet(sheetName);
         int totalRows = workbookSheet.getLastRowNum();
-        totalRows = sheet.valueRowEndsAt()!=-1 ? sheet.valueRowEndsAt() - 1 : totalRows;
+        totalRows = sheet.headerRowEndsAt()!=-1 ? sheet.headerRowEndsAt() - 1 : totalRows;
         int headerColumnIndex = ExcelSheetReader.toIndentNumber(sheet.headerColumnAt())  - 1;
         String valueColumnAt = !StringUtils.isEmpty(context.valueColumnBeginsAt()) ? context.valueColumnBeginsAt() : sheet.valueColumnAt();
         int valueColumnIndex = ExcelSheetReader.toIndentNumber(valueColumnAt)  - 1;
@@ -237,7 +244,11 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
                         classObject.setCells(value);
                         baseSheetList.add(classObject);
                     }
-                    catch (Exception ignored) {}
+                    catch (Exception e) {
+                        if(!context.suppressExceptions()) {
+                            throw new ExcelSheetReadException(e);
+                        }
+                    }
                 });
     }
 
@@ -251,18 +262,18 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         ExecutorService executor = Executors.newCachedThreadPool();
         ExcelSheetReaderTaskService service = new ExcelSheetReaderTaskService();
         for (List<Integer> rowList : rowBatchList) {
-            ExcelSheetReaderContext xContext = new ExcelSheetReaderContext();
-            xContext.setSheet(context.sheet());
-            xContext.setSheetName(context.sheetName());
+            ExcelSheetReaderContext taskSheetReaderContext = new ExcelSheetReaderContext();
+            taskSheetReaderContext.setSheet(context.sheet());
+            taskSheetReaderContext.setSheetName(context.sheetName());
             Integer from = rowList.get(0);
             Integer to = rowList.get(rowList.size() - 1);
             int valueColumnIndex = sheetInfo.valueColumnIndex();
             if(valueColumnIndex > from ) {
                 from = valueColumnIndex;
             }
-            xContext.setValueColumnBeginsAt(ExcelSheetReader.toIndentName(from + 1));
-            xContext.setValueColumnEndsAt(ExcelSheetReader.toIndentName(to + 1));
-            ExcelSheetReaderTask task = new ExcelSheetReaderTask(TaskType.READ_MULTIPLE_ROWS_OR_COLUMNS.name(), null, service, clazz, xContext, workbook, xContext.getConcurrentSheetData(), xContext.getHeaderRowIndexKeyedHeaderValueMap(), xContext.getColIndexKeyedHeaderKeyCellInfoMap(), headerKeyFieldMap);
+            taskSheetReaderContext.setValueColumnBeginsAt(ExcelSheetReader.toIndentName(from + 1));
+            taskSheetReaderContext.setValueColumnEndsAt(ExcelSheetReader.toIndentName(to + 1));
+            ExcelSheetReaderTask task = new ExcelSheetReaderTask(TaskType.READ_MULTIPLE_ROWS_OR_COLUMNS.name(), null, service, clazz, taskSheetReaderContext, workbook, taskSheetReaderContext.concurrentSheetData(), taskSheetReaderContext.headerRowIndexKeyedHeaderValueMap(), taskSheetReaderContext.colIndexKeyedHeaderKeyCellInfoMap(), headerKeyFieldMap);
             taskCallables.add(task);
         }
         try {
@@ -270,9 +281,9 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
             int counter = 0;
             for(Future<ExcelSheetReaderContext> futureContext : futureList) {
                 ExcelSheetReaderContext readerContext = futureContext.get();
-                headerRowIndexKeyedHeaderValueMap.putAll(readerContext.getHeaderRowIndexKeyedHeaderValueMap());
-                columnIndexKeyedHeaderKeyCellInfoMap.putAll(readerContext.getColIndexKeyedHeaderKeyCellInfoMap());
-                baseSheetList.addAll(readerContext.getConcurrentSheetData());
+                headerRowIndexKeyedHeaderValueMap.putAll(readerContext.headerRowIndexKeyedHeaderValueMap());
+                columnIndexKeyedHeaderKeyCellInfoMap.putAll(readerContext.colIndexKeyedHeaderKeyCellInfoMap());
+                baseSheetList.addAll(readerContext.concurrentSheetData());
                 counter++;
             }
              if(taskCallables.size() == counter) {
@@ -280,7 +291,9 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
             }
         }
         catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            if(!context.suppressExceptions()) {
+                throw new ExcelSheetReadException(e);
+            }
         }
         executor.shutdown();
     }

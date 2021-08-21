@@ -7,5 +7,5 @@ public enum ExcelSheetValidatorType {
     SHEET,
     ROW,
     SECTION,
-    COLUMN
+    CELL
 }

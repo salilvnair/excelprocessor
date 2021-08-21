@@ -10,16 +10,20 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.type.Validato
 import java.lang.reflect.Field;
 
 public class DateValidator extends BaseCellValidator {
-    private final Field field;
     public DateValidator(Field field) {
         super(field);
-        this.field = field;
     }
 
     @Override
     protected boolean violated(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
         Sheet sheet = validatorContext.sheet();
-        CellValidation cellValidation = field.getAnnotation(CellValidation.class);
+        CellValidation cellValidation = cellValidation();
+        if(allowNullOrAllowEmptyCheck(fieldValue, cellValidation)) {
+            return false;
+        }
+        if(allowNullOrAllowEmptyCheck(fieldValue, cellValidation)) {
+            return false;
+        }
         if(fieldValue instanceof String && cellValidation.date()) {
             return DateParsingUtil.isDate(fieldValue+"", cellValidation.datePattern().value());
         }

@@ -73,7 +73,10 @@ public class TypeConvertor {
             bigIntValue = bdWrapper.toBigInteger();
             bigDecimalValue = bdWrapper;
         }
-        if(destinationType == Double.class) {
+        if(destinationType == String.class) {
+            return value+"";
+        }
+        else if(destinationType == Double.class) {
             return doubleValue;
         }
         else if(destinationType == Integer.class) {

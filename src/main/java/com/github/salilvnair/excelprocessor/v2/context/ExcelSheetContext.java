@@ -33,6 +33,7 @@ public class ExcelSheetContext {
     private Map<String,Object> userValidatorMap;
     private Map<String,List<String>> validValuesDataSet;
     private Map<String,String> userDefinedMessageDataSet;
+    private boolean suppressExceptions;
 
     public String getFileName() {
         return fileName;
@@ -189,6 +190,14 @@ public class ExcelSheetContext {
         this.ignoreHeaderColumns = ignoreHeaderColumns;
     }
 
+    public boolean suppressExceptions() {
+        return suppressExceptions;
+    }
+
+    public void setSuppressExceptions(boolean suppressExceptions) {
+        this.suppressExceptions = suppressExceptions;
+    }
+
     public static class ExcelSheetContextBuilder {
         private final ExcelSheetContext excelSheetContext =  new ExcelSheetContext();
         public ExcelSheetContextBuilder fileName(String fileName) {
@@ -242,6 +251,11 @@ public class ExcelSheetContext {
         }
         public ExcelSheetContextBuilder userDefinedMessageDataSet(Map<String,String> userDefinedMessageDataSet) {
             excelSheetContext.setUserDefinedMessageDataSet(userDefinedMessageDataSet);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder suppressExceptions() {
+            excelSheetContext.setSuppressExceptions(true);
             return this;
         }
 

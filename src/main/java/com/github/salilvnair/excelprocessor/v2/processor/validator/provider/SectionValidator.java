@@ -13,7 +13,6 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.helper.ExcelV
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -21,12 +20,12 @@ import java.util.Set;
  * @author Salil V Nair
  */
 public class SectionValidator extends AbstractExcelValidator {
-    private final Set<Field> columns;
+    private final Set<Field> cells;
 
     private final Set<Field> sections;
 
     public SectionValidator(Field sectionField) {
-        columns = AnnotationUtil.getAnnotatedFields(sectionField.getType(), CellValidation.class);
+        cells = AnnotationUtil.getAnnotatedFields(sectionField.getType(), CellValidation.class);
         sections = AnnotationUtil.getAnnotatedFields(sectionField.getType(), Section.class);
     }
 
@@ -35,9 +34,9 @@ public class SectionValidator extends AbstractExcelValidator {
         List<CellValidationMessage> errors = new ArrayList<>();
         Sheet sheet = currentInstance.getClass().getAnnotation(Sheet.class);
         validatorContext.setSheet(sheet);
-        for (Field column: columns) {
-            ExcelValidatorUtil validatorUtil = new ExcelValidatorUtil(column, ExcelSheetValidatorType.COLUMN);
-            validatorContext.setField(column);
+        for (Field cell: cells) {
+            ExcelValidatorUtil validatorUtil = new ExcelValidatorUtil(cell, ExcelSheetValidatorType.CELL);
+            validatorContext.setField(cell);
             validatorUtil.setValidatorContext(validatorContext);
             errors.addAll(validatorUtil.validate(currentInstance, validatorContext));
         }

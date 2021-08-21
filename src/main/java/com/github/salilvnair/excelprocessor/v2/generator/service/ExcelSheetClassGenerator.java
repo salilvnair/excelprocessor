@@ -41,7 +41,9 @@ public class ExcelSheetClassGenerator {
         }
         AnnotationUtil.changeValue(sheet, "value", sheetInfo.name());
         AnnotationUtil.changeValue(sheet, "headerRowAt", sheetInfo.headerRowAt());
+        AnnotationUtil.changeValue(sheet, "headerRowEndsAt", sheetInfo.headerRowEndsAt());
         AnnotationUtil.changeValue(sheet, "headerColumnAt", sheetInfo.headerColumnAt());
+        AnnotationUtil.changeValue(sheet, "headerColumnEndsAt", sheetInfo.headerColumnEndsAt());
         AnnotationUtil.changeValue(sheet, "ignoreHeaderPatterns", sheetInfo.ignoreHeaderPatterns());
         List<? extends BaseSheet> readList = reader.read(dynamicHeaderSheet.getClass(), sheetContext);
         return classTemplate(sheetInfo, sheet.value(), sheet.vertical(), readList.get(0).sheetHeaders(), readList.get(0).cells(), sheet.headerRowAt(), sheet.headerColumnAt());

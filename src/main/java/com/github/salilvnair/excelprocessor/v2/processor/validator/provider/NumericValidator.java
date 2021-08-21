@@ -1,5 +1,6 @@
 package com.github.salilvnair.excelprocessor.v2.processor.validator.provider;
 
+import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.BaseCellValidator;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.type.ValidatorType;
@@ -16,6 +17,10 @@ public class NumericValidator extends BaseCellValidator {
 
     @Override
     protected boolean violated(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
+        CellValidation cellValidation = cellValidation();
+        if(allowNullOrAllowEmptyCheck(fieldValue, cellValidation)) {
+            return false;
+        }
         return !NumberUtils.isNumber(fieldValue+"");
     }
 

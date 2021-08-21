@@ -20,7 +20,6 @@ public class StopWatch {
 
     public static long elapsed(TimeUnit timeUnit) {
         TimeUnit time = TimeUnit.MILLISECONDS;
-        stop();
-        return timeUnit.convert(durationInMillis, time);
+        return timeUnit.convert(stop(), time);
     }
 }

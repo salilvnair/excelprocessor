@@ -1,5 +1,6 @@
 package com.github.salilvnair.excelprocessor.v2.type;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,7 +11,9 @@ import java.util.stream.Collectors;
 public class SheetInfo {
     private String name;
     private int headerRowAt=1;
+    private int headerRowEndsAt = -1;
     private String headerColumnAt="A";
+    private String headerColumnEndsAt="";
     private int totalRows;
     private int totalColumns;
     private int valueRowIndex;
@@ -18,7 +21,7 @@ public class SheetInfo {
     private List<CellInfo> cells;
     private boolean vertical;
     private boolean sectional;
-    private List<String> ignoreHeaderPatterns;
+    private List<String> ignoreHeaderPatterns = new ArrayList<>();
     private boolean useOriginalHeader;
     private boolean skipGettersAndSetters;
 
@@ -130,6 +133,21 @@ public class SheetInfo {
         this.sectional = sectional;
     }
 
+    public int headerRowEndsAt() {
+        return headerRowEndsAt;
+    }
+
+    public void setHeaderRowEndsAt(int headerRowEndsAt) {
+        this.headerRowEndsAt = headerRowEndsAt;
+    }
+
+    public String headerColumnEndsAt() {
+        return headerColumnEndsAt;
+    }
+
+    public void setHeaderColumnEndsAt(String headerColumnEndsAt) {
+        this.headerColumnEndsAt = headerColumnEndsAt;
+    }
 
     public static class SheetInfoBuilder {
         private final SheetInfo sheetInfo =  new SheetInfo();
@@ -144,8 +162,18 @@ public class SheetInfo {
             return this;
         }
 
+        public SheetInfo.SheetInfoBuilder headerRowEndsAt(int headerRowEndsAt) {
+            sheetInfo.setHeaderRowEndsAt(headerRowEndsAt);
+            return this;
+        }
+
         public SheetInfo.SheetInfoBuilder headerColumnAt(String headerColumnAt) {
             sheetInfo.setHeaderColumnAt(headerColumnAt);
+            return this;
+        }
+
+        public SheetInfo.SheetInfoBuilder headerColumnEndsAt(String headerColumnEndsAt) {
+            sheetInfo.setHeaderColumnEndsAt(headerColumnEndsAt);
             return this;
         }
 

@@ -10,7 +10,6 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellV
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import com.github.salilvnair.excelprocessor.v2.test.sheet.section.SectionSheet;
 import com.github.salilvnair.excelprocessor.v2.type.SheetInfo;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -22,10 +21,6 @@ import java.util.concurrent.TimeUnit;
 public class ExcelProcessorTestSuite {
     public static void main(String[] args) throws Exception {
         List<? extends BaseSheet> sheetData = sheetReader();
-        System.out.println(sheetData.size());
-//        System.out.println(sheetData.get(1).rowForegroundRgb());
-//        System.out.println(Arrays.toString(sheetData.get(0).foregroundRgb()));
-//        System.out.println(Arrays.toString(sheetData.get(1).foregroundRgb()));
         //sheetWriter(sheetData, new ExcelSheetContext());
         //generateClassTemplate();
     }
@@ -45,7 +40,7 @@ public class ExcelProcessorTestSuite {
         SheetInfo.SheetInfoBuilder sheetInfoBuilder = SheetInfo.builder();
         sheetInfoBuilder
                 .name("SectionSheet")
-                .vertical(true)
+                .vertical()
                 .headerRowAt(1)
                 .ignoreHeaderPatterns(
                     "Section"
@@ -61,15 +56,17 @@ public class ExcelProcessorTestSuite {
         InputStream inputS = ExcelSheetReaderUtil.resourceStream(com.github.salilvnair.excelprocessor.v1.test.ExcelProcessorTestSuite.TEST_EXCEL_FOLDER, "ExcelProcessorTest1.xlsx");
         Workbook workbook = ExcelSheetReaderUtil.generateWorkbook(inputS, "ExcelProcessorTest1.xlsx");
         builder.workbook(workbook);
-        //List<CountryStateInfoSheet> countryStateInfoSheets = excelProcessor.read(CountryStateInfoSheet.class, context);
         StopWatch.start();
         ExcelSheetContext sheetContext = builder.build();
-//        reader.readAndValidate(classes, sheetContext);
-        List<CountryStateInfoSheet> sheets = reader.read(CountryStateInfoSheet.class, sheetContext);
-//        List<SchoolSheet> sheets = reader.read(SchoolSheet.class, sheetContext);
-        List<CellValidationMessage> validationMessages = reader.validate(sheets, sheetContext);
+        List<CollegeSheet> sheetData = reader.read(CollegeSheet.class, sheetContext);
+        System.out.println(sheetData.size());
+        System.out.println(sheetData.get(0).rowForegroundRgb());
+        System.out.println(sheetData.get(1).rowForegroundRgb());
+        System.out.println(Arrays.toString(sheetData.get(0).foregroundRgb()));
+        System.out.println(Arrays.toString(sheetData.get(1).foregroundRgb()));
+        List<CellValidationMessage> validationMessages = reader.validate(sheetData, sheetContext);
         System.out.println("validationMessages:"+validationMessages.size());
         System.out.println("excelprocessor v2 took " + StopWatch.elapsed(TimeUnit.MILLISECONDS) + " millisecond(s)");
-        return sheets;
+        return sheetData;
     }
 }

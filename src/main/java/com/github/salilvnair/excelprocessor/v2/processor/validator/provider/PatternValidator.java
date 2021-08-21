@@ -26,6 +26,9 @@ public class PatternValidator extends BaseCellValidator {
     protected boolean violated(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
         Sheet sheet = validatorContext.sheet();
         CellValidation cellValidation = field.getAnnotation(CellValidation.class);
+        if(allowNullOrAllowEmptyCheck(fieldValue, cellValidation)) {
+            return false;
+        }
         String fieldStringValue = (String) fieldValue;
         String pattern = cellValidation.pattern();
         if(cellValidation.findPattern()) {

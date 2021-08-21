@@ -3,6 +3,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.provider;
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
+import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReadException;
 import com.github.salilvnair.excelprocessor.v2.helper.ConcurrentUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.service.ExcelSheetReaderTaskService;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.task.ExcelSheetReaderTask;
@@ -57,9 +58,9 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         else {
             headerCellFieldMapOrDynamicCellField = DynamicHeaderSheetReader.dynamicCellField(clazz);
         }
-        Map<Integer, String> headerColumnIndexKeyedHeaderValueMap = context.getHeaderColumnIndexKeyedHeaderValueMap();
-        Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap = context.getRowIndexKeyedHeaderKeyCellInfoMap();
-        List<BaseSheet> baseSheetList = context.getConcurrentSheetData();
+        Map<Integer, String> headerColumnIndexKeyedHeaderValueMap = context.headerColumnIndexKeyedHeaderValueMap();
+        Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap = context.rowIndexKeyedHeaderKeyCellInfoMap();
+        List<BaseSheet> baseSheetList = context.concurrentSheetData();
         if(concurrent) {
             _concurrentRead(clazz, context, workbook, baseSheetList, headerColumnIndexKeyedHeaderValueMap, rowIndexKeyedHeaderKeyCellInfoMap, headerCellFieldMapOrDynamicCellField);
         }
@@ -125,7 +126,8 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         List<Integer> ignoreHeaderColumns = context.ignoreHeaderColumns().stream().map(col -> ExcelSheetReader.toIndentNumber(col) -1 ).collect(Collectors.toList());
         Set<Field> sheetCells = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
         List<String> classCellHeaders = sheetCells.stream().map(cellField -> cellField.getAnnotation(Cell.class).value()).collect(Collectors.toList());
-        for (int c = headerColumnIndex; c < headerRow.getLastCellNum(); c++) {
+        int lastCellNum = StringUtils.isNotEmpty(sheet.headerColumnEndsAt()) ? ExcelSheetReader.toIndentNumber(sheet.headerColumnEndsAt()) - 1 : headerRow.getLastCellNum();
+        for (int c = headerColumnIndex; c < lastCellNum; c++) {
             String headerString = headerRow.getCell(c).getStringCellValue();
             headerString = ExcelSheetReaderUtil.cleanHeaderString(headerString);
             if(!classCellHeaders.contains(headerString) && !sheet.dynamicHeaders()) {
@@ -156,8 +158,7 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
             if(row == null){
                 continue;
             }
-            int pnC = row.getLastCellNum();
-            for (int c = headerColumnIndex; c < pnC; c++) {
+            for (int c = headerColumnIndex; c < lastCellNum; c++) {
                 if(ignoreHeaderColumns.contains(c)) {
                     continue;
                 }
@@ -207,7 +208,11 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
                         classObject.setCells(excelCellInfoMap);
                         baseSheetList.add(classObject);
                     }
-                    catch (Exception ignored) {}
+                    catch (Exception e) {
+                        if(!context.suppressExceptions()) {
+                            throw new ExcelSheetReadException(e);
+                        }
+                    }
                 });
     }
 
@@ -221,9 +226,9 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         ExecutorService executor = Executors.newCachedThreadPool();
         ExcelSheetReaderTaskService service = new ExcelSheetReaderTaskService();
         for (List<Integer> rowList : rowBatchList) {
-            ExcelSheetReaderContext xContext = new ExcelSheetReaderContext();
-            xContext.setSheet(context.sheet());
-            xContext.setSheetName(context.sheetName());
+            ExcelSheetReaderContext taskSheetReaderContext = new ExcelSheetReaderContext();
+            taskSheetReaderContext.setSheet(context.sheet());
+            taskSheetReaderContext.setSheetName(context.sheetName());
             Integer from = rowList.get(0);
             int valueRowIndex = sheetInfo.valueRowIndex();
             if(valueRowIndex > from ) {
@@ -233,9 +238,9 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
                 from = from + 1;
             }
             Integer to = rowList.get(rowList.size() - 1);
-            xContext.setValueRowBeginsAt(from);
-            xContext.setValueRowEndsAt(to+1);
-            ExcelSheetReaderTask task = new ExcelSheetReaderTask(TaskType.READ_MULTIPLE_ROWS_OR_COLUMNS.name(), null, service, clazz, xContext, workbook, xContext.getConcurrentSheetData(), xContext.getHeaderColumnIndexKeyedHeaderValueMap(), xContext.getRowIndexKeyedHeaderKeyCellInfoMap(), headerFieldOrFieldMap);
+            taskSheetReaderContext.setValueRowBeginsAt(from);
+            taskSheetReaderContext.setValueRowEndsAt(to+1);
+            ExcelSheetReaderTask task = new ExcelSheetReaderTask(TaskType.READ_MULTIPLE_ROWS_OR_COLUMNS.name(), null, service, clazz, taskSheetReaderContext, workbook, taskSheetReaderContext.concurrentSheetData(), taskSheetReaderContext.headerColumnIndexKeyedHeaderValueMap(), taskSheetReaderContext.rowIndexKeyedHeaderKeyCellInfoMap(), headerFieldOrFieldMap);
             taskCallables.add(task);
         }
         try {
@@ -243,9 +248,9 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
             int counter = 0;
             for(Future<ExcelSheetReaderContext> futureContext : futureList) {
                 ExcelSheetReaderContext readerContext = futureContext.get();
-                headerColumnIndexKeyedHeaderValueMap.putAll(readerContext.getHeaderColumnIndexKeyedHeaderValueMap());
-                rowIndexKeyedHeaderKeyCellInfoMap.putAll(readerContext.getRowIndexKeyedHeaderKeyCellInfoMap());
-                baseSheetList.addAll(readerContext.getConcurrentSheetData());
+                headerColumnIndexKeyedHeaderValueMap.putAll(readerContext.headerColumnIndexKeyedHeaderValueMap());
+                rowIndexKeyedHeaderKeyCellInfoMap.putAll(readerContext.rowIndexKeyedHeaderKeyCellInfoMap());
+                baseSheetList.addAll(readerContext.concurrentSheetData());
                 counter++;
             }
             if(taskCallables.size() == counter) {
@@ -253,7 +258,9 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
             }
         }
         catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            if(!context.suppressExceptions()) {
+                throw new ExcelSheetReadException(e);
+            }
         }
     }
 }

@@ -1,10 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.processor.validator.core;
 
 import com.github.salilvnair.excelprocessor.util.ReflectionUtil;
-import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
-import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
-import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
-import com.github.salilvnair.excelprocessor.v2.annotation.UserDefinedMessage;
+import com.github.salilvnair.excelprocessor.v2.annotation.*;
 import com.github.salilvnair.excelprocessor.v2.helper.ObjectUtils;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
@@ -37,13 +34,6 @@ public abstract class BaseCellValidator extends AbstractExcelValidator {
     public List<CellValidationMessage> validate(Object currentInstance, CellValidatorContext validatorContext) {
         List<CellValidationMessage> messages = new ArrayList<>();
         Object fieldValue = ReflectionUtil.getFieldValue(currentInstance, field.getName());
-        CellValidation cellValidation = field.getAnnotation(CellValidation.class);
-        if(cellValidation.allowNull() && ObjectUtils.isNull(fieldValue)) {
-            return Collections.unmodifiableList(messages);
-        }
-        else if(cellValidation.allowEmpty() && (!ObjectUtils.isNull(fieldValue) && ObjectUtils.isEmptyString(fieldValue))) {
-            return Collections.unmodifiableList(messages);
-        }
         if(violated(fieldValue, currentInstance, validatorContext)) {
             messages = validationMessages(fieldValue, currentInstance, validatorContext);
         }
@@ -89,8 +79,8 @@ public abstract class BaseCellValidator extends AbstractExcelValidator {
         return messages;
     }
     protected Map<String, CellInfo> cellInfoMap(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
-        Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap = validatorContext.readerContext().getRowIndexKeyedHeaderKeyCellInfoMap();
-        Map<Integer, Map<String, CellInfo>> colIndexKeyedHeaderKeyCellInfoMap = validatorContext.readerContext().getColIndexKeyedHeaderKeyCellInfoMap();
+        Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap = validatorContext.readerContext().rowIndexKeyedHeaderKeyCellInfoMap();
+        Map<Integer, Map<String, CellInfo>> colIndexKeyedHeaderKeyCellInfoMap = validatorContext.readerContext().colIndexKeyedHeaderKeyCellInfoMap();
 
         return validatorContext.sheet().vertical() ? colIndexKeyedHeaderKeyCellInfoMap.get(validatorContext.currentRow().getColumnIndex()) : rowIndexKeyedHeaderKeyCellInfoMap.get(validatorContext.currentRow().getRowIndex());
     }
@@ -104,5 +94,27 @@ public abstract class BaseCellValidator extends AbstractExcelValidator {
         validationMessage.setRow(cellInfo.rowIndex() + 1);
         validationMessage.setColumn(ExcelSheetReader.toIndentName(cellInfo.columnIndex()+1));
         validationMessage.setMappedFieldName(field.getName());
+    }
+
+    protected CellValidation cellValidation() {
+        return field.getAnnotation(CellValidation.class);
+    }
+
+    protected boolean allowNullOrAllowEmptyCheck(Object fieldValue, AllowedValues allowedValues) {
+        if(allowedValues.allowNull() && ObjectUtils.isNull(fieldValue)) {
+            return true;
+        }
+        else {
+            return allowedValues.allowEmpty() && (!ObjectUtils.isNull(fieldValue) && ObjectUtils.isEmptyString(fieldValue));
+        }
+    }
+
+    protected boolean allowNullOrAllowEmptyCheck(Object fieldValue, CellValidation cellValidation) {
+        if(cellValidation.allowNull() && ObjectUtils.isNull(fieldValue)) {
+            return true;
+        }
+        else {
+            return cellValidation.allowEmpty() && (!ObjectUtils.isNull(fieldValue) && ObjectUtils.isEmptyString(fieldValue));
+        }
     }
 }

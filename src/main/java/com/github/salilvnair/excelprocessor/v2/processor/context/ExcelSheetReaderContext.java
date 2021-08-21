@@ -39,8 +39,9 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
     private String valueColumnEndsAt;
     private int valueRowBeginsAt=-1;
     private int valueRowEndsAt=-1;
+    private boolean suppressExceptions;
 
-    public Map<Integer, Map<String, CellInfo>> getRowIndexKeyedHeaderKeyCellInfoMap() {
+    public Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap() {
         if(rowIndexKeyedHeaderKeyCellInfoMap == null) {
             rowIndexKeyedHeaderKeyCellInfoMap = BaseExcelProcessor.orderedOrUnorderedMap(sheet);
         }
@@ -51,7 +52,7 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
         this.rowIndexKeyedHeaderKeyCellInfoMap = rowIndexKeyedHeaderKeyCellInfoMap;
     }
 
-    public Map<Integer, String> getHeaderColumnIndexKeyedHeaderValueMap() {
+    public Map<Integer, String> headerColumnIndexKeyedHeaderValueMap() {
         if(headerColumnIndexKeyedHeaderValueMap == null) {
             headerColumnIndexKeyedHeaderValueMap = BaseExcelProcessor.orderedOrUnorderedMap(sheet);
         }
@@ -78,7 +79,7 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
         this.sheetData = sheetData;
     }
 
-    public Map<Integer, String> getHeaderRowIndexKeyedHeaderValueMap() {
+    public Map<Integer, String> headerRowIndexKeyedHeaderValueMap() {
         if(headerRowIndexKeyedHeaderValueMap == null) {
             headerRowIndexKeyedHeaderValueMap = BaseExcelProcessor.orderedOrUnorderedMap(sheet);
         }
@@ -89,7 +90,7 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
         this.headerRowIndexKeyedHeaderValueMap = headerRowIndexKeyedHeaderValueMap;
     }
 
-    public Map<Integer, Map<String, CellInfo>> getColIndexKeyedHeaderKeyCellInfoMap() {
+    public Map<Integer, Map<String, CellInfo>> colIndexKeyedHeaderKeyCellInfoMap() {
         if(colIndexKeyedHeaderKeyCellInfoMap == null) {
             colIndexKeyedHeaderKeyCellInfoMap = BaseExcelProcessor.orderedOrUnorderedMap(sheet);
         }
@@ -100,7 +101,7 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
         this.colIndexKeyedHeaderKeyCellInfoMap = colIndexKeyedHeaderKeyCellInfoMap;
     }
 
-    public Map<String, List<? extends BaseSheet>> getMultiOrientedSheetMap() {
+    public Map<String, List<? extends BaseSheet>> multiOrientedSheetMap() {
         return multiOrientedSheetMap;
     }
 
@@ -156,7 +157,7 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
         this.sheetName = sheetName;
     }
 
-    public Map<String, List<? extends BaseSheet>> getScatteredSheetMap() {
+    public Map<String, List<? extends BaseSheet>> scatteredSheetMap() {
         return scatteredSheetMap;
     }
 
@@ -223,7 +224,7 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
         this.ignoreHeaderColumns = ignoreHeaderColumns;
     }
 
-    public List<BaseSheet> getConcurrentSheetData() {
+    public List<BaseSheet> concurrentSheetData() {
         if(concurrentSheetData == null) {
             concurrentSheetData = BaseExcelProcessor.orderedOrUnorderedList(sheet);
         }
@@ -232,5 +233,13 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
 
     public void setConcurrentSheetData(List<BaseSheet> concurrentSheetData) {
         this.concurrentSheetData = concurrentSheetData;
+    }
+
+    public boolean suppressExceptions() {
+        return suppressExceptions;
+    }
+
+    public void setSuppressExceptions(boolean suppressExceptions) {
+        this.suppressExceptions = suppressExceptions;
     }
 }
