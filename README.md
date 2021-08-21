@@ -1,163 +1,186 @@
-# Excel Processor
-POI based library which supports below features:
+# Excel Processor v2 launched
 
+## Highlights:
+```
 * Easy annotation based excel read and write operation.
 
 * Predefined validations right out of the box i.e. required, minItems, maxItems, email, numeric etc.
 
 * Supports dynamic validations using conditional, customTask(s).
 
-* Supports ValidValues annotation for set of valid values.
+* Supports AllowedValues annotation for set of valid values.
 
 * Can be used with any framework of Java or a Rest based Java API.
 
 * A user validator map, user defined message set, valid value data set can be configured using builder pattern.
 
-*  Output of the validation contains sheet object with row and column details to rightly identify the issues.
+*  Output of the validation contains sheet object with row and column details to rightly identify the issues.~~~~
+```
 
-
-## Steps:
+## Integration steps:
 > 1. Add Maven dependency
 
 ```java
 <dependency>
     <groupId>com.github.salilvnair</groupId>
     <artifactId>excelprocessor</artifactId>
-    <version>1.0.1</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
-> 2. Annotate a class or a field using  `@ExcelSheet ` , class should be either extending abstract class named `BaseExcelSheet ` or `BaseExcelValidationSheet`
+> 2. Annotate the user defined class using `@Sheet` and it should be extending abstract class named `BaselSheet`
+
 ```java
-@ExcelSheet(value="School", hasValidation=true)
-public class SchoolSheet extends BaseExcelValidationSheet {
-   ....
+import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+
+@Sheet("School")
+public class SchoolSheet extends BaseSheet {
+   .......
 }
 ```
 
-> 3. Set it as required, conditional, numeric, email erc.
+> 3. Set it as required, conditional, numeric, email etc.
 
 ```java
-@ExcelHeaderValidator(required=true, numeric=true)
-@ExcelHeader("School Id") // this value should match with the excel header value in the sheet
-private String schoolId;
-```
+import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
+import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 
-```java
-@ExcelHeader("Name")
-@ExcelHeaderValidator(conditional=true, condition="validateName")
-private String name;
-```
+@Sheet("School")
+public class SchoolSheet extends BaseSheet {
 
-```java
-@ExcelHeader("Email Id")
-@ExcelHeaderValidator(email=true)
-private String email;
-```
+     @CellValidation(required = true, numeric = true)
+     @Cell("School Id") // this value should match with the Excel sheets header value in the sheet
+     private String schoolId;
 
-> 4. Call the processor using `ExcelProcessorBuilder`
+     @CellValidation(conditional = true, condition = "validateName")
+     @Cell("Name")
+     private String name;
 
-   - Validating excel sheet
-
-      ```java
-            Map<String, Map<String, Object>>  validationMap = excelProcessorBuilder
-                                                              .setExcelfile(file)
-                                                              .setExcelMappingBeanClasses(SchoolSheet.class,
-                                                                            CollegeSheet.class,
-                                                                            EmployerSheet.class)
-                                                              .validate();
-     ```
-                                                              
-   - Read from excel sheet(s)
-
-      ```java
-      //below snippet shows how to extract data of single sheet
-      
-			List<SchoolSheet> sheet = excelProcessorBuilder
-                                    .setExcelfile(excelfile)
-                                    .setExcelMappingBeanClasses(
-                                        SchoolSheet.class,
-                                        CollegeSheet.class,
-                                        EmployerSheet.class
-                                     )
-                                    .fromExcel()
-                                    .toSheetList(SchoolSheet.class);
-     //below snippet shows how to extract data of multiple sheets, 
-     //sheetMap will have the key as the sheet name given in the excel sheet                
      
-     Map<String, List<? extends BaseExcelSheet>> sheetMap = excelProcessorBuilder
-                                                            .setExcelfile(excelfile)
-                                                            .setExcelMappingBeanClasses(
-                                                                SchoolSheet.class,
-                                                                CollegeSheet.class,
-                                                                EmployerSheet.class
-                                                             )
-                                                            .fromExcel()                                  
-                                                            .toSheetMap();
+     @CellValidation(email = true)
+     @Cell("Email Id")
+     private String email;
+     
+     .......
+}
+```
 
-> 5. User defined map can be passed in the `JsonProcessorBuilder` which can be later used in customTask(s) or in Conditional validators.
-		
+> 4. Call the read using **_ExcelSheetReader_** which can be generated using **_ExcelSheetReaderFactory_**.
+> </br></br> **_ExcelSheetReaderFactory_** can generate a non thread based Sheet Reader 
+     > or a thread based Sheet Reader by passing an optional flag into the generate method.
+
 ```java
-Map<String,Object> validatorMap  = new HashMap<>();
-validatorMap.put("alumini", "Hogward");
-Map<String, List<? extends BaseExcelSheet>> sheetMap = ......
-                                                            .setUserValidatorMap(map)
-                                                            .fromExcel()                                  
-                                                            .toSheetMap();
+import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
+import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
+import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetReaderFactory;
+import com.github.salilvnair.excelprocessor.v2.test.sheet.CollegeSheet;
+
+import java.io.File;
+import java.util.List;
+
+public class ExcelProcessorTestSuite {
+     public void read() {
+          ExcelSheetReader reader = ExcelSheetReaderFactory.generate();// single threaded Sheet Reader
+          ExcelSheetReader reader = ExcelSheetReaderFactory.generate(true);// multi threaded Sheet Reader
+
+          //the basic reader.read() expects 2 arguments 
+          // 1st one is the User defined Sheet bean class which has to extend BaseSheet. 
+          // 2nd argument is the SheetContext
+
+          //SheetContext can be build using the ExcelSheetContext.ExcelSheetContextBuilder
+
+          ExcelSheetContext.ExcelSheetContextBuilder builder = ExcelSheetContext.builder();
+          ExcelSheetContext sheetContext = builder
+                                           .excelFile(new File("ExcelProcessorTest.xlsx"))
+                                           .build();  
+          
+          //User defined map can be passed into the builder which can be later used in customTask(s) or in conditional validators.
+          Map<String,Object> validatorMap  = new HashMap<>();
+          validatorMap.put("key", "value");
+          
+          ExcelSheetContext sheetContext = builder
+                                           .excelFile(new File("ExcelProcessorTest.xlsx"))
+                                           .userValidatorMap(validatorMap)
+                                           .build();
+          
+          List<CollegeSheet> collegeSheets = reader.read(CollegeSheet.class, sheetContext);
+
+     }
+}
+
+
+
+
+
+
 ```
-  - `validateInDetail()` will provide each sheet object with validationMessage object containing sheet row and column details along with error.
-```java
-Map<String,Object> validatorMap  = new HashMap<>();
-validatorMap.put("alumini", "Hogward");
-Map<String, List<? extends BaseExcelSheet>> sheetMap = ......
-                                                            .setUserValidatorMap(map)
-                                                            .fromExcel() 
-                                                            .validateInDetail()
-                                                            .toSheetMap();
-```
+
 
 ## Complete Usage:
 ```java
-  @ExcelSheet(
-    value="School", 
-    hasValidation=true,
-    customTaskValidator = SchoolSheetCustomValidatorTask.class
-   )
-  public class SchoolSheet extends BaseExcelValidationSheet{
-      @ExcelHeaderValidator(conditional=true, condition="validateAlumini")
-      @ExcelHeader("Name")
-      private String name;
-      @ExcelHeader(value="State")
-      private String state;
-      @ExcelHeader("No of students")
-      private Integer noOfStudents;
-      @ExcelHeader(
-        value="Image",
-        pictureResizeScale=-1,
-        picture=true,
-        pictureAnchorType = PictureAnchorType.DONT_MOVE_AND_RESIZE,
-        pictureSource=PictureSourceType.BYTE_ARRAY
-      )
-      private Byte[] image;
+import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
+import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
+import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+import com.github.salilvnair.excelprocessor.v2.test.sheet.task.CollegeSheetTaskValidator;
+
+@Sheet(
+        value="College",
+        excelTaskValidator = CollegeSheetTaskValidator.class
+)
+public class CollegeSheet extends BaseSheet {
+     @Cell("Name")
+     private String name;
      
+     @CellValidation(customTask = "defaultUniversity")
+     @Cell("University")
+     private String university;
+     
+     @Cell("State")
+     private String state;
+     
+     @CellValidation(conditional = true, condition = "shouldBeGreaterThanZero")
+     @Cell("No of students")
+     private Long noOfStudents;
+
      //getters and setters
-     ........
-  }
-```
-```java
-public class SchoolSheetCustomValidatorTask extends AbstractCustomValidatorTask {
-	public String validateAlumini(ValidatorContext validatorContext) {
-		SchoolSheet school = (SchoolSheet) validatorContext.getBaseExcelValidationSheet();
-		Map<String,Object> validatorMap = validatorContext.getUserValidatorMap();
-		if(!validatorMap.isEmpty() && school.getName()!=null) {
-			String alumini  = (String) validatorMap.get("alumini");
-			if(!school.getName().contains(alumini)){
-				return "Only "+alumini+" alumini schools are allowed";
-			}
-		}
-		return null;
-	}
+     ......
+
 }
 ```
 
-> For detailed usage check the file [ExcelProcessorTestSuite.java](src/main/java/com/github/salilvnair/excelprocessor/v1/test/ExcelProcessorTestSuite.java)
+```java
+import com.github.salilvnair.excelprocessor.v2.processor.validator.task.core.AbstractExcelTaskValidator;
+
+public class CollegeSheetTaskValidator extends AbstractExcelTaskValidator {
+     public String shouldBeGreaterThanZero(CellValidatorContext context) {
+          CollegeSheet sheet = context.sheet(CollegeSheet.class);
+          long noOfS = 0;
+          if (sheet == null) {
+               MultiOrientedCollegeSheet mSheet = context.sheet(MultiOrientedCollegeSheet.class);
+               noOfS = mSheet.getNoOfStudents();
+          } 
+          else {
+               noOfS = sheet.getNoOfStudents();
+          }
+          if (noOfS <= 0) {
+               return "Min Students should be greater than 0";
+          }
+          return null;
+     }
+
+     public void defaultUniversity(CellValidatorContext context) {
+          CollegeSheet sheet = context.sheet(CollegeSheet.class);
+          if (sheet == null) {
+               MultiOrientedCollegeSheet mSheet = context.sheet(MultiOrientedCollegeSheet.class);
+               mSheet.setUniversity("Appa University");
+          } 
+          else {
+               sheet.setUniversity("Anna University");
+          }
+     }
+}
+```
+
+> For detailed usage check the file [ExcelProcessorTestSuite.java](src/main/java/com/github/salilvnair/excelprocessor/v2/test/sheet/ExcelProcessorTestSuite.java)
