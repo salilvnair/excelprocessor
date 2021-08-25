@@ -66,29 +66,72 @@ public abstract class BaseSheet implements ExcelSheet {
         return sheetHeaders;
     }
 
-    public String[] rowForegroundHexString() {
+    public String[] rowForegroundHex() {
         if(!cells.isEmpty()) {
-            List<String> hexStrings = new ArrayList<>();
+            List<String> hexStrings = rowForegroundHexList();
+            return hexStrings.toArray(new String[0]);
+        }
+        return null;
+    }
+
+    private List<String> rowForegroundHexList() {
+        List<String> hexStrings = new ArrayList<>();
+        if(!cells.isEmpty()) {
             cells.forEach((key, value) -> {
                 String hexString = value.getForegroundHexString();
                 if (hexString != null) {
                     hexStrings.add(hexString);
                 }
             });
-            return hexStrings.toArray(new String[0]);
+        }
+        return hexStrings;
+    }
+
+    public String foregroundHex() {
+        List<String> foregroundHexList = rowForegroundHexList();
+        if(!foregroundHexList.isEmpty()) {
+            Set<String> distinctHex = foregroundHexList
+                                        .stream()
+                                        .map(String::toString)
+                                        .collect(Collectors.toSet());
+            if(distinctHex.size() == 1) {
+                return foregroundHexList.get(0);
+            }
         }
         return null;
     }
-    public String[] rowBackgroundHexString() {
+
+    public List<String> rowBackgroundHexList() {
+        List<String> hexStrings = new ArrayList<>();
         if(!cells.isEmpty()) {
-            List<String> hexStrings = new ArrayList<>();
             cells.forEach((key, value) -> {
                 String hexString = value.getBackgroundHexString();
                 if (hexString != null) {
                     hexStrings.add(hexString);
                 }
             });
+        }
+        return hexStrings;
+    }
+
+    public String[] rowBackgroundHex() {
+        if(!cells.isEmpty()) {
+            List<String> hexStrings = rowBackgroundHexList();
             return hexStrings.toArray(new String[0]);
+        }
+        return null;
+    }
+
+    public String backgroundHex() {
+        List<String> backgroundHexList = rowBackgroundHexList();
+        if(!backgroundHexList.isEmpty()) {
+            Set<String> distinctHex = backgroundHexList
+                                        .stream()
+                                        .map(String::toString)
+                                        .collect(Collectors.toSet());
+            if(distinctHex.size() == 1) {
+                return backgroundHexList.get(0);
+            }
         }
         return null;
     }

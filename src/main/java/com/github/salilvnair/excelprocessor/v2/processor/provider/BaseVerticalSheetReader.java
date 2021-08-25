@@ -200,7 +200,10 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         int cIndex = valueColumnBeginsAt;
         while(cIndex < maxColumnC) {
             Map<String, CellInfo> headerKeyCellInfoMap = orderedOrUnorderedMap(sheet);
-            for (int r = headerRowIndex; r <= totalRows; r++) {
+            totalRows = sheet.valueRowEndsAt() > -1 ? sheet.valueRowEndsAt() - 1 : totalRows;
+            int valueRowBeginsAt = sheet.valueRowBeginsAt() - 1;
+            int valueRowIndex = valueRowBeginsAt > -1 ? valueRowBeginsAt: sheet.valueRowAt() > -1 ? sheet.valueRowAt() - 1 : headerRowIndex;
+            for (int r = valueRowIndex; r <= totalRows; r++) {
                 if (ignoreHeaderRows.contains(r)) {
                     continue;
                 }
@@ -227,6 +230,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
                         continue;
                     }
                     Object cellValue = extractValueBasedOnCellType(workbook, cell, cellInfo);
+                    extractCellPropertiesAndSetCellInfo(workbook, cell, cellInfo);
                     cellInfo.setValue(cellValue);
                     headerKeyCellInfoMap.put(headerString, cellInfo);
                 }

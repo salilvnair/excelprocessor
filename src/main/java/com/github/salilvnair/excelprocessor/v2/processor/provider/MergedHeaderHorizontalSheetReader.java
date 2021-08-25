@@ -103,10 +103,10 @@ public class MergedHeaderHorizontalSheetReader extends HorizontalSheetReader {
             processedDuplicateHeaderKeyedOriginalHeaderMap.put(processSimilarHeaderString, headerString);
             headerStringList.add(processSimilarHeaderString);
         }
-        int valueRowBeginsAt = context.valueRowBeginsAt()!=-1 ? context.valueRowBeginsAt() : sheet.valueRowBeginsAt();
-        int valueRowIndex = valueRowBeginsAt!=-1 ? valueRowBeginsAt: sheet.valueRowAt()!=-1 ? sheet.valueRowAt() : headerRowIndex+1;
-        int valueEndsAt = context.valueRowEndsAt()!=-1 ? context.valueRowEndsAt() : sheet.valueRowBeginsAt();
-        totalRows = valueEndsAt!=-1 ? valueEndsAt : totalRows;
+        int valueRowBeginsAt = context.valueRowBeginsAt() > -1 ? context.valueRowBeginsAt() - 1 : sheet.valueRowBeginsAt() - 1;
+        int valueRowIndex = valueRowBeginsAt > -1 ? valueRowBeginsAt: sheet.valueRowAt() > -1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
+        int valueEndsAt = context.valueRowEndsAt() > -1 ? context.valueRowEndsAt() - 1 : sheet.valueRowEndsAt() - 1;
+        totalRows = valueEndsAt > -1 ? valueEndsAt : totalRows;
         for (int r = valueRowIndex ; r <= totalRows; r++) {
             Map<String, CellInfo> headerKeyCellInfoMap = new HashMap<>();
             Row row = workbookSheet.getRow(r);
@@ -136,6 +136,7 @@ public class MergedHeaderHorizontalSheetReader extends HorizontalSheetReader {
                     continue;
                 }
                 Object cellValue = extractValueBasedOnCellType(workbook, cell, cellInfo);
+                extractCellPropertiesAndSetCellInfo(workbook, cell, cellInfo);
                 cellInfo.setValue(cellValue);
                 headerKeyCellInfoMap.put(headerString, cellInfo);
             }

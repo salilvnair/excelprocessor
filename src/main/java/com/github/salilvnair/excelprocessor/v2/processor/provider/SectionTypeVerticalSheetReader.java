@@ -130,6 +130,7 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
                         continue;
                     }
                     Object cellValue = extractValueBasedOnCellType(workbook, cell, cellInfo);
+                    extractCellPropertiesAndSetCellInfo(workbook, cell, cellInfo);
                     cellInfo.setValue(cellValue);
                     headerKeyCellInfoMap.put(headerString, cellInfo);
                 }
