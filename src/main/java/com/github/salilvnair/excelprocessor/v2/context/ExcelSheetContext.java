@@ -18,6 +18,7 @@ import java.util.Map;
 public class ExcelSheetContext {
     private File excelFile;
     private String fileName;
+    private String filePath;
     private Workbook workbook;
     private String sheetName;
     private List<String> ignoreHeaders;
@@ -35,7 +36,7 @@ public class ExcelSheetContext {
     private Map<String,String> userDefinedMessageDataSet;
     private boolean suppressExceptions;
 
-    public String getFileName() {
+    public String fileName() {
         return fileName;
     }
 
@@ -43,7 +44,7 @@ public class ExcelSheetContext {
         this.fileName = fileName;
     }
 
-    public Workbook getWorkbook() {
+    public Workbook workbook() {
         return workbook;
     }
 
@@ -196,6 +197,14 @@ public class ExcelSheetContext {
 
     public void setSuppressExceptions(boolean suppressExceptions) {
         this.suppressExceptions = suppressExceptions;
+    }
+
+    public String filePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
     public static class ExcelSheetContextBuilder {

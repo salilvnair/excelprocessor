@@ -289,8 +289,8 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
 
     private  <T extends BaseSheet> BaseExcelSheetReader _sheetReader(ExcelSheetReaderContext readerContext, Class<T> clazz, ExcelSheetContext context, boolean multiOriented) {
         File excelFile = context.excelFile();
-        readerContext.setWorkbook(context.getWorkbook());
-        if(excelFile !=null && context.getWorkbook() == null) {
+        readerContext.setWorkbook(context.workbook());
+        if(excelFile !=null && context.workbook() == null) {
             FileInputStream inputS = null;
             try {
                 inputS = new FileInputStream(excelFile);
@@ -303,7 +303,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
                 }
             }
         }
-        readerContext.setFileName(context.getFileName());
+        readerContext.setFileName(context.fileName());
         readerContext.setExtractMultiOrientedMap(multiOriented);
         return ExcelSheetFactory.generateReader(clazz, concurrent, batchSize);
     }

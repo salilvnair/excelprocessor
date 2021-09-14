@@ -51,4 +51,18 @@ public class ExcelSheetFactory {
         return sheet != null ? generateReader(sheet, concurrent, batchSize) : null;
     }
 
+    public static BaseExcelSheetWriter generateWriter(Class<? extends BaseSheet> clazz) {
+        Sheet sheet = clazz.getAnnotation(Sheet.class);
+        return sheet != null ? generateWriter(sheet) : null;
+    }
+
+    public static BaseExcelSheetWriter generateWriter(Sheet sheet) {
+        if(sheet.vertical()) {
+            return new VerticalSheetWriter();
+        }
+        else {
+            return new HorizontalSheetWriter();
+        }
+    }
+
 }
