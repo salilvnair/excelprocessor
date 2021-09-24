@@ -9,7 +9,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellV
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.AbstractExcelValidator;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.ExcelSheetValidatorType;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.helper.ExcelValidatorUtil;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.helper.ExcelSheetValidatorUtil;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -35,13 +35,13 @@ public class SectionValidator extends AbstractExcelValidator {
         Sheet sheet = currentInstance.getClass().getAnnotation(Sheet.class);
         validatorContext.setSheet(sheet);
         for (Field cell: cells) {
-            ExcelValidatorUtil validatorUtil = new ExcelValidatorUtil(cell, ExcelSheetValidatorType.CELL);
+            ExcelSheetValidatorUtil validatorUtil = new ExcelSheetValidatorUtil(cell, ExcelSheetValidatorType.CELL);
             validatorContext.setField(cell);
             validatorUtil.setValidatorContext(validatorContext);
             errors.addAll(validatorUtil.validate(currentInstance, validatorContext));
         }
         for (Field section: sections) {
-            ExcelValidatorUtil validatorUtil = new ExcelValidatorUtil(section, ExcelSheetValidatorType.SECTION);
+            ExcelSheetValidatorUtil validatorUtil = new ExcelSheetValidatorUtil(section, ExcelSheetValidatorType.SECTION);
             validatorUtil.setValidatorContext(validatorContext);
             Object sectionInstance = ReflectionUtil.getFieldValue(currentInstance, section);
             errors.addAll(validatorUtil.validate(sectionInstance, validatorContext));

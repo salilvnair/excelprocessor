@@ -4,11 +4,10 @@ package com.github.salilvnair.excelprocessor.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.lang.reflect.ParameterizedType;
+import java.util.*;
 
+import com.google.gson.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -215,6 +214,58 @@ public class ReflectionUtil {
             clazz = clazz.getSuperclass();
         }
         return fields;
+    }
+
+
+    public static boolean hasField(final Object obj, final String fieldName) {
+        return getField(obj.getClass(), fieldName) != null;
+    }
+
+    public static boolean hasField(final Object obj, final Field field) {
+        return getField(obj.getClass(), field.getName()) != null;
+    }
+
+    public static <T> List<T> toGenericListEntity(Class<T> clazz, String jsonString) {
+        Gson gson = new GsonBuilder().setDateFormat("E MMM dd hh:mm:ss Z yyyy").create();
+        List<T> genericList = new ArrayList<T>();
+        try {
+
+            JsonParser parser = new JsonParser();
+            JsonArray array = parser.parse(jsonString).getAsJsonArray();
+
+            for (final JsonElement json : array) {
+                T entity = gson.fromJson(json, clazz);
+                genericList.add(entity);
+            }
+
+        }
+        catch (Exception ignore) {}
+        return genericList;
+    }
+
+    public static <T> T toEntity(Class<T> clazz, String jsonString) {
+        Gson gson = new GsonBuilder().setDateFormat("E MMM dd hh:mm:ss Z yyyy").create();
+        return gson.fromJson(jsonString, clazz);
+    }
+
+    public static Class<?> findParameterizedType(Object object, String fieldName) {
+        Field field = ReflectionUtil.getField(object.getClass(), fieldName);
+        return findParameterizedType(object, field);
+    }
+
+    public static Class<?> findParameterizedType(Object object, Field field) {
+        ParameterizedType stringListType = (ParameterizedType) field.getGenericType();
+        return (Class<?>) stringListType.getActualTypeArguments()[0];
+    }
+
+
+    public static Class<?> findType(Object object, String fieldName) {
+        Field field = ReflectionUtil.getField(object.getClass(), fieldName);
+        return findType(object, field);
+    }
+
+    public static Class<?> findType(Object object, Field field) {
+        return field.getType();
     }
 
 }

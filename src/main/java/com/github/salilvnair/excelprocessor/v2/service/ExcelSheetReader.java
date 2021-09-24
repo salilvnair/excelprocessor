@@ -11,7 +11,7 @@ import java.util.Map;
 
 public interface ExcelSheetReader {
 
-  default <T extends BaseSheet> ExcelInfo excelInfo(Class<T> clazz, ExcelSheetContext sheetContext)throws Exception { return null;};
+  default <T extends BaseSheet> ExcelInfo excelInfo(Class<T> clazz, ExcelSheetContext sheetContext) throws Exception { return null;}
 
   default ExcelInfo excelInfo(String[] fullyQualifiedClassNames, ExcelSheetContext sheetContext) { return null;}
 

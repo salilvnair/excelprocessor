@@ -18,7 +18,7 @@ import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetFactory;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.helper.ExcelValidator;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.helper.ExcelSheetValidator;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
 
@@ -369,7 +369,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         if(sheet.dynamicHeaders()) {
             return Collections.emptyList();
         }
-        return ExcelValidator
+        return ExcelSheetValidator
                 .init(validatorContext)
                 .setUserValidatorMap(sheetContext.userValidatorMap())
                 .setValidValuesDataSet(sheetContext.validValuesDataSet())
