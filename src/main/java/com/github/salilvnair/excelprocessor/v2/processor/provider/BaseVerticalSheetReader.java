@@ -201,7 +201,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         while(cIndex < maxColumnC) {
             Map<String, CellInfo> headerKeyCellInfoMap = orderedOrUnorderedMap(sheet);
             totalRows = sheet.valueRowEndsAt() > -1 ? sheet.valueRowEndsAt() - 1 : totalRows;
-            int valueRowBeginsAt = sheet.valueRowBeginsAt() - 1;
+            int valueRowBeginsAt = sheet.valueRowBeginsAt() > - 1 ? sheet.valueRowBeginsAt() -1 : -1;;
             int valueRowIndex = valueRowBeginsAt > -1 ? valueRowBeginsAt: sheet.valueRowAt() > -1 ? sheet.valueRowAt() - 1 : headerRowIndex;
             for (int r = valueRowIndex; r <= totalRows; r++) {
                 if (ignoreHeaderRows.contains(r)) {

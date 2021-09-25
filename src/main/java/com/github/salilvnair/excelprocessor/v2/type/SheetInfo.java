@@ -16,6 +16,7 @@ public class SheetInfo {
     private String headerColumnEndsAt="";
     private int totalRows;
     private int totalColumns;
+    private int valueRowAt=2;
     private int valueRowIndex;
     private int valueColumnIndex;
     private List<CellInfo> cells;
@@ -24,6 +25,7 @@ public class SheetInfo {
     private List<String> ignoreHeaderPatterns = new ArrayList<>();
     private boolean useOriginalHeader;
     private boolean skipGettersAndSetters;
+    private boolean allCellTypeToString;
 
     public String name() {
         return name;
@@ -117,6 +119,14 @@ public class SheetInfo {
         this.skipGettersAndSetters = skipGettersAndSetters;
     }
 
+    public boolean allCellTypeToString() {
+        return allCellTypeToString;
+    }
+
+    public void setAllCellTypeToString(boolean allCellTypeToString) {
+        this.allCellTypeToString = allCellTypeToString;
+    }
+
     public boolean useOriginalHeader() {
         return useOriginalHeader;
     }
@@ -149,6 +159,14 @@ public class SheetInfo {
         this.headerColumnEndsAt = headerColumnEndsAt;
     }
 
+    public int valueRowAt() {
+        return valueRowAt;
+    }
+
+    public void setValueRowAt(int valueRowAt) {
+        this.valueRowAt = valueRowAt;
+    }
+
     public static class SheetInfoBuilder {
         private final SheetInfo sheetInfo =  new SheetInfo();
 
@@ -159,6 +177,11 @@ public class SheetInfo {
 
         public SheetInfo.SheetInfoBuilder headerRowAt(int headerRowAt) {
             sheetInfo.setHeaderRowAt(headerRowAt);
+            return this;
+        }
+
+        public SheetInfo.SheetInfoBuilder valueRowAt(int valueRowAt) {
+            sheetInfo.setValueRowAt(valueRowAt);
             return this;
         }
 
@@ -194,6 +217,11 @@ public class SheetInfo {
 
         public SheetInfo.SheetInfoBuilder skipGettersAndSetters() {
             sheetInfo.setSkipGettersAndSetters(true);
+            return this;
+        }
+
+        public SheetInfo.SheetInfoBuilder allCellTypeToString() {
+            sheetInfo.setAllCellTypeToString(true);
             return this;
         }
 

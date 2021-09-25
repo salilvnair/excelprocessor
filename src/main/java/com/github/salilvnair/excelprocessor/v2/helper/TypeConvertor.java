@@ -1,5 +1,6 @@
 package com.github.salilvnair.excelprocessor.v2.helper;
 
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -74,7 +75,14 @@ public class TypeConvertor {
             bigDecimalValue = bdWrapper;
         }
         if(destinationType == String.class) {
-            return value+"";
+            String stringVal = value+"";
+            if(bdWrapper != null && NumberUtils.isNumber(stringVal)) {
+                double numericStringVal = bdWrapper.doubleValue();
+                if ((numericStringVal == Math.floor(numericStringVal)) && !Double.isInfinite(numericStringVal)) {
+                    stringVal = bdWrapper.longValue()+"";
+                }
+            }
+            return stringVal;
         }
         else if(destinationType == Double.class) {
             return doubleValue;

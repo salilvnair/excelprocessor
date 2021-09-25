@@ -57,7 +57,7 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
                     switch (cell.getCachedFormulaResultType()) {
                         case Cell.CELL_TYPE_NUMERIC:
                             numericCellValue = cell.getNumericCellValue();
-                            if (DateUtil.isValidExcelDate(numericCellValue)) {
+                            if (DateUtil.isCellDateFormatted(cell) && DateUtil.isValidExcelDate(numericCellValue)) {
                                 cellValue = DateUtil.getJavaDate(numericCellValue);
                                 cellInfo.setCellType(Date.class);
                                 cellInfo.setCellTypeString(CellInfo.CELL_TYPE_DATE);

@@ -41,6 +41,7 @@ public class ExcelSheetClassGenerator {
         }
         AnnotationUtil.changeValue(sheet, "value", sheetInfo.name());
         AnnotationUtil.changeValue(sheet, "headerRowAt", sheetInfo.headerRowAt());
+        AnnotationUtil.changeValue(sheet, "valueRowAt", sheetInfo.valueRowAt());
         AnnotationUtil.changeValue(sheet, "headerRowEndsAt", sheetInfo.headerRowEndsAt());
         AnnotationUtil.changeValue(sheet, "headerColumnAt", sheetInfo.headerColumnAt());
         AnnotationUtil.changeValue(sheet, "headerColumnEndsAt", sheetInfo.headerColumnEndsAt());
@@ -77,10 +78,10 @@ public class ExcelSheetClassGenerator {
             hasDuplicateHeaderString=", duplicateHeaders=true";
         }
         if(vertical) {
-            sb.append("@Sheet(value=\"").append(sheetName).append("\"").append(", vertical=true").append(hasDuplicateHeaderString).append(", headerRowAt=").append(headerRowNumber).append(", headerColumnAt=\"").append(headerColumn).append("\")\n");
+            sb.append("@Sheet(value=\"").append(sheetName).append("\"").append(", vertical=true").append(hasDuplicateHeaderString).append(", headerRowAt=").append(headerRowNumber).append(", valueRowAt=").append(sheetInfo.valueRowAt()).append(", headerColumnAt=\"").append(headerColumn).append("\")\n");
         }
         else {
-            sb.append("@Sheet(value=\"").append(sheetName).append("\"").append(hasDuplicateHeaderString).append(", headerRowAt=").append(headerRowNumber).append(", headerColumnAt=\"").append(headerColumn).append("\")\n");
+            sb.append("@Sheet(value=\"").append(sheetName).append("\"").append(hasDuplicateHeaderString).append(", headerRowAt=").append(headerRowNumber).append(", valueRowAt=").append(sheetInfo.valueRowAt()).append(", headerColumnAt=\"").append(headerColumn).append("\")\n");
         }
         String parentBaseSheet = "BaseSheet";
         sb.append("public class ").append(className).append("Sheet extends ").append(parentBaseSheet).append(" {\n");
@@ -88,6 +89,7 @@ public class ExcelSheetClassGenerator {
             String sheetHeaderKey = javaFieldNameKeyedSheetHeaderMap.get(field);
             CellInfo cellInfo = headerKeyedCellInfoMap.get(sheetHeaderKey);
             String typeString = cellInfo.cellTypeString();
+            typeString = typeString == null ? CellInfo.CELL_TYPE_STRING : sheetInfo.allCellTypeToString() ? CellInfo.CELL_TYPE_STRING : typeString;
             if(containsDuplicateHeader(cellInfo) || allDuplicateHeaders.contains(sheetHeaderKey)) {
                 sheetHeaderKey = cellInfo.originalHeader();
                 if(vertical) {
@@ -117,6 +119,7 @@ public class ExcelSheetClassGenerator {
             String sheetHeaderKey = javaFieldNameKeyedSheetHeaderMap.get(field);
             CellInfo cellInfo = headerKeyedCellInfoMap.get(sheetHeaderKey);
             String typeString = cellInfo.cellTypeString();
+            typeString = typeString == null ? CellInfo.CELL_TYPE_STRING : sheetInfo.allCellTypeToString() ? CellInfo.CELL_TYPE_STRING : typeString;
             if(containsDuplicateHeader(cellInfo) && sheetInfo.useOriginalHeader()) {
                 sheetHeaderKey = cellInfo.originalHeader();
                 field = constructValidJavaVariableNameFromHeader(sheetHeaderKey);
