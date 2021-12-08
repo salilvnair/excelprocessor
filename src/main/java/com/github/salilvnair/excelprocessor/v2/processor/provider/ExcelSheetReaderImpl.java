@@ -1,26 +1,27 @@
 package com.github.salilvnair.excelprocessor.v2.processor.provider;
 
+import com.github.salilvnair.excelprocessor.v2.annotation.MultiOrientedSheet;
+import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
+import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
+import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReadException;
+import com.github.salilvnair.excelprocessor.v2.processor.concurrent.service.ExcelSheetReaderTaskService;
+import com.github.salilvnair.excelprocessor.v2.processor.concurrent.task.ExcelSheetReaderTask;
+import com.github.salilvnair.excelprocessor.v2.processor.concurrent.type.TaskType;
+import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
+import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetFactory;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.helper.ExcelSheetValidator;
+import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
-import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
-import com.github.salilvnair.excelprocessor.v2.annotation.MultiOrientedSheet;
-import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReadException;
-import com.github.salilvnair.excelprocessor.v2.processor.concurrent.service.ExcelSheetReaderTaskService;
-import com.github.salilvnair.excelprocessor.v2.processor.concurrent.task.ExcelSheetReaderTask;
-import com.github.salilvnair.excelprocessor.v2.processor.concurrent.type.TaskType;
-import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
-import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
-import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
-import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
-import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetFactory;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.helper.ExcelSheetValidator;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
 
 public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelSheetReader {
     private boolean concurrent = false;
@@ -89,7 +90,13 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
     }
 
     @Override
-    public Map<String, List<CellValidationMessage>> validate(Map<String, List<? extends BaseSheet>> excelData, ExcelSheetContext sheetContext) {
+    public List<CellValidationMessage> validate(Map<String, List<? extends BaseSheet>> excelData, ExcelSheetContext sheetContext) {
+        Map<String, List<CellValidationMessage>> validationMessageMap = _validate(null, excelData, sheetContext);
+        return validationMessageMap.entrySet().stream().flatMap(e -> e.getValue().stream()).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, List<CellValidationMessage>> validatedMap(Map<String, List<? extends BaseSheet>> excelData, ExcelSheetContext sheetContext) {
         return _validate(null, excelData, sheetContext);
     }
 

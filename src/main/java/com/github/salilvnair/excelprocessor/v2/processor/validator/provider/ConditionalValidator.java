@@ -1,8 +1,8 @@
 package com.github.salilvnair.excelprocessor.v2.processor.validator.provider;
 
+import com.github.salilvnair.excelprocessor.util.ObjectUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
-import com.github.salilvnair.excelprocessor.v2.helper.ObjectUtils;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.BaseCellValidator;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.task.helper.ExcelValidatorTaskExecutor;
@@ -23,10 +23,10 @@ public class ConditionalValidator extends BaseCellValidator {
         Sheet sheet = validatorContext.sheet();
         CellValidation cellValidation = field.getAnnotation(CellValidation.class);
         Object object = ExcelValidatorTaskExecutor.execute(cellValidation.condition(), sheet.excelTaskValidator(), validatorContext);
-        if(!ObjectUtils.isNull(object) && !ObjectUtils.isBoolean(object)) {
+        if(!ObjectUtil.isNull(object) && !ObjectUtil.isBoolean(object)) {
             this.conditionalMessage = object+"";
         }
-        return ObjectUtils.nonNullOrBooleanTrue(object);
+        return ObjectUtil.nonNullOrBooleanTrue(object);
     }
 
     @Override

@@ -9,10 +9,10 @@ import com.github.salilvnair.excelprocessor.v2.processor.concurrent.service.Exce
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.task.ExcelSheetReaderTask;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.type.TaskType;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
-import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.service.DynamicHeaderSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.service.StaticHeaderSheetReader;
+import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
@@ -201,7 +201,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         while(cIndex < maxColumnC) {
             Map<String, CellInfo> headerKeyCellInfoMap = orderedOrUnorderedMap(sheet);
             totalRows = sheet.valueRowEndsAt() > -1 ? sheet.valueRowEndsAt() - 1 : totalRows;
-            int valueRowBeginsAt = sheet.valueRowBeginsAt() > - 1 ? sheet.valueRowBeginsAt() -1 : -1;;
+            int valueRowBeginsAt = sheet.valueRowBeginsAt() > - 1 ? sheet.valueRowBeginsAt() -1 : -1;
             int valueRowIndex = valueRowBeginsAt > -1 ? valueRowBeginsAt: sheet.valueRowAt() > -1 ? sheet.valueRowAt() - 1 : headerRowIndex;
             for (int r = valueRowIndex; r <= totalRows; r++) {
                 if (ignoreHeaderRows.contains(r)) {

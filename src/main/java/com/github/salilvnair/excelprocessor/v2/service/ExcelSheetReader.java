@@ -25,7 +25,9 @@ public interface ExcelSheetReader {
 
   default List<CellValidationMessage> validate(List<? extends BaseSheet> sheetData, ExcelSheetContext sheetContext) { return Collections.emptyList();}
 
-  default Map<String, List<CellValidationMessage>> validate(Map<String, List<? extends BaseSheet>> excelData, ExcelSheetContext sheetContext) { return Collections.emptyMap();}
+  default List<CellValidationMessage> validate(Map<String, List<? extends BaseSheet>> excelData, ExcelSheetContext sheetContext) { return Collections.emptyList();}
+
+  default Map<String, List<CellValidationMessage>> validatedMap(Map<String, List<? extends BaseSheet>> excelData, ExcelSheetContext sheetContext) { return Collections.emptyMap();}
 
   default void readAndValidate(Class<? extends BaseSheet> clazz, ExcelSheetContext sheetContext) {}
 

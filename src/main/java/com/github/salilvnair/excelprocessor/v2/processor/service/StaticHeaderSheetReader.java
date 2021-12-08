@@ -44,7 +44,7 @@ public interface StaticHeaderSheetReader {
             headerString = ExcelSheetReaderUtil.cleanAndProcessSimilarHeaderString(headerString, clazz, cell);
             CellInfo cellInfo = excelCellInfoMap.get(headerString);
             if(cellInfo!=null) {
-                Object fieldValue = TypeConvertor.convert(cellInfo.value(), cellInfo.cellType(), field.getType());
+                Object fieldValue = TypeConvertor.convert(cellInfo.value(), cellInfo.cellType(), field.getType(), field);
                 ReflectionUtil.setField(classObject, field, fieldValue);
             }
         });
@@ -73,7 +73,7 @@ public interface StaticHeaderSheetReader {
             headerString = ExcelSheetReaderUtil.cleanAndProcessSimilarHeaderString(headerString, clazz, cell);
             CellInfo cellInfo = excelCellInfoMap.get(headerString);
             if(cellInfo!=null && !mergedColumnIndices.contains(cellInfo.columnIndex())) {
-                Object fieldValue = TypeConvertor.convert(cellInfo.value(), cellInfo.cellType(), field.getType());
+                Object fieldValue = TypeConvertor.convert(cellInfo.value(), cellInfo.cellType(), field.getType(), field);
                 ReflectionUtil.setField(classObject, field, fieldValue);
             }
         });
@@ -100,7 +100,7 @@ public interface StaticHeaderSheetReader {
                 headerString = ExcelSheetReaderUtil.cleanAndProcessSimilarHeaderString(headerString, fieldInstanceClass, cell);
                 CellInfo cellInfo = excelCellInfoMap.get(headerString);
                 if(cellInfo!=null) {
-                    Object fieldValue = TypeConvertor.convert(cellInfo.value(), cellInfo.cellType(), field.getType());
+                    Object fieldValue = TypeConvertor.convert(cellInfo.value(), cellInfo.cellType(), field.getType(), field);
                     ReflectionUtil.setField(fieldObject, field, fieldValue);
                 }
             });
@@ -129,7 +129,7 @@ public interface StaticHeaderSheetReader {
                 headerString = ExcelSheetReaderUtil.cleanAndProcessSimilarHeaderString(headerString, clazz, cell);
                 CellInfo cellInfo = excelCellInfoMap.get(headerString);
                 if(cellInfo!=null) {
-                    Object fieldValue = TypeConvertor.convert(cellInfo.value(), cellInfo.cellType(), field.getType());
+                    Object fieldValue = TypeConvertor.convert(cellInfo.value(), cellInfo.cellType(), field.getType(), field);
                     ReflectionUtil.setField(classObject, field, fieldValue);
                 }
                 if(section) {

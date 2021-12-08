@@ -1,14 +1,14 @@
 package com.github.salilvnair.excelprocessor.v2.processor.validator.core;
 
+import com.github.salilvnair.excelprocessor.util.ObjectUtil;
 import com.github.salilvnair.excelprocessor.util.ReflectionUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.*;
-import com.github.salilvnair.excelprocessor.v2.helper.ObjectUtils;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
-import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.type.ValidatorType;
+import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
 
 import java.lang.reflect.Field;
@@ -101,29 +101,29 @@ public abstract class BaseCellValidator extends AbstractExcelValidator {
     }
 
     protected boolean allowNullOrAllowEmptyCheck(Object fieldValue, AllowedValues allowedValues) {
-        if(allowedValues.allowNull() && ObjectUtils.isNull(fieldValue)) {
+        if(allowedValues.allowNull() && ObjectUtil.isNull(fieldValue)) {
             return true;
         }
         else {
-            return allowedValues.allowEmpty() && (!ObjectUtils.isNull(fieldValue) && ObjectUtils.isEmptyString(fieldValue));
+            return allowedValues.allowEmpty() && (!ObjectUtil.isNull(fieldValue) && ObjectUtil.isEmptyString(fieldValue));
         }
     }
 
     protected boolean allowNullOrAllowEmptyCheck(Object fieldValue, ConditionallyAllowedValues conditionallyAllowedValues) {
-        if(conditionallyAllowedValues.allowNull() && ObjectUtils.isNull(fieldValue)) {
+        if(conditionallyAllowedValues.allowNull() && ObjectUtil.isNull(fieldValue)) {
             return true;
         }
         else {
-            return conditionallyAllowedValues.allowEmpty() && (!ObjectUtils.isNull(fieldValue) && ObjectUtils.isEmptyString(fieldValue));
+            return conditionallyAllowedValues.allowEmpty() && (!ObjectUtil.isNull(fieldValue) && ObjectUtil.isEmptyString(fieldValue));
         }
     }
 
     protected boolean allowNullOrAllowEmptyCheck(Object fieldValue, CellValidation cellValidation) {
-        if(cellValidation.allowNull() && ObjectUtils.isNull(fieldValue)) {
+        if(cellValidation.allowNull() && ObjectUtil.isNull(fieldValue)) {
             return true;
         }
         else {
-            return cellValidation.allowEmpty() && (!ObjectUtils.isNull(fieldValue) && ObjectUtils.isEmptyString(fieldValue));
+            return cellValidation.allowEmpty() && (!ObjectUtil.isNull(fieldValue) && ObjectUtil.isEmptyString(fieldValue));
         }
     }
 }

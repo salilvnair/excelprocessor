@@ -1,13 +1,11 @@
 package com.github.salilvnair.excelprocessor.v2.processor.helper;
 
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
-import com.github.salilvnair.excelprocessor.v1.reflect.constant.ExcelValidatorConstant;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.processor.constant.SheetProcessingCommonConstant;
 import com.github.salilvnair.excelprocessor.v2.processor.context.BaseExcelSheetContext;
-import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
@@ -15,8 +13,6 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -76,7 +72,7 @@ public class ExcelSheetReaderUtil {
                 Set<Field> fields = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
                 for(Field field:fields) {
                     Cell cell = field.getAnnotation(Cell.class);
-                    if(!ExcelValidatorConstant.EMPTY_STRING.equals(cell.value())
+                    if(StringUtils.isNotEmpty(cell.value())
                             && cell.value().equals(headerString)) {
                         if(sheet.vertical()) {
                             if((cell.row()-1) == rowIndex) {
@@ -108,7 +104,7 @@ public class ExcelSheetReaderUtil {
     public static String processSimilarHeaderString(Sheet sheet, String headerString, List<Cell> cells, int columnIndex, int rowIndex) {
         if(sheet.sectional()) {
             for(Cell cell:cells) {
-                if(!ExcelValidatorConstant.EMPTY_STRING.equals(cell.value())
+                if(StringUtils.isNotEmpty(cell.value())
                         && cell.value().equals(headerString)) {
                     if(sheet.vertical()) {
                         if((cell.row()-1) == rowIndex) {
@@ -168,16 +164,12 @@ public class ExcelSheetReaderUtil {
 
     public static String cleanAndProcessSimilarHeaderString(String headerString, Class<? extends BaseSheet> clazz, int c, int r, List<String> headerStringList) {
         headerString = cleanHeaderString(headerString);
-        if(headerStringList!=null && !headerStringList.isEmpty() && headerStringList.contains(headerString)) {
-            headerString = processSimilarHeaderString(headerString, clazz, c, r);
-        }
+        headerString = processSimilarHeaderString(headerString, clazz, c, r);
         return headerString;
     }
 
     public static String processSimilarHeaderString(String headerString, Class<? extends BaseSheet> clazz, int c, int r, List<String> headerStringList) {
-        if(headerStringList!=null && !headerStringList.isEmpty() && headerStringList.contains(headerString)) {
-            headerString = processSimilarHeaderString(headerString, clazz, c, r);
-        }
+        headerString = processSimilarHeaderString(headerString, clazz, c, r);
         return headerString;
     }
 

@@ -1,7 +1,11 @@
 package com.github.salilvnair.excelprocessor.v2.helper;
 
+import com.github.salilvnair.excelprocessor.util.DateParsingUtil;
+import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
+
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -29,6 +33,37 @@ public class TypeConvertor {
         }
         else if(value instanceof Number) {
             convertedValue = convertNumber(value, sourceType, destinationType);
+        }
+        return convertedValue;
+    }
+
+    public static Object convert(Object value, Type sourceType, Type destinationType, Field cellField) {
+        Object convertedValue = value;
+        Cell cell = cellField.getAnnotation(Cell.class);
+        if(cell!=null && sourceType==Date.class) {
+            if(cell.dateString() || cell.dateTimeString() || destinationType == String.class) {
+                convertedValue = resolveDateOrDateTimeString(value, sourceType, destinationType, cell, cellField);
+                return convertedValue;
+            }
+        }
+        if(value instanceof Double && destinationType==Date.class) {
+            convertedValue = DateUtil.getJavaDate((Double) value);
+        }
+        else if(value instanceof Number) {
+            convertedValue = convertNumber(value, sourceType, destinationType);
+        }
+        return convertedValue;
+    }
+
+    private static Object resolveDateOrDateTimeString(Object value, Type sourceType, Type destinationType, Cell cell, Field cellField) {
+        Object convertedValue = value;
+        if(cell.dateString() || destinationType == String.class) {
+            DateParsingUtil.DateFormat dateFormat = cell.dateFormat();
+            convertedValue = DateParsingUtil.getDesiredDateFormat(dateFormat, (Date)value);
+        }
+        else if(cell.dateTimeString()) {
+            DateParsingUtil.DateTimeFormat dateTimeFormat = cell.dateTimeFormat();
+            convertedValue = DateParsingUtil.getDesiredDateTimeFormat(dateTimeFormat, (Date)value);
         }
         return convertedValue;
     }

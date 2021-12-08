@@ -16,7 +16,6 @@ public class SheetInfo {
     private String headerColumnEndsAt="";
     private int totalRows;
     private int totalColumns;
-    private int valueRowAt=2;
     private int valueRowIndex;
     private int valueColumnIndex;
     private List<CellInfo> cells;
@@ -159,73 +158,60 @@ public class SheetInfo {
         this.headerColumnEndsAt = headerColumnEndsAt;
     }
 
-    public int valueRowAt() {
-        return valueRowAt;
-    }
-
-    public void setValueRowAt(int valueRowAt) {
-        this.valueRowAt = valueRowAt;
-    }
-
     public static class SheetInfoBuilder {
         private final SheetInfo sheetInfo =  new SheetInfo();
 
-        public SheetInfo.SheetInfoBuilder name(String sheetName) {
+        public SheetInfoBuilder name(String sheetName) {
             sheetInfo.setName(sheetName);
             return this;
         }
 
-        public SheetInfo.SheetInfoBuilder headerRowAt(int headerRowAt) {
+        public SheetInfoBuilder headerRowAt(int headerRowAt) {
             sheetInfo.setHeaderRowAt(headerRowAt);
             return this;
         }
 
-        public SheetInfo.SheetInfoBuilder valueRowAt(int valueRowAt) {
-            sheetInfo.setValueRowAt(valueRowAt);
-            return this;
-        }
-
-        public SheetInfo.SheetInfoBuilder headerRowEndsAt(int headerRowEndsAt) {
+        public SheetInfoBuilder headerRowEndsAt(int headerRowEndsAt) {
             sheetInfo.setHeaderRowEndsAt(headerRowEndsAt);
             return this;
         }
 
-        public SheetInfo.SheetInfoBuilder headerColumnAt(String headerColumnAt) {
+        public SheetInfoBuilder headerColumnAt(String headerColumnAt) {
             sheetInfo.setHeaderColumnAt(headerColumnAt);
             return this;
         }
 
-        public SheetInfo.SheetInfoBuilder headerColumnEndsAt(String headerColumnEndsAt) {
+        public SheetInfoBuilder headerColumnEndsAt(String headerColumnEndsAt) {
             sheetInfo.setHeaderColumnEndsAt(headerColumnEndsAt);
             return this;
         }
 
-        public SheetInfo.SheetInfoBuilder vertical() {
+        public SheetInfoBuilder vertical() {
             sheetInfo.setVertical(true);
             return this;
         }
 
-        public SheetInfo.SheetInfoBuilder sectional() {
+        public SheetInfoBuilder sectional() {
             sheetInfo.setSectional(true);
             return this;
         }
 
-        public SheetInfo.SheetInfoBuilder useOriginalHeader() {
+        public SheetInfoBuilder useOriginalHeader() {
             sheetInfo.setUseOriginalHeader(true);
             return this;
         }
 
-        public SheetInfo.SheetInfoBuilder skipGettersAndSetters() {
+        public SheetInfoBuilder skipGettersAndSetters() {
             sheetInfo.setSkipGettersAndSetters(true);
             return this;
         }
 
-        public SheetInfo.SheetInfoBuilder allCellTypeToString() {
+        public SheetInfoBuilder allCellTypeToString() {
             sheetInfo.setAllCellTypeToString(true);
             return this;
         }
 
-        public SheetInfo.SheetInfoBuilder ignoreHeaderPatterns(String... pattern) {
+        public SheetInfoBuilder ignoreHeaderPatterns(String... pattern) {
             List<String> ignoreHeaderPatterns = Arrays.stream(pattern).collect(Collectors.toList());
             sheetInfo.setIgnoreHeaderPatterns(ignoreHeaderPatterns);
             return this;

@@ -1,9 +1,9 @@
 package com.github.salilvnair.excelprocessor.v2.processor.validator.provider;
 
+import com.github.salilvnair.excelprocessor.util.ObjectUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.AllowedValues;
 import com.github.salilvnair.excelprocessor.v2.annotation.ConditionallyAllowedValues;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
-import com.github.salilvnair.excelprocessor.v2.helper.ObjectUtils;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.BaseCellValidator;
@@ -79,7 +79,7 @@ public class AllowedValueValidator extends BaseCellValidator {
     private boolean satisfiesValidValueCondition(String condition, CellValidatorContext validatorContext) {
         Sheet sheet = validatorContext.sheet();
         Object object = ExcelValidatorTaskExecutor.execute(condition, sheet.excelTaskValidator(), validatorContext);
-        return ObjectUtils.isBoolean(object) && (Boolean) object;
+        return ObjectUtil.isBoolean(object) && (Boolean) object;
     }
 
     private boolean violatesAllowedValues(String[] allowedValues, String dataSetKey, int[] range, CellValidatorContext validatorContext, String fieldValue) {

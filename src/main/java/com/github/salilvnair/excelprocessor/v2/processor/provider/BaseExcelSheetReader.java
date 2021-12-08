@@ -31,7 +31,7 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
                 break;
             case Cell.CELL_TYPE_NUMERIC:
                 double numericCellValue = cell.getNumericCellValue();
-                if(DateUtil.isCellDateFormatted(cell)) {
+                if(DateUtil.isCellDateFormatted(cell) && DateUtil.isValidExcelDate(numericCellValue)) {
                     cellValue = cell.getDateCellValue();
                     cellInfo.setCellType(Date.class);
                     cellInfo.setCellTypeString(CellInfo.CELL_TYPE_DATE);
@@ -79,7 +79,7 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
                 switch (formulaEvaluatedCellValue.getCellType()) {
                     case Cell.CELL_TYPE_NUMERIC:
                         numericCellValue = formulaEvaluatedCellValue.getNumberValue();
-                        if(DateUtil.isValidExcelDate(numericCellValue)) {
+                        if(DateUtil.isCellDateFormatted(cell) && DateUtil.isValidExcelDate(numericCellValue)) {
                             cellValue = DateUtil.getJavaDate(numericCellValue);
                             cellInfo.setCellType(Date.class);
                             cellInfo.setCellTypeString(CellInfo.CELL_TYPE_DATE);

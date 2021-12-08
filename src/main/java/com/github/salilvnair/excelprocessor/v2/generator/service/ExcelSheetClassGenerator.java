@@ -1,7 +1,5 @@
 package com.github.salilvnair.excelprocessor.v2.generator.service;
 
-import java.util.*;
-import java.util.stream.Collectors;
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
@@ -13,6 +11,9 @@ import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.sheet.DynamicHeaderSheet;
 import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
 import com.github.salilvnair.excelprocessor.v2.type.SheetInfo;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -41,7 +42,6 @@ public class ExcelSheetClassGenerator {
         }
         AnnotationUtil.changeValue(sheet, "value", sheetInfo.name());
         AnnotationUtil.changeValue(sheet, "headerRowAt", sheetInfo.headerRowAt());
-        AnnotationUtil.changeValue(sheet, "valueRowAt", sheetInfo.valueRowAt());
         AnnotationUtil.changeValue(sheet, "headerRowEndsAt", sheetInfo.headerRowEndsAt());
         AnnotationUtil.changeValue(sheet, "headerColumnAt", sheetInfo.headerColumnAt());
         AnnotationUtil.changeValue(sheet, "headerColumnEndsAt", sheetInfo.headerColumnEndsAt());
@@ -78,10 +78,10 @@ public class ExcelSheetClassGenerator {
             hasDuplicateHeaderString=", duplicateHeaders=true";
         }
         if(vertical) {
-            sb.append("@Sheet(value=\"").append(sheetName).append("\"").append(", vertical=true").append(hasDuplicateHeaderString).append(", headerRowAt=").append(headerRowNumber).append(", valueRowAt=").append(sheetInfo.valueRowAt()).append(", headerColumnAt=\"").append(headerColumn).append("\")\n");
+            sb.append("@Sheet(value=\"").append(sheetName).append("\"").append(", vertical=true").append(hasDuplicateHeaderString).append(", headerRowAt=").append(headerRowNumber).append(", headerColumnAt=\"").append(headerColumn).append("\")\n");
         }
         else {
-            sb.append("@Sheet(value=\"").append(sheetName).append("\"").append(hasDuplicateHeaderString).append(", headerRowAt=").append(headerRowNumber).append(", valueRowAt=").append(sheetInfo.valueRowAt()).append(", headerColumnAt=\"").append(headerColumn).append("\")\n");
+            sb.append("@Sheet(value=\"").append(sheetName).append("\"").append(hasDuplicateHeaderString).append(", headerRowAt=").append(headerRowNumber).append(", headerColumnAt=\"").append(headerColumn).append("\")\n");
         }
         String parentBaseSheet = "BaseSheet";
         sb.append("public class ").append(className).append("Sheet extends ").append(parentBaseSheet).append(" {\n");

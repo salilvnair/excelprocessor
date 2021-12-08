@@ -103,7 +103,7 @@ public class MergedHeaderHorizontalSheetReader extends HorizontalSheetReader {
             processedDuplicateHeaderKeyedOriginalHeaderMap.put(processSimilarHeaderString, headerString);
             headerStringList.add(processSimilarHeaderString);
         }
-        int valueRowBeginsAt = context.valueRowBeginsAt() > -1 ? context.valueRowBeginsAt() - 1 : sheet.valueRowBeginsAt() > - 1 ? sheet.valueRowBeginsAt() -1 : -1;;
+        int valueRowBeginsAt = context.valueRowBeginsAt() > -1 ? context.valueRowBeginsAt() - 1 : sheet.valueRowBeginsAt() > - 1 ? sheet.valueRowBeginsAt() -1 : -1;
         int valueRowIndex = valueRowBeginsAt > -1 ? valueRowBeginsAt: sheet.valueRowAt() > -1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int valueEndsAt = context.valueRowEndsAt() > -1 ? context.valueRowEndsAt() - 1 : sheet.valueRowEndsAt() > - 1 ? sheet.valueRowEndsAt() - 1 : -1;
         totalRows = valueEndsAt > -1 ? valueEndsAt : totalRows;
