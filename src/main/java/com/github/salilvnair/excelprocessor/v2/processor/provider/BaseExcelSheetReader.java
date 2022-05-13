@@ -102,19 +102,18 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
     }
 
     protected void extractCellPropertiesAndSetCellInfo(Workbook workbook, Cell cell, CellInfo cellInfo) {
-        Color fcolor = cell.getCellStyle().getFillForegroundColorColor();
-        Color bcolor = cell.getCellStyle().getFillBackgroundColorColor();
-        cellInfo.setBackgroundColor(bcolor);
-        cellInfo.setForegroundColor(fcolor);
-        if(fcolor!=null) {
-            extractColorPropertiesAndSetCellInfo(fcolor, cellInfo, false);
-        }
-        if(bcolor!=null) {
-            extractColorPropertiesAndSetCellInfo(bcolor, cellInfo, true);
-        }
+        Color fgColor = cell.getCellStyle().getFillForegroundColorColor();
+        Color bgColor = cell.getCellStyle().getFillBackgroundColorColor();
+        cellInfo.setBackgroundColor(bgColor);
+        cellInfo.setForegroundColor(fgColor);
+        extractColorPropertiesAndSetCellInfo(fgColor, cellInfo, false);
+        extractColorPropertiesAndSetCellInfo(bgColor, cellInfo, true);
     }
 
     private void extractColorPropertiesAndSetCellInfo(Color color, CellInfo cellInfo, boolean background) {
+        if(color == null) {
+            return;
+        }
         String hex = null;
         short[] rgb =  null;
         if (color instanceof XSSFColor) {
@@ -130,7 +129,7 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
         }
         else if (color instanceof HSSFColor) {
             if (! (color instanceof HSSFColor.AUTOMATIC))
-            hex = ((HSSFColor) color).getHexString();
+                hex = ((HSSFColor) color).getHexString();
             rgb = ((HSSFColor) color).getTriplet();
         }
         if (background) {

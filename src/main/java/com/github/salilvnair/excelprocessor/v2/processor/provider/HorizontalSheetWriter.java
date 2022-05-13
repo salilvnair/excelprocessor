@@ -6,6 +6,7 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetWriterUtil;
+import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -27,20 +28,21 @@ public class HorizontalSheetWriter extends BaseExcelSheetWriter {
         org.apache.poi.ss.usermodel.Sheet workbookSheet = workbook.createSheet(sheet.value());
         List<Field> cells = new ArrayList<>(cellFields);
         Row row = null;
-        for (int r = 0; r < 1; r++) {
-            row = workbookSheet.createRow(r);
-            for (int c = 0; c < cellFields.size(); c++) {
-                Field cellField = cells.get(c);
-                Cell cell = cellField.getAnnotation(Cell.class);
-                Object fieldValue = cell.value();
-                org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
-                writeDataToCell(rowCell, fieldValue);
-            }
-        }
-        for (int r = 0; r < sheetData.size(); r++) {
+        writeDataToHeader(cellFields, workbookSheet, cells, sheet, context);
+        writeDataToBody(sheetData, cellFields, workbookSheet, cells, sheet, context);
+        context.setWorkbook(workbook);
+    }
+
+    private void writeDataToBody(List<? extends BaseSheet> sheetData, Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, List<Field> cells, Sheet sheet, ExcelSheetWriterContext context) {
+        Row row;
+        int valueRowIndex = sheet.valueRowAt() - 1;
+        int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
+        int valueColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.valueColumnAt())  - 1;
+        valueColumnIndex = valueColumnIndex != -1 ? valueColumnIndex : headerColumnIndex + 1;
+        for (int r = valueRowIndex; r < sheetData.size(); r++) {
             BaseSheet sheetDataObj = sheetData.get(r);
             row = workbookSheet.createRow(r+1);
-            for (int c = 0; c < cellFields.size(); c++) {
+            for (int c = valueColumnIndex; c < cellFields.size(); c++) {
                 Field cellField = cells.get(c);
                 Cell cell = cellField.getAnnotation(Cell.class);
                 Object fieldValue = ReflectionUtil.getFieldValue(sheetDataObj, cellField);
@@ -48,6 +50,25 @@ public class HorizontalSheetWriter extends BaseExcelSheetWriter {
                 writeDataToCell(rowCell, fieldValue);
             }
         }
-        context.setWorkbook(workbook);
+    }
+
+    private void writeDataToHeader(Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, List<Field> cells, Sheet sheet, ExcelSheetWriterContext context) {
+        Row row;
+        int headerRowIndex = sheet.headerRowAt() - 1;
+        int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
+        if(context.template() != null) {
+            row = context.template().getSheet(sheet.value()).getRow(headerRowIndex);
+        }
+        else {
+            row = workbookSheet.createRow(headerRowIndex);
+        }
+
+        for (int c = headerColumnIndex; c < cellFields.size(); c++) {
+            Field cellField = cells.get(c);
+            Cell cell = cellField.getAnnotation(Cell.class);
+            Object fieldValue = cell.value();
+            org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
+            writeDataToCell(rowCell, fieldValue);
+        }
     }
 }

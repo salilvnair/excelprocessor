@@ -18,4 +18,12 @@ public interface ExcelSheetWriter {
     default <T extends BaseSheet> Workbook workbook(List<T> sheetData, ExcelSheetContext sheetContext) { return null;}
 
     default Workbook workbook(Map<String, List<? extends BaseSheet>> sheets, ExcelSheetContext sheetContext) {return null;}
+
+    static  int toIndentNumber(String name) {
+        return ExcelSheetReader.toIndentNumber(name);
+    }
+
+    static String toIndentName(int number) {
+        return ExcelSheetReader.toIndentName(number);
+    }
 }
