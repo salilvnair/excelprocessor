@@ -1,9 +1,11 @@
 package com.github.salilvnair.excelprocessor.v2.processor.provider;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import java.util.*;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.processor.context.BaseExcelSheetContext;
-
-import java.util.*;
 
 /**
  * @author Salil V Nair
@@ -53,5 +55,19 @@ public abstract class BaseExcelProcessor {
             set = new HashSet<>();
         }
         return set;
+    }
+    
+    public static boolean rowIsEmpty(Row row) {
+        boolean isEmpty = true;
+        DataFormatter dataFormatter = new DataFormatter();
+        if (row != null) {
+            for (Cell cell : row) {
+                if (dataFormatter.formatCellValue(cell).trim().length() > 0) {
+                    isEmpty = false;
+                    break;
+                }
+            }
+        }
+        return isEmpty;
     }
 }
