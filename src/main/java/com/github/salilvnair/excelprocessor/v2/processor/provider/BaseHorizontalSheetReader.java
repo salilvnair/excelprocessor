@@ -173,7 +173,7 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         for (int r = valueRowIndex ; r <= totalRows; r++) {
             Map<String, CellInfo> headerKeyCellInfoMap = orderedOrUnorderedMap(sheet);
             Row row = workbookSheet.getRow(r);
-            if(row == null){
+            if(row == null  || rowIsEmpty(row, headerColumnIndex, lastCellNum)){
                 continue;
             }
             for (int c = headerColumnIndex; c < lastCellNum; c++) {
