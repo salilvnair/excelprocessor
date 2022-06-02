@@ -151,6 +151,45 @@ public interface StaticHeaderSheetReader {
         return classObject;
     }
 
+    static BaseSheet cellValueResolver(Class<?> clazz, int rowOrColumnIndexKey, Map<String, CellInfo> excelCellInfoMap, boolean section, Set<String> processedHeader)  throws InstantiationException, IllegalAccessException {
+        BaseSheet classObject = clazz.asSubclass(BaseSheet.class).newInstance();
+        Sheet sheet = clazz.getAnnotation(Sheet.class);
+        if(sheet.vertical()) {
+            classObject.setColumnIndex(rowOrColumnIndexKey);
+            classObject.setColumn(ExcelSheetReader.toIndentName(rowOrColumnIndexKey + 1));
+        }
+        else {
+            classObject.setRowIndex(rowOrColumnIndexKey);
+            classObject.setRow(rowOrColumnIndexKey+1);
+        }
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            if (field.getAnnotation(Cell.class) != null) {
+                Cell cell = field.getAnnotation(Cell.class);
+                String headerString = cell.value();
+                String headerStringKey = excelCellInfoMap.keySet().stream().filter(key -> !processedHeader.contains(key) && key.contains(headerString)).findFirst().orElse(null);
+                if(headerStringKey != null ) {
+                    processedHeader.add(headerStringKey);
+                }
+                else  {
+                    headerStringKey = headerString;
+                }
+                CellInfo cellInfo = excelCellInfoMap.get(headerStringKey);
+                if(cellInfo!=null) {
+                    Object fieldValue = TypeConvertor.convert(cellInfo.value(), cellInfo.cellType(), field.getType(), field);
+                    ReflectionUtil.setField(classObject, field, fieldValue);
+                }
+            }
+            else if (field.getAnnotation(Section.class) != null) {
+                BaseSheet fieldValue = cellValueResolver(field.getType(), rowOrColumnIndexKey, excelCellInfoMap, true, processedHeader);
+                classObject.cells().putAll(fieldValue.cells());
+                ReflectionUtil.setField(classObject, field, fieldValue);
+            }
+        }
+        return classObject;
+    }
+
+
     static Set<Field> findAllSectionFields(Class<?> clazz) {
         Set<Field> allSectionFields = new HashSet<>();
         Set<Field> sectionFields = AnnotationUtil.getAnnotatedFields(clazz, Section.class);

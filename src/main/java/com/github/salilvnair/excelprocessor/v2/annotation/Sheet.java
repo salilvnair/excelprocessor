@@ -32,6 +32,7 @@ public @interface Sheet {
 	int headerRowEndsAt() default -1;
 	boolean mergedHeaders() default false;
 	boolean sectional() default false;
+	boolean ordered() default false;
 	int mergedHeaderRowAt() default -1;
 	String headerRowBeginsAtText() default "";
 	String headerRowEndsAtText() default "";

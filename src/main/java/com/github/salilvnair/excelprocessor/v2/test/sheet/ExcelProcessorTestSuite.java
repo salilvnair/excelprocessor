@@ -58,7 +58,7 @@ public class ExcelProcessorTestSuite {
         builder.workbook(workbook);
         StopWatch.start();
         ExcelSheetContext sheetContext = builder.build();
-        List<CollegeSheet> sheetData = reader.read(CollegeSheet.class, sheetContext);
+        List<SectionSheet> sheetData = reader.read(SectionSheet.class, sheetContext);
         System.out.println(sheetData.size());
         System.out.println(sheetData.get(0).rowForegroundRgb());
         System.out.println(sheetData.get(1).rowForegroundRgb());
