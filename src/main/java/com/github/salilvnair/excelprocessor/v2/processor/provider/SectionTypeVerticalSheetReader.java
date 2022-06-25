@@ -177,8 +177,8 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
 
     private  Set<Field> populateSectionTextKeyedFieldMap(Map<String, Field> sectionEndingTextKeyedFieldMap, Map<String, Field> sectionBeginningTextKeyedFieldMap, Class<?> clazz) {
         Set<Field> sectionFields = StaticHeaderSheetReader.findAllSectionFields(clazz);
-        sectionBeginningTextKeyedFieldMap.putAll(sectionFields.stream().collect(Collectors.toMap(field -> field.getAnnotation(Section.class).sectionBeginningRowText(), field -> field)));
-        sectionEndingTextKeyedFieldMap.putAll(sectionFields.stream().collect(Collectors.toMap(field -> field.getAnnotation(Section.class).sectionEndingRowText(), field -> field)));
+        sectionBeginningTextKeyedFieldMap.putAll(sectionFields.stream().collect(Collectors.toMap(field -> field.getAnnotation(Section.class).beginningText(), field -> field)));
+        sectionEndingTextKeyedFieldMap.putAll(sectionFields.stream().collect(Collectors.toMap(field -> field.getAnnotation(Section.class).endingText(), field -> field)));
         return sectionFields;
     }
 
@@ -200,16 +200,16 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
             if(sectionBeginningTextKeyedFieldMap.containsKey(headerString)) {
                 //this index is begining of the section range
                 sectionRangeAddress.setSectionBeginningText(headerString);
-                sectionRangeAddress.setFirstRow(r);
-                sectionRangeAddress.setFirstColumn(headerColumnIndex);
+                sectionRangeAddress.setSectionBeginningRowIndex(r);
+                sectionRangeAddress.setSectionFirstColIndex(headerColumnIndex);
                 sectionBeginningTextKeyedFieldMap.remove(headerString);
                 sectionTextKeyedSectionRangeAddressMap.put(headerString, sectionRangeAddress);
             }
             else if(sectionEndingTextKeyedFieldMap.containsKey(headerString)) {
                 //this index is ending of the section range
                 sectionRangeAddress.setSectionEndingText(headerString);
-                sectionRangeAddress.setLastRow(r);
-                sectionRangeAddress.setLastColumn(headerColumnIndex);
+                sectionRangeAddress.setSectionEndingRowIndex(r);
+                sectionRangeAddress.setSectionLastColIndex(headerColumnIndex);
                 sectionBeginningTextKeyedFieldMap.remove(headerString);
                 sectionTextKeyedSectionRangeAddressMap.put(headerString, sectionRangeAddress);
             }
@@ -222,11 +222,11 @@ public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
                 .stream()
                 .map(sectionField -> {
                     Section sectionFieldAnnotation = sectionField.getAnnotation(Section.class);
-                    SectionRangeAddress sectionRangeAddress1 = sectionTextKeyedSectionRangeAddressMap.get(sectionFieldAnnotation.sectionBeginningRowText());
-                    SectionRangeAddress sectionRangeAddress2 = sectionTextKeyedSectionRangeAddressMap.get(sectionFieldAnnotation.sectionEndingRowText());
-                    sectionRangeAddress1.setSectionEndingText(sectionRangeAddress2.getSectionEndingText());
-                    sectionRangeAddress1.setLastColumn(sectionRangeAddress2.getLastColumn());
-                    sectionRangeAddress1.setLastRow(sectionRangeAddress2.getLastRow());
+                    SectionRangeAddress sectionRangeAddress1 = sectionTextKeyedSectionRangeAddressMap.get(sectionFieldAnnotation.beginningText());
+                    SectionRangeAddress sectionRangeAddress2 = sectionTextKeyedSectionRangeAddressMap.get(sectionFieldAnnotation.endingText());
+                    sectionRangeAddress1.setSectionEndingText(sectionRangeAddress2.sectionEndingText());
+                    sectionRangeAddress1.setSectionLastColIndex(sectionRangeAddress2.sectionLastColIndex());
+                    sectionRangeAddress1.setSectionEndingRowIndex(sectionRangeAddress2.sectionEndingRow());
                     return sectionRangeAddress1;
                 })
                 .collect(Collectors.toList());

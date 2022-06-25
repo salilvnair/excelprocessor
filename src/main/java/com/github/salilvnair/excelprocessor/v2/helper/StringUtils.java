@@ -1,5 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.helper;
 
+import java.util.Collection;
+
 /**
  * @author Salil V Nair
  */
@@ -32,5 +34,18 @@ public abstract class StringUtils {
 
     public static boolean hasLength(String str) {
         return (str != null && !str.isEmpty());
+    }
+
+    public static String findClosestMatch(Collection<String> collection, String target) {
+        int distance = Integer.MAX_VALUE;
+        String closest = null;
+        for (String compareObject : collection) {
+            int currentDistance = org.apache.commons.lang.StringUtils.getLevenshteinDistance(compareObject, target);
+            if(currentDistance < distance) {
+                distance = currentDistance;
+                closest = compareObject;
+            }
+        }
+        return closest;
     }
 }

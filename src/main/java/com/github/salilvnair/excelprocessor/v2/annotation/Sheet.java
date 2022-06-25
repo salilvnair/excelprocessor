@@ -1,12 +1,12 @@
 package com.github.salilvnair.excelprocessor.v2.annotation;
 
-import com.github.salilvnair.excelprocessor.v2.processor.validator.task.core.AbstractExcelTaskValidator;
-import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import com.github.salilvnair.excelprocessor.v2.processor.validator.task.core.AbstractExcelTaskValidator;
+import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -43,5 +43,6 @@ public @interface Sheet {
 	boolean duplicateHeaders() default false;
 	boolean dynamicHeaders() default false;
 	String userDefinedMessage() default "";
-	final class DefaultTaskValidator extends AbstractExcelTaskValidator {}
+	final class DefaultTaskValidator extends AbstractExcelTaskValidator {};
+    SectionHint[] sectionHints() default {};
 }

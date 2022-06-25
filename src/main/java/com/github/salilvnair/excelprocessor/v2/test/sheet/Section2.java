@@ -20,7 +20,7 @@ public class Section2 extends BaseSheet {
     private String landPhone;
     @Cell("Fax")
     private String fax;
-    @Section
+    @Section(beginningText = "Use this sub-section 2b", endingText = "End of sub-section 2b")
     private SubSection2 subSection2;
     @Cell("Age")
     private String section2Age;

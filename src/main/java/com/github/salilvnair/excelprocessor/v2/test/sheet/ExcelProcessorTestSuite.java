@@ -50,7 +50,7 @@ public class ExcelProcessorTestSuite {
     }
 
     private static List<? extends BaseSheet> sheetReader() throws Exception {
-        ExcelSheetReader reader = ExcelSheetReaderFactory.generate(true);
+        ExcelSheetReader reader = ExcelSheetReaderFactory.generate();
         ExcelSheetContext.ExcelSheetContextBuilder builder = ExcelSheetContext.builder();
         builder.fileName("ExcelProcessorTest1.xlsx");
         InputStream inputS = ExcelSheetReaderUtil.resourceStream(com.github.salilvnair.excelprocessor.v1.test.ExcelProcessorTestSuite.TEST_EXCEL_FOLDER, "ExcelProcessorTest1.xlsx");

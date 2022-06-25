@@ -9,6 +9,7 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.helper.TypeConvertor;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
+import com.github.salilvnair.excelprocessor.v2.processor.model.SectionRangeAddress;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
@@ -191,7 +192,7 @@ public interface StaticHeaderSheetReader {
 
 
     static Set<Field> findAllSectionFields(Class<?> clazz) {
-        Set<Field> allSectionFields = new HashSet<>();
+        Set<Field> allSectionFields = new LinkedHashSet<>();
         Set<Field> sectionFields = AnnotationUtil.getAnnotatedFields(clazz, Section.class);
         if(!sectionFields.isEmpty()) {
             sectionFields.forEach(sectionField -> allSectionFields.addAll(findAllSectionFields(sectionField.getType())));
@@ -201,7 +202,7 @@ public interface StaticHeaderSheetReader {
     }
 
     static Set<Field> findAllCellFields(Class<?> clazz) {
-        Set<Field> cellFields = new HashSet<>();
+        Set<Field> cellFields = new LinkedHashSet<>();
         Set<Field> topLevelCellFields = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
         Set<Field> sectionFields = AnnotationUtil.getAnnotatedFields(clazz, Section.class);
         if(!sectionFields.isEmpty()) {
