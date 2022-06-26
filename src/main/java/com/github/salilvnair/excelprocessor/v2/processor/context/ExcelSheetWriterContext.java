@@ -3,8 +3,6 @@ package com.github.salilvnair.excelprocessor.v2.processor.context;
 import lombok.*;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.io.File;
-
 /**
  * @author Salil V Nair
  */
@@ -17,7 +15,11 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
 
     private Workbook template;
 
+    private Workbook existingWorkbook;
+
     private boolean streamingWorkbook;
+
+    private boolean containsExistingWorkbook;
 
     public Workbook workbook() {
         return super.getWorkbook();
@@ -26,9 +28,15 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
     public boolean streamingWorkbook() {
         return streamingWorkbook;
     }
+    public boolean containsExistingWorkbook() {
+        return containsExistingWorkbook;
+    }
 
     public Workbook template() {
         return this.template;
+    }
+    public Workbook existingWorkbook() {
+        return this.existingWorkbook;
     }
 
 }

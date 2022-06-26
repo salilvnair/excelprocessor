@@ -3074,7 +3074,7 @@ public class ExcelProcessorUtil {
 				}
 			}
 		}
-		String predefinedMessage = !ExcelValidatorConstant.EMPTY_STRING.equals(predefined.messageDescription()) ? predefined.messageDescription():headerKey+" value doesn�t match with the dropdown list provided in the sheet at row["+ExcelHeaderConstant.ROW_NUM_PLACEHOLDER+"]";
+		String predefinedMessage = !ExcelValidatorConstant.EMPTY_STRING.equals(predefined.messageDescription()) ? predefined.messageDescription():headerKey+" value does not match with the dropdown list provided in the sheet at row["+ExcelHeaderConstant.ROW_NUM_PLACEHOLDER+"]";
 		if(!ExcelValidatorConstant.EMPTY_STRING.equals(predefined.messageDescription())) {
 			ExcelSheet excelSheet = getExcelSheetFromBaseExcelSheet(excelHeaderBean);
 			if(excelSheet!=null) {

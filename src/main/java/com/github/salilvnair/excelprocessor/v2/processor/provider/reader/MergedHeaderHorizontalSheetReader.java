@@ -4,7 +4,7 @@ import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.MergedCell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
-import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReadException;
+import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReaderException;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.service.StaticHeaderSheetReader;
@@ -160,7 +160,7 @@ public class MergedHeaderHorizontalSheetReader extends HorizontalSheetReader {
                     }
                     catch (Exception e) {
                         if(!context.suppressExceptions()) {
-                            throw new ExcelSheetReadException(e);
+                            throw new ExcelSheetReaderException(e);
                         }
                     }
                 });

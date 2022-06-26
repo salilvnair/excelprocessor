@@ -3,7 +3,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.provider.reader;
 import com.github.salilvnair.excelprocessor.v2.annotation.MultiOrientedSheet;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
-import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReadException;
+import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReaderException;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.service.ExcelSheetReaderTaskService;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.task.ExcelSheetReaderTask;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.type.TaskType;
@@ -119,7 +119,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
             }
             catch (ClassNotFoundException e) {
                 if(!sheetContext.suppressExceptions()) {
-                    throw new ExcelSheetReadException(e);
+                    throw new ExcelSheetReaderException(e);
                 }
             }
         }
@@ -153,7 +153,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
                 ExcelInfo excelInfoItr = _excelInfo(clazz, sheetContext);
                 if(excelInfoItr == null) {
                     if(!sheetContext.suppressExceptions()) {
-                        throw new ExcelSheetReadException("ExcelInfo is null."); //TODO v2: change to a constant
+                        throw new ExcelSheetReaderException("ExcelInfo is null."); //TODO v2: change to a constant
                     }
                 }
                 else {
@@ -162,7 +162,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
             }
             catch (ClassNotFoundException e) {
                 if(!sheetContext.suppressExceptions()) {
-                    throw new ExcelSheetReadException(e);
+                    throw new ExcelSheetReaderException(e);
                 }
             }
         }
@@ -213,7 +213,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
                 }
                 catch (ClassNotFoundException e) {
                     if(!context.suppressExceptions()) {
-                        throw new ExcelSheetReadException(e);
+                        throw new ExcelSheetReaderException(e);
                     }
                 }
             }
@@ -232,7 +232,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
             }
             catch (ClassNotFoundException e) {
                 if(!context.suppressExceptions()) {
-                    throw new ExcelSheetReadException(e);
+                    throw new ExcelSheetReaderException(e);
                 }
             }
             ExcelSheetReaderTask task = new ExcelSheetReaderTask(TaskType.READ_MULTIPLE_SHEETS.name(), null, service, context, clazz);
@@ -243,7 +243,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         }
         catch (InterruptedException e) {
             if(!context.suppressExceptions()) {
-                throw new ExcelSheetReadException(e);
+                throw new ExcelSheetReaderException(e);
             }
         }
         if(futureList!=null) {
@@ -255,7 +255,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
                 }
                 catch (InterruptedException | ExecutionException e) {
                     if(!context.suppressExceptions()) {
-                        throw new ExcelSheetReadException(e);
+                        throw new ExcelSheetReaderException(e);
                     }
                 }
             }
@@ -307,7 +307,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
             }
             catch (Exception e) {
                 if(!context.suppressExceptions()) {
-                    throw new ExcelSheetReadException(e);
+                    throw new ExcelSheetReaderException(e);
                 }
             }
         }

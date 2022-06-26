@@ -3,7 +3,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.provider.reader;
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
-import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReadException;
+import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReaderException;
 import com.github.salilvnair.excelprocessor.v2.helper.ConcurrentUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.service.ExcelSheetReaderTaskService;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.task.ExcelSheetReaderTask;
@@ -44,14 +44,14 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
     public void read(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context) {
         if(!validateWorkbook(context)) {
             if(!context.suppressExceptions()) {
-                throw new ExcelSheetReadException("Validation Failed");//TODO v2: change it to exception later on
+                throw new ExcelSheetReaderException("Validation Failed");//TODO v2: change it to exception later on
             }
             return;
         }
         Workbook workbook = ExcelSheetReaderUtil.extractWorkbook(context);
         if (workbook == null) {
             if(!context.suppressExceptions()) {
-                throw new ExcelSheetReadException("Workbook Null");//TODO v2: change it to exception later on
+                throw new ExcelSheetReaderException("Workbook Null");//TODO v2: change it to exception later on
             }
             return;
         }
@@ -86,14 +86,14 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
     ExcelInfo excelInfo(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context) {
         if(!validateWorkbook(context)) {
             if(!context.suppressExceptions()) {
-                throw new ExcelSheetReadException("Invalid workbook."); //TODO v2: change to a constant
+                throw new ExcelSheetReaderException("Invalid workbook."); //TODO v2: change to a constant
             }
             return null;
         }
         Workbook workbook = ExcelSheetReaderUtil.extractWorkbook(context);
         if (workbook == null) {
             if(!context.suppressExceptions()) {
-                throw new ExcelSheetReadException("Workbook is null."); //TODO v2: change to a constant
+                throw new ExcelSheetReaderException("Workbook is null."); //TODO v2: change to a constant
             }
             return null;
         }
@@ -108,7 +108,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         org.apache.poi.ss.usermodel.Sheet sheet = workbook.getSheet(sheetName);
         if(sheet == null) {
             if(!context.suppressExceptions()) {
-                throw new ExcelSheetReadException("Sheet '"+sheetName + "' is not present in the excel.");
+                throw new ExcelSheetReaderException("Sheet '"+sheetName + "' is not present in the excel.");
             }
             return null;
         }
@@ -262,7 +262,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
                     }
                     catch (Exception e) {
                         if(!context.suppressExceptions()) {
-                            throw new ExcelSheetReadException(e);
+                            throw new ExcelSheetReaderException(e);
                         }
                     }
                 });
@@ -272,7 +272,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         ExcelInfo excelInfo = excelInfo(clazz, context);
         if(excelInfo == null) {
             if(!context.suppressExceptions()) {
-                throw new ExcelSheetReadException("ExcelInfo is null."); //TODO v2: change to a constant
+                throw new ExcelSheetReaderException("ExcelInfo is null."); //TODO v2: change to a constant
             }
             return;
         }
@@ -314,7 +314,7 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
         }
         catch (InterruptedException | ExecutionException e) {
             if(!context.suppressExceptions()) {
-                throw new ExcelSheetReadException(e);
+                throw new ExcelSheetReaderException(e);
             }
         }
         executor.shutdown();

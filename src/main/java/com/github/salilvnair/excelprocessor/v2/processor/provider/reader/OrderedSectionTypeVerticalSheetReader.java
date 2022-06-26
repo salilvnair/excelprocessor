@@ -6,7 +6,7 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Section;
 import com.github.salilvnair.excelprocessor.v2.annotation.SectionHint;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
-import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReadException;
+import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReaderException;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.model.SectionRangeAddress;
@@ -190,7 +190,7 @@ public class OrderedSectionTypeVerticalSheetReader extends BaseVerticalSheetRead
                     }
                     catch (Exception e) {
                         if(!context.suppressExceptions()) {
-                            throw new ExcelSheetReadException(e);
+                            throw new ExcelSheetReaderException(e);
                         }
                     }
                 });
