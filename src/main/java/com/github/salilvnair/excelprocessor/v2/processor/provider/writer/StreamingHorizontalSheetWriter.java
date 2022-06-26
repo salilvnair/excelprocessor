@@ -31,6 +31,6 @@ public class StreamingHorizontalSheetWriter extends BaseHorizontalSheetWriter {
         writeDataToHeader(cellFields, sxssfSheet, cells, sheet, context);
         writeDataToBody(sheetData, cellFields, sxssfSheet, cells, sheet, context);
         context.setWorkbook(sxssfWorkbook);
-        context.setContainsStreamingWorkbook(true);
+        context.setStreamingWorkbook(true);
     }
 }
