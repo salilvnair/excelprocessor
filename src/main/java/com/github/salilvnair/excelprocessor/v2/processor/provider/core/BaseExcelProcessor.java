@@ -1,4 +1,4 @@
-package com.github.salilvnair.excelprocessor.v2.processor.provider;
+package com.github.salilvnair.excelprocessor.v2.processor.provider.core;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -70,4 +70,19 @@ public abstract class BaseExcelProcessor {
         }
         return isEmpty;
     }
+    
+    public static boolean rowIsEmpty(Row row, int headerColumnIndex, int lastCellNum) {
+        boolean isEmpty = true;
+        DataFormatter dataFormatter = new DataFormatter();
+        if (row != null) {
+            for (int c = headerColumnIndex; c < lastCellNum; c++) {
+                if (dataFormatter.formatCellValue(row.getCell(c)).trim().length() > 0) {
+                    isEmpty = false;
+                    break;
+                }
+            }
+        }
+        return isEmpty;
+    }
+    
 }

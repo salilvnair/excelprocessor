@@ -50,7 +50,7 @@ public class ExcelProcessorTestSuite {
     }
 
     private static List<? extends BaseSheet> sheetReader() throws Exception {
-        ExcelSheetReader reader = ExcelSheetReaderFactory.generate(true);
+        ExcelSheetReader reader = ExcelSheetReaderFactory.generate();
         ExcelSheetContext.ExcelSheetContextBuilder builder = ExcelSheetContext.builder();
         builder.fileName("ExcelProcessorTest1.xlsx");
         InputStream inputS = ExcelSheetReaderUtil.resourceStream(com.github.salilvnair.excelprocessor.v1.test.ExcelProcessorTestSuite.TEST_EXCEL_FOLDER, "ExcelProcessorTest1.xlsx");
@@ -58,7 +58,7 @@ public class ExcelProcessorTestSuite {
         builder.workbook(workbook);
         StopWatch.start();
         ExcelSheetContext sheetContext = builder.build();
-        List<CollegeSheet> sheetData = reader.read(CollegeSheet.class, sheetContext);
+        List<SectionSheet> sheetData = reader.read(SectionSheet.class, sheetContext);
         System.out.println(sheetData.size());
         System.out.println(sheetData.get(0).rowForegroundRgb());
         System.out.println(sheetData.get(1).rowForegroundRgb());

@@ -1,4 +1,4 @@
-package com.github.salilvnair.excelprocessor.v2.processor.provider;
+package com.github.salilvnair.excelprocessor.v2.processor.provider.writer;
 
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
 import com.github.salilvnair.excelprocessor.util.ReflectionUtil;

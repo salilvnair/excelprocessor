@@ -69,7 +69,7 @@ public class AnnotationUtil {
 		if (Object.class.equals(clazz)) {
 			return Collections.emptySet();
 		}
-		Set<Field> annotatedFields = new LinkedHashSet<Field>();
+		Set<Field> annotatedFields = new LinkedHashSet<>();
 		Field[] fields = clazz.getDeclaredFields();
 		for (Field field : fields) {
 			if (field.getAnnotation(annotation) != null) {

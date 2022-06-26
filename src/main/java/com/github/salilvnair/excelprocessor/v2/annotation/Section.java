@@ -11,6 +11,6 @@ public @interface Section {
 	String value() default "";
 	int headerRowBeginsAt() default -1;
 	int headerRowEndsAt() default -1;
-	String sectionBeginningRowText() default "";
-	String sectionEndingRowText() default "";
+	String beginningText() default "";
+	String endingText() default "";
  }

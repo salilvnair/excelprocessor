@@ -1,6 +1,6 @@
 package com.github.salilvnair.excelprocessor.v2.processor.factory;
 
-import com.github.salilvnair.excelprocessor.v2.processor.provider.ExcelSheetReaderImpl;
+import com.github.salilvnair.excelprocessor.v2.processor.provider.reader.ExcelSheetReaderImpl;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 
 /**

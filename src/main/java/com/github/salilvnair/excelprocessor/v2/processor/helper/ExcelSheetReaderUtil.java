@@ -123,6 +123,20 @@ public class ExcelSheetReaderUtil {
         return headerString;
     }
 
+    public static String processSimilarHeaderString( List<String> sheetHeaders, Sheet sheet, String headerString, int columnIndex, int rowIndex) {
+        if(sheet.sectional() && sheetHeaders.contains(headerString)) {
+            if(sheet.vertical()) {
+                int cellRow = rowIndex + 1;
+                return headerString+ SheetProcessingCommonConstant.UNDERSCORE+cellRow;
+            }
+            else {
+                String columnName = ExcelSheetReader.toIndentName(columnIndex+1);
+                return headerString+SheetProcessingCommonConstant.UNDERSCORE+columnName;
+            }
+        }
+        return headerString;
+    }
+
 
     public static String processSimilarHeaderString(String headerString, Class<?> clazz, Cell cell) {
         if(clazz.isAnnotationPresent(Sheet.class)) {
@@ -208,6 +222,7 @@ public class ExcelSheetReaderUtil {
         else {
             throw new IllegalArgumentException("The specified file is not Excel file");
         }
+        inputStream.close();
         return workbook;
     }
 
