@@ -101,6 +101,9 @@ public class ExcelSheetContext {
     }
 
     public ExcelSheetWriterContext writerContext() {
+        if(writerContext == null) {
+            writerContext = new ExcelSheetWriterContext();
+        }
         return writerContext;
     }
 

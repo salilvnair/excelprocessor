@@ -222,6 +222,7 @@ public class ExcelSheetReaderUtil {
         else {
             throw new IllegalArgumentException("The specified file is not Excel file");
         }
+        inputStream.close();
         return workbook;
     }
 

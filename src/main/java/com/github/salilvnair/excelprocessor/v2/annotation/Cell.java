@@ -1,6 +1,10 @@
 package com.github.salilvnair.excelprocessor.v2.annotation;
 
 import com.github.salilvnair.excelprocessor.util.DateParsingUtil;
+import com.github.salilvnair.excelprocessor.v1.reflect.type.PictureAnchorType;
+import com.github.salilvnair.excelprocessor.v1.reflect.type.PictureSourceType;
+import com.github.salilvnair.excelprocessor.v1.reflect.type.PictureType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -17,4 +21,24 @@ public @interface Cell {
 	String value() default "";
 	String column() default "";
 	int row() default -1;
+
+    boolean picture() default false;
+
+    PictureType pictureType() default PictureType.JPEG;
+
+    PictureSourceType pictureSource() default PictureSourceType.FILE_PATH;
+
+    PictureAnchorType pictureAnchorType() default PictureAnchorType.DONT_MOVE_AND_RESIZE;
+
+    double pictureResizeScale() default 1.0;
+
+    IndexedColors foregroundColor() default IndexedColors.AUTOMATIC;
+
+    IndexedColors backgroundColor() default IndexedColors.AUTOMATIC;
+
+    short fillPattern() default 1;
+
+    short borderStyle() default 0;
+
+    IndexedColors borderColor() default IndexedColors.AUTOMATIC;
 }

@@ -1,10 +1,8 @@
-package com.github.salilvnair.excelprocessor.v2.processor.provider;
+package com.github.salilvnair.excelprocessor.v2.processor.provider.reader;
 
 import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
-import com.github.salilvnair.excelprocessor.util.ListGenerator;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Section;
-import com.github.salilvnair.excelprocessor.v2.annotation.SectionHint;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReadException;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
@@ -22,13 +20,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * @author Salil V Nair
  */
-public class OrderedSectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
-    public OrderedSectionTypeVerticalSheetReader(boolean concurrent, int batchSize) {
+public class SectionTypeVerticalSheetReader extends BaseVerticalSheetReader {
+    public SectionTypeVerticalSheetReader(boolean concurrent, int batchSize) {
         super(concurrent, batchSize);
     }
 
@@ -62,22 +59,7 @@ public class OrderedSectionTypeVerticalSheetReader extends BaseVerticalSheetRead
         Set<Field> sheetCells = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
         List<String> annotatedHeaders = sheetCells.stream().map(cellField -> cellField.getAnnotation(Cell.class).value()).collect(Collectors.toList());
         extractSectionAnnotatedHeaders(clazz, annotatedHeaders);
-        Set<Field> sectionTypeCells = StaticHeaderSheetReader.findAllSectionFields(clazz);
-        Set<String> annotatedSectionBeginningEndingTexts = new HashSet<>();
-        sectionTypeCells.forEach(sectionTypeCell -> {
-            Section sectionTypeCellAnnotation = sectionTypeCell.getAnnotation(Section.class);
-            annotatedSectionBeginningEndingTexts.add(sectionTypeCellAnnotation.beginningText());
-            annotatedSectionBeginningEndingTexts.add(sectionTypeCellAnnotation.endingText());
-        });
-        Map<String, Integer> sectionRangeMap = new HashMap<>();
-        SectionHint[] sectionHints = sheet.sectionHints();
-        List<String> sectionStrings = sectionHints.length > 0 ? Arrays
-                                                                .stream(sectionHints)
-                                                                .map(sectionHint -> ListGenerator
-                                                                                        .immutable()
-                                                                                        .generate(sectionHint.beginningTextLike(), sectionHint.endingTextLike()))
-                                                                .flatMap(List::stream)
-                                                                .collect(Collectors.toList()) : Collections.emptyList();
+        List<Cell> allCells = StaticHeaderSheetReader.findAllCells(clazz);
         for (int r = headerRowIndex; r <= totalRows; r++) {
             Row row = workbookSheet.getRow(r);
             if(row == null){
@@ -97,13 +79,6 @@ public class OrderedSectionTypeVerticalSheetReader extends BaseVerticalSheetRead
             }
             String headerString = headerCell.getStringCellValue();
             headerString = ExcelSheetReaderUtil.cleanHeaderString(headerString);
-            if(!annotatedSectionBeginningEndingTexts.contains(headerString)) {
-                //these are the section headers which is not present in pojo mapping
-                if(sectionStrings.stream().anyMatch(headerString::contains)) {
-                    sectionRangeMap.put(headerString, r);
-                }
-            }
-
             if(!annotatedHeaders.contains(headerString) && !sheet.dynamicHeaders()) {
                 ignoreHeaderRows.add(r);
                 continue;
@@ -116,16 +91,13 @@ public class OrderedSectionTypeVerticalSheetReader extends BaseVerticalSheetRead
                 ignoreHeaderRows.add(r);
                 continue;
             }
-            String processSimilarHeaderString = ExcelSheetReaderUtil.processSimilarHeaderString(sheetHeaders, sheet, headerString, headerColumnIndex, r);
             sheetHeaders.add(headerString);
+            String processSimilarHeaderString = ExcelSheetReaderUtil.processSimilarHeaderString(sheet, headerString, allCells, headerColumnIndex, r);
             headerRowIndexKeyedHeaderValueMap.put(r, processSimilarHeaderString);
             processedDuplicateHeaderKeyedOriginalHeaderMap.put(processSimilarHeaderString, headerString);
             headerStringList.add(processSimilarHeaderString);
 
         }
-
-        //skip all unknown header range
-        processUnknownSectionsIfAny(sheet, ignoreHeaderRows, sectionRangeMap);
 
         int valueColumnBeginsAt = valueColumnIndex!= -1 ? valueColumnIndex : headerColumnIndex + 1;
         int cIndex = valueColumnBeginsAt;
@@ -181,8 +153,7 @@ public class OrderedSectionTypeVerticalSheetReader extends BaseVerticalSheetRead
                             classObject = DynamicHeaderSheetReader.dynamicCellValueResolver(clazz, headerStringList, value, key, finalDynamicCellField);
                         }
                         else {
-                            Set<String> processedHeader = new HashSet<>();
-                            classObject = StaticHeaderSheetReader.cellValueResolver(clazz, key, value, false, processedHeader);
+                            classObject = StaticHeaderSheetReader.cellValueResolver(clazz, key, value, false);
                         }
                         classObject.setSheetHeaders(sheetHeaders);
                         classObject.setCells(value);
@@ -194,28 +165,6 @@ public class OrderedSectionTypeVerticalSheetReader extends BaseVerticalSheetRead
                         }
                     }
                 });
-    }
-
-    private void processUnknownSectionsIfAny(Sheet sheet, List<Integer> ignoreHeaderRows, Map<String, Integer> sectionRangeMap) {
-        SectionHint[] sectionHints = sheet.sectionHints();
-        if(sectionHints.length > 0) {
-            for(SectionHint sectionHint: sectionHints) {
-                sectionRangeMap.forEach((key, value) -> {
-                    int rb = value;
-                    int re = -1;
-                    if (key.contains(sectionHint.beginningTextLike())) {
-                        String newKey = key.replace(sectionHint.beginningTextLike(), sectionHint.endingTextLike());
-                        if(!sectionRangeMap.containsKey(newKey) && sectionHint.findClosestMatch()) {
-                            newKey = com.github.salilvnair.excelprocessor.v2.helper.StringUtils.findClosestMatch(sectionRangeMap.keySet(), newKey);
-                        }
-                        re = sectionRangeMap.get(newKey);
-                    }
-                    if(re > -1) {
-                        IntStream.range(rb, (re+1)).boxed().forEach(ignoreHeaderRows::add);
-                    }
-                });
-            }
-        }
     }
 
 
@@ -277,7 +226,7 @@ public class OrderedSectionTypeVerticalSheetReader extends BaseVerticalSheetRead
                     SectionRangeAddress sectionRangeAddress2 = sectionTextKeyedSectionRangeAddressMap.get(sectionFieldAnnotation.endingText());
                     sectionRangeAddress1.setSectionEndingText(sectionRangeAddress2.sectionEndingText());
                     sectionRangeAddress1.setSectionLastColIndex(sectionRangeAddress2.sectionLastColIndex());
-                    sectionRangeAddress1.setSectionEndingRowIndex(sectionRangeAddress2.sectionEndingRowIndex());
+                    sectionRangeAddress1.setSectionEndingRowIndex(sectionRangeAddress2.sectionEndingRow());
                     return sectionRangeAddress1;
                 })
                 .collect(Collectors.toList());

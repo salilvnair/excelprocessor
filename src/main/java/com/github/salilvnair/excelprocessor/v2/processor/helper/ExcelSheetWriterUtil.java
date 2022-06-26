@@ -29,7 +29,7 @@ public class ExcelSheetWriterUtil {
         synchronized (staticFileCreatorObjectLock) {
             destinationFile = new File(new File(filePath), fileName);
         }
-        FileOutputStream fout=new FileOutputStream(destinationFile);
+        FileOutputStream fout = new FileOutputStream(destinationFile);
         workbook.write(fout);
         fout.close();
     }

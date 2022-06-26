@@ -45,4 +45,5 @@ public @interface Sheet {
 	String userDefinedMessage() default "";
 	final class DefaultTaskValidator extends AbstractExcelTaskValidator {};
     SectionHint[] sectionHints() default {};
+    boolean streamingWorkbook() default false;
 }

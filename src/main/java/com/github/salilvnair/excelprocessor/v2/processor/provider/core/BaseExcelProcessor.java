@@ -1,4 +1,4 @@
-package com.github.salilvnair.excelprocessor.v2.processor.provider;
+package com.github.salilvnair.excelprocessor.v2.processor.provider.core;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
