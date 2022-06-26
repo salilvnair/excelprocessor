@@ -1,4 +1,4 @@
-# Excel Processor v2 launched
+# Released Excel Processor v2
 
 ## Highlights:
 ```
