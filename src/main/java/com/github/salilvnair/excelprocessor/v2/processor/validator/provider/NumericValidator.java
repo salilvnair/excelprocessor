@@ -4,7 +4,7 @@ import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.BaseCellValidator;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.type.ValidatorType;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.lang.reflect.Field;
 
@@ -21,7 +21,7 @@ public class NumericValidator extends BaseCellValidator {
         if(allowNullOrAllowEmptyCheck(fieldValue, cellValidation)) {
             return false;
         }
-        return !NumberUtils.isNumber(fieldValue+"");
+        return !NumberUtils.isCreatable(fieldValue+"");
     }
 
     @Override

@@ -49,16 +49,16 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
     }
 
     protected void addUserDefinedCellStyle(Cell cellFieldAnnotation, org.apache.poi.ss.usermodel.Cell cell, Workbook workbook) {
-        CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BORDER_TOP, cellFieldAnnotation.borderStyle());
-        CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BORDER_RIGHT, cellFieldAnnotation.borderStyle());
-        CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BORDER_BOTTOM, cellFieldAnnotation.borderStyle());
-        CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BORDER_LEFT, cellFieldAnnotation.borderStyle());
-        CellUtil.setCellStyleProperty(cell, workbook, CellUtil.TOP_BORDER_COLOR, cellFieldAnnotation.borderColor().getIndex());
-        CellUtil.setCellStyleProperty(cell, workbook, CellUtil.RIGHT_BORDER_COLOR, cellFieldAnnotation.borderColor().getIndex());
-        CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BOTTOM_BORDER_COLOR, cellFieldAnnotation.borderColor().getIndex());
-        CellUtil.setCellStyleProperty(cell, workbook, CellUtil.LEFT_BORDER_COLOR, cellFieldAnnotation.borderColor().getIndex());
-        CellUtil.setCellStyleProperty(cell, workbook, CellUtil.FILL_FOREGROUND_COLOR, cellFieldAnnotation.foregroundColor().getIndex());
-        CellUtil.setCellStyleProperty(cell, workbook, CellUtil.FILL_PATTERN, cellFieldAnnotation.fillPattern());
+        CellUtil.setCellStyleProperty(cell, CellUtil.BORDER_TOP, cellFieldAnnotation.borderStyle());
+        CellUtil.setCellStyleProperty(cell, CellUtil.BORDER_RIGHT, cellFieldAnnotation.borderStyle());
+        CellUtil.setCellStyleProperty(cell, CellUtil.BORDER_BOTTOM, cellFieldAnnotation.borderStyle());
+        CellUtil.setCellStyleProperty(cell, CellUtil.BORDER_LEFT, cellFieldAnnotation.borderStyle());
+        CellUtil.setCellStyleProperty(cell, CellUtil.TOP_BORDER_COLOR, cellFieldAnnotation.borderColor().getIndex());
+        CellUtil.setCellStyleProperty(cell, CellUtil.RIGHT_BORDER_COLOR, cellFieldAnnotation.borderColor().getIndex());
+        CellUtil.setCellStyleProperty(cell, CellUtil.BOTTOM_BORDER_COLOR, cellFieldAnnotation.borderColor().getIndex());
+        CellUtil.setCellStyleProperty(cell, CellUtil.LEFT_BORDER_COLOR, cellFieldAnnotation.borderColor().getIndex());
+        CellUtil.setCellStyleProperty(cell, CellUtil.FILL_FOREGROUND_COLOR, cellFieldAnnotation.foregroundColor().getIndex());
+        CellUtil.setCellStyleProperty(cell, CellUtil.FILL_PATTERN, cellFieldAnnotation.fillPattern());
     }
 
 

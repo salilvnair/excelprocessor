@@ -1,6 +1,6 @@
 package com.github.salilvnair.excelprocessor.v1.reflect.validator;
 
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import com.github.salilvnair.excelprocessor.v1.reflect.annotation.ExcelHeaderValidator;
 import com.github.salilvnair.excelprocessor.v1.reflect.annotation.ExcelSheet;
@@ -39,7 +39,7 @@ public class NumericValidator extends BaseExcelValidator {
 			}
 			else if(columnValue instanceof String) {
 				String columnStringValue = (String) columnValue;
-				invalidNumericDetected = !(NumberUtils.isNumber(columnStringValue));
+				invalidNumericDetected = !(NumberUtils.isCreatable(columnStringValue));
 			}	
 			else if(columnValue instanceof Long) {
 				if(!isDefaultNumericType) {

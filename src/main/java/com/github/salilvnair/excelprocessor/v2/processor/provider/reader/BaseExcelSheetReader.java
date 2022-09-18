@@ -23,14 +23,14 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
 
     protected Object extractValueBasedOnCellType(Workbook workbook, Cell cell, CellInfo cellInfo) {
         Object cellValue = null;
-        int cellType = cell.getCellType();
+        CellType cellType = cell.getCellType();
         switch (cellType) {
-            case Cell.CELL_TYPE_STRING:
+            case STRING:
                 cellValue = cell.getStringCellValue();
                 cellInfo.setCellType(String.class);
                 cellInfo.setCellTypeString(CellInfo.CELL_TYPE_STRING);
                 break;
-            case Cell.CELL_TYPE_NUMERIC:
+            case NUMERIC:
                 double numericCellValue = cell.getNumericCellValue();
                 if(DateUtil.isCellDateFormatted(cell) && DateUtil.isValidExcelDate(numericCellValue)) {
                     cellValue = cell.getDateCellValue();
@@ -43,12 +43,12 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
                     cellInfo.setCellTypeString(CellInfo.CELL_TYPE_DOUBLE);
                 }
                 break;
-            case Cell.CELL_TYPE_BOOLEAN:
+            case BOOLEAN:
                 cellValue = cell.getBooleanCellValue();
                 cellInfo.setCellType(Boolean.class);
                 cellInfo.setCellTypeString(CellInfo.CELL_TYPE_BOOLEAN);
                 break;
-            case Cell.CELL_TYPE_FORMULA:
+            case FORMULA:
                 FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
                 CellValue formulaEvaluatedCellValue = null;
                 try {
@@ -56,7 +56,7 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
                 }
                 catch (Exception ex) {
                     switch (cell.getCachedFormulaResultType()) {
-                        case Cell.CELL_TYPE_NUMERIC:
+                        case NUMERIC:
                             numericCellValue = cell.getNumericCellValue();
                             if (DateUtil.isCellDateFormatted(cell) && DateUtil.isValidExcelDate(numericCellValue)) {
                                 cellValue = DateUtil.getJavaDate(numericCellValue);
@@ -69,7 +69,7 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
                                 cellInfo.setCellTypeString(CellInfo.CELL_TYPE_DOUBLE);
                             }
                             break;
-                        case Cell.CELL_TYPE_STRING:
+                        case STRING:
                             cellValue = cell.getStringCellValue().replaceAll("'", "");
                             cellInfo.setCellType(String.class);
                             cellInfo.setCellTypeString(CellInfo.CELL_TYPE_STRING);
@@ -78,7 +78,7 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
                     break;
                 }
                 switch (formulaEvaluatedCellValue.getCellType()) {
-                    case Cell.CELL_TYPE_NUMERIC:
+                    case NUMERIC:
                         numericCellValue = formulaEvaluatedCellValue.getNumberValue();
                         if(DateUtil.isCellDateFormatted(cell) && DateUtil.isValidExcelDate(numericCellValue)) {
                             cellValue = DateUtil.getJavaDate(numericCellValue);
@@ -91,7 +91,7 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
                             cellInfo.setCellTypeString(CellInfo.CELL_TYPE_DOUBLE);
                         }
                         break;
-                    case Cell.CELL_TYPE_STRING:
+                    case STRING:
                         cellValue = formulaEvaluatedCellValue.getStringValue().replaceAll("'", "");
                         cellInfo.setCellType(String.class);
                         cellInfo.setCellTypeString(CellInfo.CELL_TYPE_STRING);
@@ -120,7 +120,7 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
         if (color instanceof XSSFColor) {
             hex = ((XSSFColor) color).getARGBHex();
             hex = hex!=null && hex.length() > 2 ? hex.substring(2) : hex;
-            byte[] rgbBytes = ((XSSFColor) color).getRgb();
+            byte[] rgbBytes = ((XSSFColor) color).getRGB();
             if(rgbBytes != null) {
                 rgb =  new short[3];
                 rgb[0]= rgbBytes[0] < 0 ? (short) (rgbBytes[0]+256) : rgbBytes[0];
@@ -129,8 +129,9 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
             }
         }
         else if (color instanceof HSSFColor) {
-            if (! (color instanceof HSSFColor.AUTOMATIC))
+            if (! (color.equals(HSSFColor.HSSFColorPredefined.AUTOMATIC.getColor()))) {
                 hex = ((HSSFColor) color).getHexString();
+            }
             rgb = ((HSSFColor) color).getTriplet();
         }
         if (background) {

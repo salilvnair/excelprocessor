@@ -229,9 +229,7 @@ public class ReflectionUtil {
         Gson gson = new GsonBuilder().setDateFormat("E MMM dd hh:mm:ss Z yyyy").create();
         List<T> genericList = new ArrayList<T>();
         try {
-
-            JsonParser parser = new JsonParser();
-            JsonArray array = parser.parse(jsonString).getAsJsonArray();
+            JsonArray array = JsonParser.parseString(jsonString).getAsJsonArray();
 
             for (final JsonElement json : array) {
                 T entity = gson.fromJson(json, clazz);

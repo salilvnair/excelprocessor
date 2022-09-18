@@ -8,7 +8,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReader
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.File;

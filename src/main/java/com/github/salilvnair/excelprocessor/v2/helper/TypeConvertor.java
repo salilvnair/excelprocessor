@@ -2,7 +2,7 @@ package com.github.salilvnair.excelprocessor.v2.helper;
 
 import com.github.salilvnair.excelprocessor.util.DateParsingUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 
 import java.lang.reflect.Field;
@@ -111,7 +111,7 @@ public class TypeConvertor {
         }
         if(destinationType == String.class) {
             String stringVal = value+"";
-            if(bdWrapper != null && NumberUtils.isNumber(stringVal)) {
+            if(bdWrapper != null && NumberUtils.isCreatable(stringVal)) {
                 double numericStringVal = bdWrapper.doubleValue();
                 if ((numericStringVal == Math.floor(numericStringVal)) && !Double.isInfinite(numericStringVal)) {
                     stringVal = bdWrapper.longValue()+"";

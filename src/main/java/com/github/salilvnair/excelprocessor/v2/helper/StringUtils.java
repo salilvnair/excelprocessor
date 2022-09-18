@@ -1,5 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.helper;
 
+import org.apache.commons.text.similarity.LevenshteinDistance;
+
 import java.util.Collection;
 
 /**
@@ -40,7 +42,7 @@ public abstract class StringUtils {
         int distance = Integer.MAX_VALUE;
         String closest = null;
         for (String compareObject : collection) {
-            int currentDistance = org.apache.commons.lang.StringUtils.getLevenshteinDistance(compareObject, target);
+            int currentDistance =  LevenshteinDistance.getDefaultInstance().apply(compareObject, target);
             if(currentDistance < distance) {
                 distance = currentDistance;
                 closest = compareObject;

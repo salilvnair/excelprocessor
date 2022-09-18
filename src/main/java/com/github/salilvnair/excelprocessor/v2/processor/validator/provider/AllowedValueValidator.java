@@ -9,7 +9,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellV
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.BaseCellValidator;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.task.helper.ExcelValidatorTaskExecutor;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.type.ValidatorType;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

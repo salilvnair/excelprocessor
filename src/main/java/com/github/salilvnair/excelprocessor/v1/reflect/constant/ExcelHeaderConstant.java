@@ -50,8 +50,8 @@ public class ExcelHeaderConstant {
 	public static final short WRITE_TO_EXCEL_TIME_FORMAT_H_MM_SS_AM_PM_INDEX = 19;
 	
 	public static final String EXCEL_SHEET_INFO_HEADERS = "EXCEL_INFO_MAP_HEADERS";
-	public static final String EXCEL_SHEET_INFO_ROWS = "EXCEL_INFO_MAP_HEADERS";
-	public static final String EXCEL_SHEET_INFO_CELLS = "EXCEL_INFO_MAP_HEADERS";
+	public static final String EXCEL_SHEET_INFO_ROWS = "EXCEL_SHEET_INFO_ROWS";
+	public static final String EXCEL_SHEET_INFO_CELLS = "EXCEL_SHEET_INFO_CELLS";
 	public static final String EXCEL_SHEET_INFO_IS_VERTICAL= "EXCEL_SHEET_INFO_IS_VERTICAL";
 	
 }

@@ -15,9 +15,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.github.salilvnair.excelprocessor.v1.reflect.context.ExcelValidationMessage;
-import org.apache.commons.collections.IteratorUtils;
-import org.apache.commons.collections.Predicate;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.collections4.IteratorUtils;
+import org.apache.commons.collections4.Predicate;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
@@ -114,14 +114,14 @@ public class ExcelProcessorUtil {
 	    public boolean evaluate(Object object) {
 	       Row row = (Row) object;
 	       Cell cell = row.getCell(2);
-	       if (cell == null || cell.getCellType() == Cell.CELL_TYPE_BLANK) {
+	       if (cell == null || cell.getCellType() == CellType.BLANK) {
 	          return false;
-	       } else if (cell.getCellType() == Cell.CELL_TYPE_STRING && 
-	                  cell.getStringCellValue().isEmpty()) {
-	         return false;
-	      }
-	      return true;
-	    }
+	       } 
+	       else {
+	           return cell.getCellType() != CellType.STRING ||
+                       !cell.getStringCellValue().isEmpty();
+           }
+        }
 	}
 
 	public void uploadExcelOnGivenPath(Workbook workbook,String fileName,String filePath) throws Exception{
@@ -500,14 +500,14 @@ public class ExcelProcessorUtil {
 						Cell cellValue=firstSheet.getRow(j).getCell(i);
 						if(cellValue!=null){
 						switch (cellValue.getCellType()) {
-							case Cell.CELL_TYPE_STRING:
+							case STRING:
 								jsonStringValue=cellValue.getStringCellValue();
 								break;
-							case Cell.CELL_TYPE_BOOLEAN:
+							case BOOLEAN:
 								jsonBooleanValue=cellValue.getBooleanCellValue();
 								jsonStringValue = jsonBooleanValue.toString();
 								break;
-							case Cell.CELL_TYPE_NUMERIC:
+							case NUMERIC:
 								jsonDoubleValue=cellValue.getNumericCellValue();
 								jsonLongValue=new BigDecimal(cellValue.getNumericCellValue()).longValue();
 								jsonIntegerValue=new BigDecimal(cellValue.getNumericCellValue()).intValue();
@@ -515,18 +515,18 @@ public class ExcelProcessorUtil {
 								jsonStringValue = jsonDoubleValue.toString();
 								break;					
 							// for Formula
-							case Cell.CELL_TYPE_FORMULA:
+							case FORMULA:
 								FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator(); 
 								CellValue formulaEvaluatedCellValue = formulaEvaluator.evaluate(cellValue);
 								switch (cellValue.getCachedFormulaResultType()) {
-								case Cell.CELL_TYPE_NUMERIC:
+								case NUMERIC:
 									jsonDoubleValue = formulaEvaluatedCellValue.getNumberValue();
 									jsonLongValue = new BigDecimal(jsonDoubleValue).longValue();
 									jsonIntegerValue = new BigDecimal(jsonDoubleValue).intValue();
 									jsonDateValue = DateUtil.getJavaDate(jsonDoubleValue);//cellValue.getDateCellValue();
 									jsonStringValue = jsonDoubleValue.toString();
 									break;
-								case Cell.CELL_TYPE_STRING:							
+								case STRING:							
 									jsonStringValue = cellValue.getStringCellValue().replaceAll("'", "");
 									break;
 								}
@@ -627,18 +627,18 @@ public class ExcelProcessorUtil {
         Row lastRow = null;
         Cell cell = null;
 
-        while (stop == false) {
+        while (!stop) {
             nonBlankRowFound = false;
             lastRow = sheet.getRow(sheet.getLastRowNum());
             if(lastRow!=null) {
                 for (c = lastRow.getFirstCellNum(); c <= lastRow.getLastCellNum(); c++) {
                     cell = lastRow.getCell(c);
-                    if (cell != null && lastRow.getCell(c).getCellType() != Cell.CELL_TYPE_BLANK
+                    if (cell != null && lastRow.getCell(c).getCellType() != CellType.BLANK
                     		&& !ExcelValidatorConstant.EMPTY_STRING.equals(cell.toString())) {
                         nonBlankRowFound = true;
                     }
                 }
-                if (nonBlankRowFound == true) {
+                if (nonBlankRowFound) {
                     stop = true;
                 } 
                 else {
@@ -734,14 +734,14 @@ public class ExcelProcessorUtil {
 						Cell cellValue=currentSheet.getRow(j).getCell(i);
 						if(cellValue!=null){
 						switch (cellValue.getCellType()) {
-							case Cell.CELL_TYPE_STRING:
+							case STRING:
 								jsonStringValue=cellValue.getStringCellValue();
 								break;
-							case Cell.CELL_TYPE_BOOLEAN:
+							case BOOLEAN:
 								jsonBooleanValue=cellValue.getBooleanCellValue();
 								jsonStringValue = jsonBooleanValue.toString();
 								break;
-							case Cell.CELL_TYPE_NUMERIC:
+							case NUMERIC:
 								jsonDoubleValue=cellValue.getNumericCellValue();
 								jsonLongValue=new BigDecimal(cellValue.getNumericCellValue()).longValue();
 								jsonIntegerValue=new BigDecimal(cellValue.getNumericCellValue()).intValue();
@@ -749,18 +749,18 @@ public class ExcelProcessorUtil {
 								jsonStringValue = jsonDoubleValue.toString();
 								break;					
 							// for Formula
-							case Cell.CELL_TYPE_FORMULA:
+							case FORMULA:
 								FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator(); 
 								CellValue formulaEvaluatedCellValue = formulaEvaluator.evaluate(cellValue);
 								switch (cellValue.getCachedFormulaResultType()) {
-								case Cell.CELL_TYPE_NUMERIC:
+								case NUMERIC:
 									jsonDoubleValue = formulaEvaluatedCellValue.getNumberValue();
 									jsonLongValue = new BigDecimal(jsonDoubleValue).longValue();
 									jsonIntegerValue = new BigDecimal(jsonDoubleValue).intValue();
 									jsonDateValue = DateUtil.getJavaDate(jsonDoubleValue);//cellValue.getDateCellValue();
 									jsonStringValue = jsonDoubleValue.toString();
 									break;
-								case Cell.CELL_TYPE_STRING:							
+								case STRING:							
 									jsonStringValue = cellValue.getStringCellValue().replaceAll("'", "");
 									break;
 								}
@@ -940,14 +940,14 @@ public class ExcelProcessorUtil {
 						Cell cellValue=currentSheet.getRow(j).getCell(i);
 						if(cellValue!=null){
 						switch (cellValue.getCellType()) {
-							case Cell.CELL_TYPE_STRING:
+							case STRING:
 								jsonStringValue=cellValue.getStringCellValue();
 								break;
-							case Cell.CELL_TYPE_BOOLEAN:
+							case BOOLEAN:
 								jsonBooleanValue=cellValue.getBooleanCellValue();
 								jsonStringValue = jsonBooleanValue.toString();
 								break;
-							case Cell.CELL_TYPE_NUMERIC:
+							case NUMERIC:
 								jsonDoubleValue=cellValue.getNumericCellValue();
 								jsonLongValue=new BigDecimal(cellValue.getNumericCellValue()).longValue();
 								jsonIntegerValue=new BigDecimal(cellValue.getNumericCellValue()).intValue();
@@ -955,18 +955,18 @@ public class ExcelProcessorUtil {
 								jsonStringValue = jsonDoubleValue.toString();
 								break;					
 							// for Formula
-							case Cell.CELL_TYPE_FORMULA:
+							case FORMULA:
 								FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator(); 
 								CellValue formulaEvaluatedCellValue = formulaEvaluator.evaluate(cellValue);
 								switch (cellValue.getCachedFormulaResultType()) {
-								case Cell.CELL_TYPE_NUMERIC:
+								case NUMERIC:
 									jsonDoubleValue = formulaEvaluatedCellValue.getNumberValue();
 									jsonLongValue = new BigDecimal(jsonDoubleValue).longValue();
 									jsonIntegerValue = new BigDecimal(jsonDoubleValue).intValue();
 									jsonDateValue = DateUtil.getJavaDate(jsonDoubleValue);//cellValue.getDateCellValue();
 									jsonStringValue = jsonDoubleValue.toString();
 									break;
-								case Cell.CELL_TYPE_STRING:							
+								case STRING:							
 									jsonStringValue = cellValue.getStringCellValue().replaceAll("'", "");
 									break;
 								}
@@ -1140,14 +1140,14 @@ public class ExcelProcessorUtil {
 						Cell cellValue=currentSheet.getRow(j).getCell(i);
 						if(cellValue!=null){
 						switch (cellValue.getCellType()) {
-							case Cell.CELL_TYPE_STRING:
+							case STRING:
 								jsonStringValue=cellValue.getStringCellValue();
 								break;
-							case Cell.CELL_TYPE_BOOLEAN:
+							case BOOLEAN:
 								jsonBooleanValue=cellValue.getBooleanCellValue();
 								jsonStringValue = jsonBooleanValue.toString();
 								break;
-							case Cell.CELL_TYPE_NUMERIC:
+							case NUMERIC:
 								jsonDoubleValue=cellValue.getNumericCellValue();
 								jsonLongValue=new BigDecimal(cellValue.getNumericCellValue()).longValue();
 								jsonIntegerValue=new BigDecimal(cellValue.getNumericCellValue()).intValue();
@@ -1155,18 +1155,18 @@ public class ExcelProcessorUtil {
 								jsonStringValue = jsonDoubleValue.toString();
 								break;					
 							// for Formula
-							case Cell.CELL_TYPE_FORMULA:
+							case FORMULA:
 								FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator(); 
 								CellValue formulaEvaluatedCellValue = formulaEvaluator.evaluate(cellValue);
 								switch (cellValue.getCachedFormulaResultType()) {
-								case Cell.CELL_TYPE_NUMERIC:
+								case NUMERIC:
 									jsonDoubleValue = formulaEvaluatedCellValue.getNumberValue();
 									jsonLongValue = new BigDecimal(jsonDoubleValue).longValue();
 									jsonIntegerValue = new BigDecimal(jsonDoubleValue).intValue();
 									jsonDateValue = DateUtil.getJavaDate(jsonDoubleValue);//cellValue.getDateCellValue();
 									jsonStringValue = jsonDoubleValue.toString();
 									break;
-								case Cell.CELL_TYPE_STRING:							
+								case STRING:							
 									jsonStringValue = cellValue.getStringCellValue().replaceAll("'", "");
 									break;
 								}
@@ -1342,27 +1342,27 @@ public class ExcelProcessorUtil {
 					String jsonKey = null;
 					if (cellValue != null) {
 						switch (cellValue.getCellType()) {
-							case Cell.CELL_TYPE_STRING:
+							case STRING:
 								jsonKey = cellValue.getStringCellValue();
 								break;
-							case Cell.CELL_TYPE_BOOLEAN:
+							case BOOLEAN:
 								Boolean bolVal = cellValue.getBooleanCellValue();
 								jsonKey = bolVal.toString();
 								break;
-							case Cell.CELL_TYPE_NUMERIC:
+							case NUMERIC:
 								Double numVal = cellValue.getNumericCellValue();
 								jsonKey = numVal.toString();
 								break;
 							// for Formula
-							case Cell.CELL_TYPE_FORMULA:
+							case FORMULA:
 								FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
 								CellValue formulaEvaluatedCellValue = formulaEvaluator.evaluate(cellValue);
 								switch (cellValue.getCachedFormulaResultType()) {
-									case Cell.CELL_TYPE_NUMERIC:
+									case NUMERIC:
 										Double formNumVal = formulaEvaluatedCellValue.getNumberValue();
 										jsonKey = formNumVal.toString();
 										break;
-									case Cell.CELL_TYPE_STRING:
+									case STRING:
 										jsonKey = cellValue.getStringCellValue().replaceAll("'", "");
 										break;
 								}
@@ -1565,14 +1565,14 @@ public class ExcelProcessorUtil {
 					Date jsonDateValue = null;
 					if (cellValue != null) {
 						switch (cellValue.getCellType()) {
-						case Cell.CELL_TYPE_STRING:
+						case STRING:
 							jsonStringValue = cellValue.getStringCellValue();
 							break;
-						case Cell.CELL_TYPE_BOOLEAN:
+						case BOOLEAN:
 							jsonBooleanValue = cellValue.getBooleanCellValue();
 							jsonStringValue = jsonBooleanValue.toString();
 							break;
-						case Cell.CELL_TYPE_NUMERIC:
+						case NUMERIC:
 							jsonDoubleValue = cellValue.getNumericCellValue();
 							jsonLongValue = new BigDecimal(cellValue.getNumericCellValue()).longValue();
 							jsonIntegerValue = new BigDecimal(cellValue.getNumericCellValue()).intValue();
@@ -1580,18 +1580,18 @@ public class ExcelProcessorUtil {
 							jsonStringValue = jsonDoubleValue.toString();
 							break;
 						// for Formula
-						case Cell.CELL_TYPE_FORMULA:
+						case FORMULA:
 							FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator(); 
 							CellValue formulaEvaluatedCellValue = formulaEvaluator.evaluate(cellValue);
 							switch (cellValue.getCachedFormulaResultType()) {
-							case Cell.CELL_TYPE_NUMERIC:
+							case NUMERIC:
 								jsonDoubleValue = formulaEvaluatedCellValue.getNumberValue();
 								jsonLongValue = new BigDecimal(jsonDoubleValue).longValue();
 								jsonIntegerValue = new BigDecimal(jsonDoubleValue).intValue();
 								jsonDateValue = DateUtil.getJavaDate(jsonDoubleValue);//cellValue.getDateCellValue();
 								jsonStringValue = jsonDoubleValue.toString();
 								break;
-							case Cell.CELL_TYPE_STRING:							
+							case STRING:							
 								jsonStringValue = cellValue.getStringCellValue().replaceAll("'", "");
 								break;
 							}
@@ -1772,14 +1772,14 @@ public class ExcelProcessorUtil {
 				Date jsonDateValue = null;
 				if (cellValue != null) {
 					switch (cellValue.getCellType()) {
-					case Cell.CELL_TYPE_STRING:
+					case STRING:
 						jsonStringValue = cellValue.getStringCellValue();
 						break;
-					case Cell.CELL_TYPE_BOOLEAN:
+					case BOOLEAN:
 						jsonBooleanValue = cellValue.getBooleanCellValue();
 						jsonStringValue = jsonBooleanValue.toString();
 						break;
-					case Cell.CELL_TYPE_NUMERIC:
+					case NUMERIC:
 						jsonDoubleValue = cellValue.getNumericCellValue();
 						jsonLongValue = new BigDecimal(cellValue.getNumericCellValue()).longValue();
 						jsonIntegerValue = new BigDecimal(cellValue.getNumericCellValue()).intValue();
@@ -1787,18 +1787,18 @@ public class ExcelProcessorUtil {
 						jsonStringValue = jsonDoubleValue.toString();
 						break;
 					// for Formula
-					case Cell.CELL_TYPE_FORMULA:
+					case FORMULA:
 						FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator(); 
 						CellValue formulaEvaluatedCellValue = formulaEvaluator.evaluate(cellValue);
 						switch (cellValue.getCachedFormulaResultType()) {
-						case Cell.CELL_TYPE_NUMERIC:
+						case NUMERIC:
 							jsonDoubleValue = formulaEvaluatedCellValue.getNumberValue();
 							jsonLongValue = new BigDecimal(jsonDoubleValue).longValue();
 							jsonIntegerValue = new BigDecimal(jsonDoubleValue).intValue();
 							jsonDateValue = DateUtil.getJavaDate(jsonDoubleValue);//cellValue.getDateCellValue();
 							jsonStringValue = jsonDoubleValue.toString();
 							break;
-						case Cell.CELL_TYPE_STRING:							
+						case STRING:							
 							jsonStringValue = cellValue.getStringCellValue().replaceAll("'", "");
 							break;
 						}
@@ -2406,13 +2406,13 @@ public class ExcelProcessorUtil {
 			}
 	        int pictureIdx = sheet.getWorkbook().addPicture(bytes,pictureType);
 	        CreationHelper helper = sheet.getWorkbook().getCreationHelper();
-	        Drawing drawing = sheet.createDrawingPatriarch();
+	        Drawing<?> drawing = sheet.createDrawingPatriarch();
 	        ClientAnchor anchor = helper.createClientAnchor();
 	        anchor.setRow1(row1);
 	        anchor.setRow2(row2);
 	        anchor.setCol1(col1);
 	        anchor.setCol2(col2);
-	        anchor.setAnchorType(pictureTypeHeader.pictureAnchorType().value());
+	        anchor.setAnchorType(ClientAnchor.AnchorType.byId(pictureTypeHeader.pictureAnchorType().value()));
 	        Picture pic = drawing.createPicture(anchor, pictureIdx);
 	        if(pictureTypeHeader.pictureResizeScale()!=-1) {
 	        	pic.resize(pictureTypeHeader.pictureResizeScale());
@@ -2445,10 +2445,10 @@ public class ExcelProcessorUtil {
 
 	  CreationHelper helper = sheet.getWorkbook().getCreationHelper();
 
-	  Drawing drawing = sheet.createDrawingPatriarch();
+	  Drawing<?> drawing = sheet.createDrawingPatriarch();
 
 	  ClientAnchor anchor = helper.createClientAnchor();
-	  anchor.setAnchorType(ClientAnchor.DONT_MOVE_AND_RESIZE);
+	  anchor.setAnchorType(ClientAnchor.AnchorType.DONT_MOVE_AND_RESIZE);
 
 	  anchor.setRow1(row1); //first anchor determines upper left position
 	  if (sheet instanceof XSSFSheet) {
@@ -2716,14 +2716,14 @@ public class ExcelProcessorUtil {
 		Date jsonDateValue = null;
 		if (cellValue != null) {
 			switch (cellValue.getCellType()) {
-				case Cell.CELL_TYPE_STRING:
+				case STRING:
 					jsonStringValue = cellValue.getStringCellValue();
 					break;
-				case Cell.CELL_TYPE_BOOLEAN:
+				case BOOLEAN:
 					jsonBooleanValue = cellValue.getBooleanCellValue();
 					jsonStringValue = jsonBooleanValue.toString();
 					break;
-				case Cell.CELL_TYPE_NUMERIC:
+				case NUMERIC:
 					jsonDoubleValue = cellValue.getNumericCellValue();
 					jsonLongValue = new BigDecimal(cellValue.getNumericCellValue()).longValue();
 					jsonIntegerValue = new BigDecimal(cellValue.getNumericCellValue()).intValue();
@@ -2731,18 +2731,18 @@ public class ExcelProcessorUtil {
 					jsonStringValue = jsonDoubleValue.toString();
 					break;
 				// for Formula
-				case Cell.CELL_TYPE_FORMULA:
+				case FORMULA:
 					FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
 					CellValue formulaEvaluatedCellValue = formulaEvaluator.evaluate(cellValue);
 					switch (cellValue.getCachedFormulaResultType()) {
-						case Cell.CELL_TYPE_NUMERIC:
+						case NUMERIC:
 							jsonDoubleValue = formulaEvaluatedCellValue.getNumberValue();
 							jsonLongValue = new BigDecimal(jsonDoubleValue).longValue();
 							jsonIntegerValue = new BigDecimal(jsonDoubleValue).intValue();
 							jsonDateValue = DateUtil.getJavaDate(jsonDoubleValue);//cellValue.getDateCellValue();
 							jsonStringValue = jsonDoubleValue.toString();
 							break;
-						case Cell.CELL_TYPE_STRING:
+						case STRING:
 							jsonStringValue = cellValue.getStringCellValue().replaceAll("'", "");
 							break;
 					}
@@ -3244,7 +3244,7 @@ public class ExcelProcessorUtil {
 	public Font getFontByHtmlTag(Workbook workbook,String htmlTag) {
 		if(htmlTag.equals("BOLD")) {
 			Font boldFont = workbook.createFont();
-			boldFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+			boldFont.setBold(true);
 			return boldFont;
 		}
 		else if(htmlTag.equals("STRIKEOUT")) {
@@ -3373,7 +3373,7 @@ public class ExcelProcessorUtil {
 	private void makeRowBold(Workbook wb, Row row){
 	    CellStyle style =  wb.createCellStyle();//Create style
 	    Font font = wb.createFont();//Create font
-	    font.setBoldweight(Font.BOLDWEIGHT_BOLD);//Make font bold	    
+	    font.setBold(true);//Make font bold	    
 	    for(int i = 0; i < row.getLastCellNum(); i++){//For each cell in the row 
 		    style.setFont(font);//set it to bold
 	        row.getCell(i).setCellStyle(style);//Set the style
@@ -3383,14 +3383,14 @@ public class ExcelProcessorUtil {
 	private void makeVerticalHeaderBold(Workbook wb, Row row){
 		CellStyle style =  wb.createCellStyle();//Create style
 	    Font font = wb.createFont();//Create font
-	    font.setBoldweight(Font.BOLDWEIGHT_BOLD);//Make font bold	
+	    font.setBold(true);
 	    style.setFont(font);//set it to bold
         row.getCell(0).setCellStyle(style);//Set the style
 	}
 	
 	public void setFontWeight(Workbook workbook, Row row,short fontType,boolean isPivot) {
 	    Font font = workbook.createFont();//Create font
-	    font.setBoldweight(fontType);	
+	    font.setBold(true)	;
 	    setFont(workbook, row, font, isPivot);
 	}
 	
@@ -3475,10 +3475,8 @@ public class ExcelProcessorUtil {
 	public void wrapTextUsingPredicate(Workbook wb,Sheet sheet) {
 		int rowCounter=0;
 		CellStyle style = null;//Create style
-		Iterator<Row> rowIterator = sheet.iterator();
-		Iterator<Row> filterIterator = rowIterator;
-		@SuppressWarnings("unchecked")
-		Iterator<Row> nonEmptyRowIterator = IteratorUtils.filteredIterator(filterIterator , new ValidRowPredicate<Row>());
+        @SuppressWarnings("unchecked")
+		Iterator<Row> nonEmptyRowIterator = IteratorUtils.filteredIterator(sheet.iterator(), new ValidRowPredicate<Row>());
 		while (nonEmptyRowIterator.hasNext()) {
 			nonEmptyRowIterator.next();
 			Row row=sheet.getRow(rowCounter);
@@ -3535,17 +3533,15 @@ public class ExcelProcessorUtil {
 			rowCounter++;
 		}
 		if(rowCounter>0) {
-			Iterator<Cell> cellKeyIterator=currentSheet.getRow(headerRowNum).iterator();
-			while (cellKeyIterator.hasNext()) {
-				Cell cell = cellKeyIterator.next();
-				if (cell == null || cell.getCellType() == Cell.CELL_TYPE_BLANK) {
-			          continue;
-			       } else if (cell.getCellType() == Cell.CELL_TYPE_STRING && 
-			                  cell.getStringCellValue().isEmpty()) {
-			    	   continue;
-			      }
-				cellCounter++;
-			}
+            for (Cell cell : currentSheet.getRow(headerRowNum)) {
+                if (cell == null || cell.getCellType() == CellType.BLANK) {
+                    continue;
+                } else if (cell.getCellType() == CellType.STRING &&
+                        cell.getStringCellValue().isEmpty()) {
+                    continue;
+                }
+                cellCounter++;
+            }
 			List<String> jsonHeaderList = new ArrayList<>();
 			List<String> jsonHeaderTypeList = new ArrayList<>();
 			List<String> jsonHeaderValidJavaVariableList = new ArrayList<>();
@@ -3557,7 +3553,7 @@ public class ExcelProcessorUtil {
 					generateExcelBeanAndCustomHeaderFromExcel(currentSheet, cellCounter, headerRowNum, valueRowNum, jsonKey, jsonHeaderList, jsonHeaderTypeList, jsonHeaderValidJavaVariableList,ignoreHeaderList);					 
 				}
 			excelBeanBuilder.append("=====================================================================================================================================================");
-			excelBeanBuilder.append("\n\t\t\t\t\t\t    "+sheetName+" Sheet BEGINS    \n");				
+			excelBeanBuilder.append("\n\t\t\t\t\t\t    ").append(sheetName).append(" Sheet BEGINS    \n");
 			excelBeanBuilder.append("=====================================================================================================================================================");
 			excelBeanBuilder.append("\n");			
 			if(isEnableHBMGenerator()) {
@@ -3863,13 +3859,13 @@ public class ExcelProcessorUtil {
 			 Cell cellValue=currentSheet.getRow(valueRowNum).getCell(i);
 			 if(cellValue!=null){
 				switch (cellValue.getCellType()) {
-					case Cell.CELL_TYPE_STRING:
+					case STRING:
 						jsonStringValue=EXCEL_COLUMN_FIELD_TYPE_STRING;
 						break;
-					case Cell.CELL_TYPE_BOOLEAN:
+					case BOOLEAN:
 						jsonStringValue=EXCEL_COLUMN_FIELD_TYPE_BOOLEAN;
 						break;
-					case Cell.CELL_TYPE_NUMERIC:
+					case NUMERIC:
 						//String numericValue = cellValue.getNumericCellValue()+"";
 						DataFormatter formatter = new DataFormatter();
 						String numericValue = formatter.formatCellValue(cellValue);
@@ -3886,13 +3882,13 @@ public class ExcelProcessorUtil {
 							jsonStringValue=EXCEL_COLUMN_FIELD_TYPE_DATE;
 						}
 						break;
-					case Cell.CELL_TYPE_BLANK:
+					case BLANK:
 						jsonStringValue=EXCEL_COLUMN_FIELD_TYPE_NOT_AVAILABLE_DEFAULT_STRING;
 						break;
 						// for Formula
-					case Cell.CELL_TYPE_FORMULA:
+					case FORMULA:
 						switch (cellValue.getCachedFormulaResultType()) {
-						case Cell.CELL_TYPE_NUMERIC:
+						case NUMERIC:
 							//String numericValue = cellValue.getNumericCellValue()+"";
 							formatter = new DataFormatter();
 							numericValue = formatter.formatCellValue(cellValue);
@@ -3909,7 +3905,7 @@ public class ExcelProcessorUtil {
 								jsonStringValue=EXCEL_COLUMN_FIELD_TYPE_DATE;
 							}
 							break;
-						case Cell.CELL_TYPE_STRING:							
+						case STRING:							
 							jsonStringValue = EXCEL_COLUMN_FIELD_TYPE_STRING;
 							break;
 						}
@@ -3942,8 +3938,7 @@ public class ExcelProcessorUtil {
 			for(int i=columnHeader;i<=columns;i++) {
 				if (row.getCell(i) == null) {
 					if(isValue){
-						 String jsonStringValue = EXCEL_COLUMN_FIELD_TYPE_NOT_AVAILABLE_DEFAULT_STRING;
-						 jsonHeaderTypeList.add(jsonStringValue);
+                        jsonHeaderTypeList.add(EXCEL_COLUMN_FIELD_TYPE_NOT_AVAILABLE_DEFAULT_STRING);
 					}
 					continue;
 				}
@@ -3985,13 +3980,13 @@ public class ExcelProcessorUtil {
 					 Cell cellValue=row.getCell(i);
 						if(cellValue!=null){
 							switch (cellValue.getCellType()) {
-								case Cell.CELL_TYPE_STRING:
+								case STRING:
 									jsonStringValue=EXCEL_COLUMN_FIELD_TYPE_STRING;
 									break;
-								case Cell.CELL_TYPE_BOOLEAN:
+								case BOOLEAN:
 									jsonStringValue=EXCEL_COLUMN_FIELD_TYPE_BOOLEAN;
 									break;
-								case Cell.CELL_TYPE_NUMERIC:
+								case NUMERIC:
 									//String numericValue = cellValue.getNumericCellValue()+"";
 									DataFormatter formatter = new DataFormatter();
 									String numericValue = formatter.formatCellValue(cellValue);
@@ -4008,13 +4003,13 @@ public class ExcelProcessorUtil {
 										jsonStringValue=EXCEL_COLUMN_FIELD_TYPE_DATE;
 									}
 									break;
-								case Cell.CELL_TYPE_BLANK:
+								case BLANK:
 									jsonStringValue=EXCEL_COLUMN_FIELD_TYPE_NOT_AVAILABLE_DEFAULT_STRING;
 									break;
 									// for Formula
-								case Cell.CELL_TYPE_FORMULA:
+								case FORMULA:
 									switch (cellValue.getCachedFormulaResultType()) {
-									case Cell.CELL_TYPE_NUMERIC:
+									case NUMERIC:
 										//String numericValue = cellValue.getNumericCellValue()+"";
 										formatter = new DataFormatter();
 										numericValue = formatter.formatCellValue(cellValue);
@@ -4031,7 +4026,7 @@ public class ExcelProcessorUtil {
 											jsonStringValue=EXCEL_COLUMN_FIELD_TYPE_DATE;
 										}
 										break;
-									case Cell.CELL_TYPE_STRING:							
+									case STRING:							
 										jsonStringValue = EXCEL_COLUMN_FIELD_TYPE_STRING;
 										break;
 									}
@@ -4140,22 +4135,19 @@ public class ExcelProcessorUtil {
     public void copyCell(Cell oldCell, Cell newCell) {
         copyCellStyle(oldCell, newCell);
         switch(oldCell.getCellType()) {
-            case Cell.CELL_TYPE_STRING:
+            case STRING:
                 newCell.setCellValue(oldCell.getStringCellValue());
                 break;
-            case Cell.CELL_TYPE_NUMERIC:
+            case NUMERIC:
                 newCell.setCellValue(oldCell.getNumericCellValue());
                 break;
-            case Cell.CELL_TYPE_BLANK:
-                newCell.setCellType(Cell.CELL_TYPE_BLANK);
-                break;
-            case Cell.CELL_TYPE_BOOLEAN:
+            case BOOLEAN:
                 newCell.setCellValue(oldCell.getBooleanCellValue());
                 break;
-            case Cell.CELL_TYPE_ERROR:
+            case ERROR:
                 newCell.setCellErrorValue(oldCell.getErrorCellValue());
                 break;
-            case Cell.CELL_TYPE_FORMULA:
+            case FORMULA:
                 newCell.setCellFormula(oldCell.getCellFormula());
                 break;
             default:
@@ -4195,7 +4187,7 @@ public class ExcelProcessorUtil {
 	protected void highlightCell(Workbook workbook, Cell cell, ExcelSheet excelSheet) {
 		CellStyle cs = workbook.createCellStyle();
 		cs.setFillForegroundColor(excelSheet.highlightedErrorCellColor().getIndex());
-		cs.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		cs.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 		cell.setCellStyle(cs);
 	}
 
@@ -4225,16 +4217,16 @@ public class ExcelProcessorUtil {
     private void setUserDefinedCellStyle(Cell cell, Workbook workbook, String jsonKey, Map<String, ExcelHeader> fieldExcelHeaderMap) {
     	if(jsonKey!=null && fieldExcelHeaderMap.containsKey(jsonKey)) {
     		ExcelHeader excelHeader = fieldExcelHeaderMap.get(jsonKey);
-    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BORDER_TOP, excelHeader.borderStyle());
-    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BORDER_RIGHT, excelHeader.borderStyle());
-    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BORDER_BOTTOM, excelHeader.borderStyle());
-    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BORDER_LEFT, excelHeader.borderStyle());
-    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.TOP_BORDER_COLOR, excelHeader.borderColor().getIndex());
-    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.RIGHT_BORDER_COLOR, excelHeader.borderColor().getIndex());
-    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.BOTTOM_BORDER_COLOR, excelHeader.borderColor().getIndex());
-    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.LEFT_BORDER_COLOR, excelHeader.borderColor().getIndex());
-    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.FILL_FOREGROUND_COLOR, excelHeader.foregroundColor().getIndex());
-    		CellUtil.setCellStyleProperty(cell, workbook, CellUtil.FILL_PATTERN, excelHeader.fillPattern());
+    		CellUtil.setCellStyleProperty(cell, CellUtil.BORDER_TOP, excelHeader.borderStyle());
+    		CellUtil.setCellStyleProperty(cell, CellUtil.BORDER_RIGHT, excelHeader.borderStyle());
+    		CellUtil.setCellStyleProperty(cell, CellUtil.BORDER_BOTTOM, excelHeader.borderStyle());
+    		CellUtil.setCellStyleProperty(cell, CellUtil.BORDER_LEFT, excelHeader.borderStyle());
+    		CellUtil.setCellStyleProperty(cell, CellUtil.TOP_BORDER_COLOR, excelHeader.borderColor().getIndex());
+    		CellUtil.setCellStyleProperty(cell, CellUtil.RIGHT_BORDER_COLOR, excelHeader.borderColor().getIndex());
+    		CellUtil.setCellStyleProperty(cell, CellUtil.BOTTOM_BORDER_COLOR, excelHeader.borderColor().getIndex());
+    		CellUtil.setCellStyleProperty(cell, CellUtil.LEFT_BORDER_COLOR, excelHeader.borderColor().getIndex());
+    		CellUtil.setCellStyleProperty(cell, CellUtil.FILL_FOREGROUND_COLOR, excelHeader.foregroundColor().getIndex());
+    		CellUtil.setCellStyleProperty(cell, CellUtil.FILL_PATTERN, excelHeader.fillPattern());
     	}
     }
     
@@ -4245,11 +4237,10 @@ public class ExcelProcessorUtil {
     	char[] value = string.toCharArray();
     	int i = value.length;
     	int j = 0;
-        char[] arrayOfChar = value;
-        while ((j < i) && (arrayOfChar[j] <= ' '||arrayOfChar[j] == '\u00A0')) {
+        while ((j < i) && (value[j] <= ' '|| value[j] == '\u00A0')) {
         	j++;
         }
-        while ((j < i) && (arrayOfChar[(i - 1)] <= ' ' || arrayOfChar[(i - 1)] == '\u00A0')) {
+        while ((j < i) && (value[(i - 1)] <= ' ' || value[(i - 1)] == '\u00A0')) {
         	i--;
         }
         return (j > 0) || (i < value.length) ? string.substring(j, i) : string;
