@@ -82,7 +82,6 @@ import java.util.List;
 public class ExcelProcessorTestSuite {
      public void read() {
           ExcelSheetReader reader = ExcelSheetReaderFactory.generate();// single threaded Sheet Reader
-          ExcelSheetReader reader = ExcelSheetReaderFactory.generate(true);// multi threaded Sheet Reader
 
           //the basic reader.read() expects 2 arguments 
           // 1st one is the User defined Sheet bean class which has to extend BaseSheet. 
