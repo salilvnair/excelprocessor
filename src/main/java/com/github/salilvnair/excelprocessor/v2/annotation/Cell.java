@@ -15,11 +15,17 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface Cell {
     DateParsingUtil.DateFormat dateFormat() default DateParsingUtil.DateFormat.SLASH_MM_DD_YYYY;
+
     DateParsingUtil.DateTimeFormat dateTimeFormat() default DateParsingUtil.DateTimeFormat.SLASH_MM_DD_YYYY_HH_MM;
+
     boolean dateString() default false;
+
     boolean dateTimeString() default false;
+
 	String value() default "";
+
 	String column() default "";
+
 	int row() default -1;
 
     boolean picture() default false;
@@ -31,6 +37,18 @@ public @interface Cell {
     PictureAnchorType pictureAnchorType() default PictureAnchorType.DONT_MOVE_AND_RESIZE;
 
     double pictureResizeScale() default 1.0;
+
+    boolean hasForegroundColor() default false;
+
+    boolean hasBackgroundColor() default false;
+
+    boolean hasFillPattern() default false;
+
+    boolean hasBorderStyle() default false;
+
+    boolean hasBorderColor() default false;
+
+    boolean wrapText() default false;
 
     IndexedColors foregroundColor() default IndexedColors.AUTOMATIC;
 
