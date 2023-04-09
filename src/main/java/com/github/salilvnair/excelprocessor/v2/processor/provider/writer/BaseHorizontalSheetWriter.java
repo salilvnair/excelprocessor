@@ -32,6 +32,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
                 Object fieldValue = cell.value();
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
                 writeDataToCell(rowCell, fieldValue);
+                applyCellStyles(rowCell, cellField);
             }
         }
     }
