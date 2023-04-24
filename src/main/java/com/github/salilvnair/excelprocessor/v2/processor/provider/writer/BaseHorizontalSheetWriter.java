@@ -31,7 +31,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
                 Cell cell = cellField.getAnnotation(Cell.class);
                 Object fieldValue = cell.value();
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
-                writeDataToCell(rowCell, fieldValue);
+                writeDataToHeaderCell(sheet, cell, rowCell, fieldValue);
                 applyCellStyles(rowCell, cellField);
             }
         }
@@ -47,9 +47,10 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
             Row row = workbookSheet.createRow(createRowIndex);
             for (int c = headerColumnIndex; c < cellFields.size(); c++) {
                 Field cellField = cells.get(c);
+                Cell cellInfo = cellField.getAnnotation(Cell.class);
                 Object fieldValue = ReflectionUtil.getFieldValue(sheetDataObj, cellField);
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
-                writeDataToCell(rowCell, fieldValue);
+                writeDataToCell(sheet, cellInfo, rowCell, fieldValue);
                 applyCellStyles(rowCell, cellField);
             }
         }

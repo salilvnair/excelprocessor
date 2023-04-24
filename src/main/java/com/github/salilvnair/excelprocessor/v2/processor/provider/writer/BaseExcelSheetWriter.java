@@ -2,14 +2,14 @@ package com.github.salilvnair.excelprocessor.v2.processor.provider.writer;
 
 import com.github.salilvnair.excelprocessor.v1.reflect.annotation.ExcelHeader;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
+import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.helper.TypeConvertor;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.core.BaseExcelProcessor;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellUtil;
 
 import java.lang.reflect.Field;
@@ -23,31 +23,62 @@ import java.util.List;
  */
 public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements ExcelSheetWriter {
     abstract void write(List<? extends BaseSheet> sheetData, ExcelSheetWriterContext context);
-    
-    protected void writeDataToCell(org.apache.poi.ss.usermodel.Cell cell, Object value) {
+
+    protected void writeDataToHeaderCell(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
+        processCommonCellData(sheetInfo, cellInfo, rowCell, value);
+    }
+
+    protected void writeDataToCell(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
+        if(cellInfo.hyperLink()) {
+            processHyperLink(sheetInfo, cellInfo, rowCell, value);
+        }
+        else {
+            processCommonCellData(sheetInfo, cellInfo, rowCell, value);
+        }
+    }
+
+    private void processCommonCellData(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
         if(value instanceof Double) {
-            cell.setCellValue(TypeConvertor.convert(value, Double.class));
+            rowCell.setCellValue(TypeConvertor.convert(value, Double.class));
         }
         else if(value instanceof String) {
-            cell.setCellValue(TypeConvertor.convert(value, String.class));
+            rowCell.setCellValue(TypeConvertor.convert(value, String.class));
         }
         else if(value instanceof Date) {
-            cell.setCellValue(TypeConvertor.convert(value, Date.class));
+            rowCell.setCellValue(TypeConvertor.convert(value, Date.class));
         }
         else if(value instanceof Integer) {
-            cell.setCellValue(TypeConvertor.convert(Integer.class, Double.class, value));
+            rowCell.setCellValue(TypeConvertor.convert(Integer.class, Double.class, value));
         }
         else if(value instanceof Long) {
-            cell.setCellValue(TypeConvertor.convert(Long.class, Double.class, value));
+            rowCell.setCellValue(TypeConvertor.convert(Long.class, Double.class, value));
         }
         else if(value instanceof Float) {
-            cell.setCellValue(TypeConvertor.convert(Float.class, Double.class, value));
+            rowCell.setCellValue(TypeConvertor.convert(Float.class, Double.class, value));
         }
         else if(value instanceof BigInteger) {
-            cell.setCellValue(TypeConvertor.convert(BigInteger.class, Double.class, value));
+            rowCell.setCellValue(TypeConvertor.convert(BigInteger.class, Double.class, value));
         }
         else if(value instanceof BigDecimal) {
-            cell.setCellValue(TypeConvertor.convert(BigDecimal.class, Double.class, value));
+            rowCell.setCellValue(TypeConvertor.convert(BigDecimal.class, Double.class, value));
+        }
+    }
+
+    private void processHyperLink(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
+        if(value instanceof String) {
+            Workbook workbook = rowCell.getSheet().getWorkbook();
+            CreationHelper creationHelper = workbook.getCreationHelper();
+            Hyperlink link = creationHelper.createHyperlink(HyperlinkType.URL);
+            link.setAddress((String) value);
+            String linkText = "".equals(cellInfo.hyperLinkText()) ? (String) value : cellInfo.hyperLinkText();
+            rowCell.setCellValue(linkText);
+            rowCell.setHyperlink(link);
+            Font font = workbook.createFont();
+            font.setBold(true);
+            font.setUnderline(FontUnderline.SINGLE.getByteValue());
+            font.setColor(IndexedColors.BLUE.getIndex());
+            CellUtil.setFont(rowCell, font);
+
         }
     }
 

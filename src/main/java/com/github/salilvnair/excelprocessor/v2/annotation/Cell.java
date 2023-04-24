@@ -59,4 +59,7 @@ public @interface Cell {
     short borderStyle() default 0;
 
     IndexedColors borderColor() default IndexedColors.AUTOMATIC;
+
+    boolean hyperLink() default false;
+    String hyperLinkText() default "";
 }

@@ -34,7 +34,7 @@ public class VerticalSheetWriter extends BaseExcelSheetWriter {
                 Cell cell = cellField.getAnnotation(Cell.class);
                 Object fieldValue = cell.value();
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
-                writeDataToCell(rowCell, fieldValue);
+                writeDataToHeaderCell(sheet, cell, rowCell, fieldValue);
                 applyCellStyles(rowCell, cellField);
             }
             for (int c = 0; c < sheetData.size(); c++) {
@@ -42,7 +42,7 @@ public class VerticalSheetWriter extends BaseExcelSheetWriter {
                 Cell cell = cellField.getAnnotation(Cell.class);
                 Object fieldValue = ReflectionUtil.getFieldValue(sheetDataObj, cellField);
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c+1);
-                writeDataToCell(rowCell, fieldValue);
+                writeDataToCell(sheet, cell, rowCell, fieldValue);
                 applyCellStyles(rowCell, cellField);
             }
         }

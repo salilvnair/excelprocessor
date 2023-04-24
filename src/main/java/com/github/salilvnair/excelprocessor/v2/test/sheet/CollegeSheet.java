@@ -6,9 +6,11 @@ import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.test.sheet.task.CollegeSheetTaskValidator;
+import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
 
 @Sheet(
         value="College",
+        type = ExcelFileType.Extension.XLSX,
         excelTaskValidator = CollegeSheetTaskValidator.class
 )
 public class CollegeSheet extends BaseSheet {
@@ -22,6 +24,9 @@ public class CollegeSheet extends BaseSheet {
     @CellValidation(conditional = true, condition = "shouldBeGreaterThanZero")
     @Cell("No of students")
     private Long noOfStudents;
+
+    @Cell(value = "University Webpage URL", hyperLink = true, hyperLinkText = "Click here to open")
+    private String universityHomepageURL;
 
   //getters and setters
     public String getName() {
@@ -53,5 +58,12 @@ public class CollegeSheet extends BaseSheet {
 		return "CollegeSheet [name=" + name + ", university=" + university + ", state=" + state + ", noOfStudents="
 				+ noOfStudents + "]";
 	}
-    
+
+    public String getUniversityHomepageURL() {
+        return universityHomepageURL;
+    }
+
+    public void setUniversityHomepageURL(String universityHomepageURL) {
+        this.universityHomepageURL = universityHomepageURL;
+    }
 }
