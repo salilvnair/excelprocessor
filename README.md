@@ -24,7 +24,7 @@
 <dependency>
     <groupId>com.github.salilvnair</groupId>
     <artifactId>excelprocessor</artifactId>
-    <version>2.0.2</version>
+    <version>2.0.6</version>
 </dependency>
 ```
 
@@ -67,8 +67,7 @@ public class SchoolSheet extends BaseSheet {
 ```
 
 > 4. Call the read using **_ExcelSheetReader_** which can be generated using **_ExcelSheetReaderFactory_**.
-> </br></br> **_ExcelSheetReaderFactory_** can generate a non thread based Sheet Reader 
-     > or a thread based Sheet Reader by passing an optional flag into the generate method.
+
 
 ```java
 import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
