@@ -7,6 +7,10 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.test.sheet.task.CollegeSheetTaskValidator;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
+import com.github.salilvnair.excelprocessor.v2.type.PictureAnchorType;
+import com.github.salilvnair.excelprocessor.v2.type.PictureSourceType;
+
+import java.util.List;
 
 @Sheet(
         value="College",
@@ -27,6 +31,28 @@ public class CollegeSheet extends BaseSheet {
 
     @Cell(value = "University Webpage URL", hyperLink = true, hyperLinkText = "Click here to open")
     private String universityHomepageURL;
+
+    @Cell(value="Images",
+        pictureResizeScale=-1,
+        multiPicture = true,
+        pictureHeightInPixels = 30,
+        pictureWidthInPixels = 30,
+        pictureMarginInPixels = 5,
+        columnWidthInUnits = 50*256,
+        pictureAnchorType = PictureAnchorType.MOVE_AND_RESIZE,
+        pictureSource= PictureSourceType.BYTE_ARRAY)
+    private List<Byte[]> images;
+
+    @Cell(value="Image",
+        pictureResizeScale=-1,
+        picture = true,
+        pictureHeightInPixels = 30,
+        pictureWidthInPixels = 30,
+        pictureMarginInPixels = 5,
+        columnWidthInUnits = 50*256,
+        pictureAnchorType = PictureAnchorType.MOVE_AND_RESIZE,
+        pictureSource= PictureSourceType.BYTE_ARRAY)
+    private Byte[] image;
 
   //getters and setters
     public String getName() {
@@ -66,4 +92,21 @@ public class CollegeSheet extends BaseSheet {
     public void setUniversityHomepageURL(String universityHomepageURL) {
         this.universityHomepageURL = universityHomepageURL;
     }
+
+    public List<Byte[]> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Byte[]> images) {
+        this.images = images;
+    }
+
+    public Byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(Byte[] image) {
+        this.image = image;
+    }
+
 }

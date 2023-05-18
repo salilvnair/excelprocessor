@@ -11,8 +11,9 @@ import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.SheetInfo;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.ss.usermodel.Workbook;
-
+import org.apache.poi.util.IOUtils;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,9 +25,23 @@ public class ExcelProcessorTestSuite {
         List<? extends BaseSheet> sheetData = prepareCollegeSheet();
         ExcelSheetContext excelSheetContext = new ExcelSheetContext();
         excelSheetContext.setFilePath("/Users/salilvnair/workspace/dbv");
-        excelSheetContext.setFileName("text1.xlsx");
-        sheetWriter(sheetData, excelSheetContext);
+        excelSheetContext.setFileName("pictureText.xlsx");
+        pictureSheetWriter(sheetData, excelSheetContext);
         //generateClassTemplate("consistof.xlsx");
+    }
+
+    private static void pictureSheetWriter(List<? extends BaseSheet> sheetData, ExcelSheetContext excelSheetContext) throws Exception {
+        InputStream inputS = ExcelSheetReaderUtil.resourceStream(com.github.salilvnair.excelprocessor.v1.test.ExcelProcessorTestSuite.IMAGES_EXCEL_FOLDER, "e.png");
+        byte[] image1 = IOUtils.toByteArray(inputS);
+        CollegeSheet collegeSheet = (CollegeSheet) sheetData.get(0);
+        List<Byte[]> imageBytes = new ArrayList<>();
+        imageBytes.add(ArrayUtils.toObject(image1));
+        inputS = ExcelSheetReaderUtil.resourceStream(com.github.salilvnair.excelprocessor.v1.test.ExcelProcessorTestSuite.IMAGES_EXCEL_FOLDER, "box.png");
+        byte[] image2 = IOUtils.toByteArray(inputS);
+        imageBytes.add(ArrayUtils.toObject(image2));
+        collegeSheet.setImages(imageBytes);
+        collegeSheet.setImage(ArrayUtils.toObject(image1));
+        sheetWriter(sheetData, excelSheetContext);
     }
 
     private static List<? extends BaseSheet> prepareCollegeSheet() {

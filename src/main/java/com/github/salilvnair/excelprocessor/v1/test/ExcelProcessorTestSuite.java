@@ -24,6 +24,7 @@ import com.github.salilvnair.excelprocessor.v1.builder.ExcelProcessorBuilder;
 public class ExcelProcessorTestSuite {
 
 	public static final String TEST_EXCEL_FOLDER = "excel";
+    public static final String IMAGES_EXCEL_FOLDER = "images";
 
 	public static void main(String[] args) {
 		String fileName = "ExcelProcessorTest.xls";

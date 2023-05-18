@@ -1,6 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.processor.provider.writer;
 
-import com.github.salilvnair.excelprocessor.v1.reflect.annotation.ExcelHeader;
+import com.github.salilvnair.excelprocessor.v2.type.PictureSourceType;
+import com.github.salilvnair.excelprocessor.v2.type.PictureType;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.helper.TypeConvertor;
@@ -8,13 +9,19 @@ import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWrite
 import com.github.salilvnair.excelprocessor.v2.processor.provider.core.BaseExcelProcessor;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellUtil;
+import org.apache.poi.util.IOUtils;
+import org.apache.poi.util.Units;
 
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 
@@ -29,11 +36,49 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
     }
 
     protected void writeDataToCell(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
+        initCellProperties(sheetInfo, cellInfo, rowCell, value);
         if(cellInfo.hyperLink()) {
             processHyperLink(sheetInfo, cellInfo, rowCell, value);
         }
+        else if (cellInfo.multiPicture() || cellInfo.picture()) {
+            processCellImageData(sheetInfo, cellInfo, rowCell, value);
+        }
         else {
             processCommonCellData(sheetInfo, cellInfo, rowCell, value);
+        }
+    }
+
+    private void initCellProperties(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
+        if(cellInfo.columnWidthInUnits() != -1) {
+            rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), cellInfo.columnWidthInUnits());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void processCellImageData(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
+        if(cellInfo.picture()) {
+            int r = rowCell.getRow().getRowNum();
+            int c = rowCell.getColumnIndex();
+            int dx1 = Units.pixelToEMU(cellInfo.pictureMarginInPixels());
+            int dy1 = Units.pixelToEMU(0);
+            int dx2 = Units.pixelToEMU(cellInfo.pictureWidthInPixels());
+            int dy2 = Units.pixelToEMU(cellInfo.pictureHeightInPixels());
+            drawImageOnExcelSheet(rowCell.getSheet(), r, r, c, c, dx1, dy1, dx2, dy2, value, cellInfo);
+        }
+
+        else if(cellInfo.multiPicture()) {
+            List<Object> imageValues = (List<Object>) value;
+            int i = 0;
+            for(Object imageValue: imageValues) {
+                int r = rowCell.getRow().getRowNum();
+                int c = rowCell.getColumnIndex();
+                int dx1 = Units.pixelToEMU(i * (cellInfo.pictureWidthInPixels()) + cellInfo.pictureMarginInPixels());
+                int dy1 = Units.pixelToEMU(0);
+                int dx2 = Units.pixelToEMU((i + 1) * cellInfo.pictureWidthInPixels());
+                int dy2 = Units.pixelToEMU(cellInfo.pictureHeightInPixels());
+                drawImageOnExcelSheet(rowCell.getSheet(), r, r, c, c, dx1, dy1, dx2, dy2, imageValue, cellInfo);
+                i++;
+            }
         }
     }
 
@@ -136,4 +181,50 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
             }
         }
     }
+
+    public void drawImageOnExcelSheet(org.apache.poi.ss.usermodel.Sheet sheet, int row1,
+                                         int row2, int col1, int col2, int dx1, int dy1, int dx2, int dy2, Object pictureSource, Cell cell)  {
+
+        try {
+            byte[] bytes = null;
+            if(cell.pictureSource().equals(PictureSourceType.BYTE_ARRAY)) {
+                bytes = castFromWrapperByteArray(pictureSource);
+            }
+            else if(cell.pictureSource().equals(PictureSourceType.FILE_PATH)) {
+                InputStream is = Files.newInputStream(Paths.get((String) pictureSource));
+                bytes = IOUtils.toByteArray(is);
+                is.close();
+            }
+            int pictureType = Workbook.PICTURE_TYPE_JPEG;
+            if(cell.pictureType().equals(PictureType.PNG)){
+                pictureType = Workbook.PICTURE_TYPE_PNG;
+            }
+            int pictureIdx = sheet.getWorkbook().addPicture(bytes,pictureType);
+            CreationHelper helper = sheet.getWorkbook().getCreationHelper();
+            Drawing<?> drawing = sheet.createDrawingPatriarch();
+            ClientAnchor anchor = helper.createClientAnchor();
+            anchor.setCol1(col1);
+            anchor.setDx1(dx1);
+            anchor.setRow1(row1);
+            anchor.setDy1(dy1);
+            anchor.setCol2(col2);
+            anchor.setDx2(dx2);
+            anchor.setRow2(row2);
+            anchor.setDy2(dy2);
+            anchor.setAnchorType(ClientAnchor.AnchorType.byId(cell.pictureAnchorType().value()));
+            Picture pic = drawing.createPicture(anchor, pictureIdx);
+            if(cell.pictureResizeScale()!=-1) {
+                pic.resize(cell.pictureResizeScale());
+            }
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private byte[] castFromWrapperByteArray(Object pictureSource) {
+        Byte[] wrapperBytes = (Byte[]) pictureSource;
+        return ArrayUtils.toPrimitive(wrapperBytes);
+    }
+
 }

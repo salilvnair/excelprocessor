@@ -1,9 +1,9 @@
 package com.github.salilvnair.excelprocessor.v2.annotation;
 
 import com.github.salilvnair.excelprocessor.util.DateParsingUtil;
-import com.github.salilvnair.excelprocessor.v1.reflect.type.PictureAnchorType;
-import com.github.salilvnair.excelprocessor.v1.reflect.type.PictureSourceType;
-import com.github.salilvnair.excelprocessor.v1.reflect.type.PictureType;
+import com.github.salilvnair.excelprocessor.v2.type.PictureAnchorType;
+import com.github.salilvnair.excelprocessor.v2.type.PictureSourceType;
+import com.github.salilvnair.excelprocessor.v2.type.PictureType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 
 import java.lang.annotation.ElementType;
@@ -29,6 +29,16 @@ public @interface Cell {
 	int row() default -1;
 
     boolean picture() default false;
+
+    boolean multiPicture() default false;
+
+    int pictureMarginInPixels() default 0;
+
+    int pictureHeightInPixels() default 100;
+
+    int pictureWidthInPixels() default 100;
+
+    int columnWidthInUnits() default -1;
 
     PictureType pictureType() default PictureType.JPEG;
 
