@@ -39,7 +39,6 @@ public class CollegeSheet extends BaseSheet {
         pictureWidthInPixels = 30,
         pictureMarginInPixels = 5,
         columnWidthInUnits = 50*256,
-        pictureAnchorType = PictureAnchorType.MOVE_AND_RESIZE,
         pictureSource= PictureSourceType.BYTE_ARRAY)
     private List<Byte[]> images;
 
@@ -50,7 +49,6 @@ public class CollegeSheet extends BaseSheet {
         pictureWidthInPixels = 30,
         pictureMarginInPixels = 5,
         columnWidthInUnits = 50*256,
-        pictureAnchorType = PictureAnchorType.MOVE_AND_RESIZE,
         pictureSource= PictureSourceType.BYTE_ARRAY)
     private Byte[] image;
 

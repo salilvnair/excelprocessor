@@ -44,7 +44,7 @@ public @interface Cell {
 
     PictureSourceType pictureSource() default PictureSourceType.FILE_PATH;
 
-    PictureAnchorType pictureAnchorType() default PictureAnchorType.DONT_MOVE_AND_RESIZE;
+    PictureAnchorType pictureAnchorType() default PictureAnchorType.MOVE_AND_RESIZE;
 
     double pictureResizeScale() default 1.0;
 
