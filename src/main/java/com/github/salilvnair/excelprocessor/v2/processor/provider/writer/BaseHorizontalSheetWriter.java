@@ -7,6 +7,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWrite
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellUtil;
@@ -14,7 +15,9 @@ import org.apache.poi.ss.util.CellUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -52,7 +55,44 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
                 writeDataToCell(sheet, cellInfo, rowCell, fieldValue);
                 applyCellStyles(rowCell, cellField);
+                FormulaEvaluator evaluator = workbookSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+                evaluator.evaluateFormulaCell(rowCell);
             }
         }
     }
+
+    protected void writeDynamicDataToHeader(Map<String, Object> headerKeyedCellValueMap, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
+        Row row;
+        Set<String> headers = headerKeyedCellValueMap.keySet();
+        int headerRowIndex = sheet.headerRowAt() - 1;
+        int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
+        if(context.template() == null) {
+            row = workbookSheet.createRow(headerRowIndex);
+            for (int c = headerColumnIndex; c < headers.size(); c++) {
+                String header = new ArrayList<>(headers).get(c);
+                Object fieldValue = headerKeyedCellValueMap.get(header);
+                org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
+                convertAndSetCellValue(rowCell, fieldValue);
+            }
+        }
+    }
+
+    protected void writeDynamicDataToBody(List<? extends BaseSheet> sheetData, Map<String, Object> headerKeyedCellValueMap, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
+        Set<String> headers = headerKeyedCellValueMap.keySet();
+        int headerRowIndex = sheet.headerRowAt() - 1;
+        int valueRowIndex = sheet.valueRowAt()!=-1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
+        int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
+        for (int r = 0; r < sheetData.size(); r++) {
+            BaseSheet sheetDataObj = sheetData.get(r);
+            int createRowIndex = r + valueRowIndex;
+            Row row = workbookSheet.createRow(createRowIndex);
+            for (int c = headerColumnIndex; c < headers.size(); c++) {
+                String header = new ArrayList<>(headers).get(c);
+                Object fieldValue = headerKeyedCellValueMap.get(header);
+                org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
+                convertAndSetCellValue(rowCell, fieldValue);
+            }
+        }
+    }
+
 }

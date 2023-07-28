@@ -9,6 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 
 /**
  * @author Salil V Nair
@@ -22,6 +23,21 @@ public class ExcelSheetWriterUtil {
             return new XSSFWorkbook();
         }
         return new HSSFWorkbook();
+    }
+
+    public static Workbook generateWorkbook(InputStream inputStream, String excelFile) throws Exception {
+        Workbook workbook;
+        if (excelFile.endsWith(ExcelFileType.Extension.XLSX) || excelFile.endsWith(ExcelFileType.Extension.XLSM)) {
+            workbook = new XSSFWorkbook(inputStream);
+        }
+        else if (excelFile.endsWith(ExcelFileType.Extension.XLS)) {
+            workbook = new HSSFWorkbook(inputStream);
+        }
+        else {
+            throw new IllegalArgumentException("The specified file is not Excel file");
+        }
+        inputStream.close();
+        return workbook;
     }
 
     public static void write(Workbook workbook, String fileName, String filePath) throws Exception{

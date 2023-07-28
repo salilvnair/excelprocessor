@@ -68,11 +68,12 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
     private ExcelSheetWriterContext buildExcelSheetWriterContext(ExcelSheetContext sheetContext, boolean existingWorkbook) {
         File excelFile = sheetContext.excelFile();
         Workbook workbook = sheetContext.workbook();
+        existingWorkbook = existingWorkbook || sheetContext.template() != null;
         if(excelFile !=null && workbook == null && !existingWorkbook) {
             FileInputStream inputS = null;
             try {
                 inputS = new FileInputStream(excelFile);
-                workbook = ExcelSheetReaderUtil.generateWorkbook(inputS, excelFile.getAbsolutePath());
+                workbook = ExcelSheetWriterUtil.generateWorkbook(inputS, excelFile.getAbsolutePath());
                 sheetContext.setFileName(excelFile.getName());
             }
             catch (Exception e) {

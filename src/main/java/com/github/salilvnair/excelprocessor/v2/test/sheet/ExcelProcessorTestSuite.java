@@ -14,6 +14,8 @@ import com.github.salilvnair.excelprocessor.v2.type.SheetInfo;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.util.IOUtils;
+
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,9 +25,12 @@ import java.util.concurrent.TimeUnit;
 public class ExcelProcessorTestSuite {
     public static void main(String[] args) throws Exception {
         List<? extends BaseSheet> sheetData = prepareCollegeSheet();
-        ExcelSheetContext excelSheetContext = new ExcelSheetContext();
-        excelSheetContext.setFilePath("/Users/salilvnair/workspace/dbv");
-        excelSheetContext.setFileName("pictureText.xlsx");
+        ExcelSheetContext excelSheetContext = ExcelSheetContext
+                                                .builder()
+                .filePath("/Users/salilvnair/workspace/dbv")
+                .fileName("pictureText2.xlsx")
+                .template(new File("/Users/salilvnair/workspace/dbv/pictureText.xlsx"))
+                 .build();
         pictureSheetWriter(sheetData, excelSheetContext);
         //generateClassTemplate("consistof.xlsx");
     }
@@ -51,7 +56,7 @@ public class ExcelProcessorTestSuite {
         collegeSheet.setState("Chennai");
         collegeSheet.setUniversity("Anna University");
         collegeSheet.setNoOfStudents(5000L);
-        collegeSheet.setUniversityHomepageURL("https://www.salilvnair.com");
+        collegeSheet.setUniversityHomepageURL("https://www.salilvnair.com, https://www.google.com");
         sheetData.add(collegeSheet);
         return sheetData;
     }

@@ -2,6 +2,7 @@ package com.github.salilvnair.excelprocessor.v2.sheet;
 
 import com.github.salilvnair.excelprocessor.v2.annotation.DynamicCell;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -9,13 +10,13 @@ import java.util.Map;
  */
 public class DynamicHeaderSheet extends BaseSheet {
     @DynamicCell
-    private Map<String, Object> dynamicHeaderKeyedCellValueMap;
+    private LinkedHashMap<String, Object> dynamicHeaderKeyedCellValueMap;
 
-    public Map<String, Object> dynamicHeaderKeyedCellValueMap() {
+    public LinkedHashMap<String, Object> dynamicHeaderKeyedCellValueMap() {
         return dynamicHeaderKeyedCellValueMap;
     }
 
-    public void setDynamicHeaderKeyedCellValueMap(Map<String, Object> dynamicHeaderKeyedCellValueMap) {
+    public void setDynamicHeaderKeyedCellValueMap(LinkedHashMap<String, Object> dynamicHeaderKeyedCellValueMap) {
         this.dynamicHeaderKeyedCellValueMap = dynamicHeaderKeyedCellValueMap;
     }
 }

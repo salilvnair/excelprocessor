@@ -72,4 +72,6 @@ public @interface Cell {
 
     boolean hyperLink() default false;
     String hyperLinkText() default "";
+
+    boolean multiHyperLink() default false;
 }

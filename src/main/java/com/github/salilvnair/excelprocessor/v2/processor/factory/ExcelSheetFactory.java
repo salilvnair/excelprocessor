@@ -3,10 +3,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.factory;
 import com.github.salilvnair.excelprocessor.v2.annotation.MultiOrientedSheet;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.reader.*;
-import com.github.salilvnair.excelprocessor.v2.processor.provider.writer.BaseExcelSheetWriter;
-import com.github.salilvnair.excelprocessor.v2.processor.provider.writer.HorizontalSheetWriter;
-import com.github.salilvnair.excelprocessor.v2.processor.provider.writer.StreamingHorizontalSheetWriter;
-import com.github.salilvnair.excelprocessor.v2.processor.provider.writer.VerticalSheetWriter;
+import com.github.salilvnair.excelprocessor.v2.processor.provider.writer.*;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
 
@@ -67,6 +64,9 @@ public class ExcelSheetFactory {
     public static BaseExcelSheetWriter generateWriter(Sheet sheet) {
         if(sheet.vertical()) {
             return new VerticalSheetWriter();
+        }
+        else if(sheet.dynamicHeaders()) {
+            return new DynamicHorizontalSheetWriter();
         }
         else if (ExcelFileType.Extension.XLSX.equals(sheet.type()) && sheet.streamingWorkbook()) {
             return new StreamingHorizontalSheetWriter();

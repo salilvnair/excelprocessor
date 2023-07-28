@@ -1,5 +1,6 @@
 package com.github.salilvnair.excelprocessor.v2.processor.provider.writer;
 
+import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.type.PictureSourceType;
 import com.github.salilvnair.excelprocessor.v2.type.PictureType;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
@@ -82,7 +83,11 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         }
     }
 
-    private void processCommonCellData(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
+    protected void processCommonCellData(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
+        convertAndSetCellValue(rowCell, value);
+    }
+
+    protected void convertAndSetCellValue(org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
         if(value instanceof Double) {
             rowCell.setCellValue(TypeConvertor.convert(value, Double.class));
         }
@@ -110,21 +115,92 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
     }
 
     private void processHyperLink(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
-        if(value instanceof String) {
-            Workbook workbook = rowCell.getSheet().getWorkbook();
-            CreationHelper creationHelper = workbook.getCreationHelper();
-            Hyperlink link = creationHelper.createHyperlink(HyperlinkType.URL);
-            link.setAddress((String) value);
-            String linkText = "".equals(cellInfo.hyperLinkText()) ? (String) value : cellInfo.hyperLinkText();
-            rowCell.setCellValue(linkText);
-            rowCell.setHyperlink(link);
-            Font font = workbook.createFont();
-            font.setBold(true);
-            font.setUnderline(FontUnderline.SINGLE.getByteValue());
-            font.setColor(IndexedColors.BLUE.getIndex());
-            CellUtil.setFont(rowCell, font);
-
+        if (value == null) {
+            return;
         }
+        if(value instanceof String) {
+            boolean containsMultipleHyperLinks = ExcelSheetReaderUtil.containsMultipleHyperLinks(String.valueOf(value));
+            if(containsMultipleHyperLinks && cellInfo.multiHyperLink()) {
+                processMultiLinkCellValue(sheetInfo, cellInfo, rowCell, value);
+            }
+            else if (containsMultipleHyperLinks) {
+                processMultiLinkAsSimpleText(sheetInfo, cellInfo, rowCell, value);
+            }
+            else {
+                processUniLinkCellValue(sheetInfo, cellInfo, rowCell, value);
+            }
+        }
+    }
+
+    private void processMultiLinkAsSimpleText(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
+        processCommonCellData(sheetInfo, cellInfo, rowCell, value);
+        Workbook workbook = rowCell.getSheet().getWorkbook();
+        // Create a CellStyle for the formula cell
+        CellStyle formulaCellStyle = workbook.createCellStyle();
+
+        // Create a Font with desired settings
+        Font font = workbook.createFont();
+        font.setBold(true);
+        font.setColor(IndexedColors.BLUE.getIndex());
+        font.setUnderline(FontUnderline.SINGLE.getByteValue());
+        // Set the Font to the CellStyle
+        formulaCellStyle.setFont(font);
+
+        // Apply the CellStyle to the formula cell
+        rowCell.setCellStyle(formulaCellStyle);
+    }
+
+    private void processUniLinkCellValue(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
+        Workbook workbook = rowCell.getSheet().getWorkbook();
+        CreationHelper creationHelper = workbook.getCreationHelper();
+        Hyperlink link = creationHelper.createHyperlink(HyperlinkType.URL);
+        link.setAddress((String) value);
+        String linkText = "".equals(cellInfo.hyperLinkText()) ? (String) value : cellInfo.hyperLinkText();
+        rowCell.setCellValue(linkText);
+        rowCell.setHyperlink(link);
+        Font font = workbook.createFont();
+        font.setBold(true);
+        font.setUnderline(FontUnderline.SINGLE.getByteValue());
+        font.setColor(IndexedColors.BLUE.getIndex());
+        CellUtil.setFont(rowCell, font);
+    }
+
+    private void processMultiLinkCellValue(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
+        Workbook workbook = rowCell.getSheet().getWorkbook();
+        List<String> hyperlinks = ExcelSheetReaderUtil.extractHyperlinks(String.valueOf(value));
+        String cellFormula = createHyperlinkFormula(hyperlinks);
+        rowCell.setCellFormula(cellFormula);
+
+        // Create a CellStyle for the formula cell
+        CellStyle formulaCellStyle = workbook.createCellStyle();
+
+        // Create a Font with desired settings
+        Font font = workbook.createFont();
+        font.setBold(true);
+        font.setColor(IndexedColors.BLUE.getIndex());
+        font.setUnderline(FontUnderline.SINGLE.getByteValue());
+        // Set the Font to the CellStyle
+        formulaCellStyle.setFont(font);
+
+        // Apply the CellStyle to the formula cell
+        rowCell.setCellStyle(formulaCellStyle);
+    }
+
+    private static String createHyperlinkFormula(List<String> hyperlinks) {
+        StringBuilder formulaBuilder = new StringBuilder();
+
+        for (int i = 0; i < hyperlinks.size(); i++) {
+            String link = hyperlinks.get(i);
+
+            String hyperlink = "HYPERLINK(\"" + link + "\", \"" + link + "\")";
+            formulaBuilder.append(hyperlink);
+
+            if (i < hyperlinks.size() - 1) {
+                formulaBuilder.append(" & CHAR(10) & ");
+            }
+        }
+
+        return formulaBuilder.toString();
     }
 
     protected void applyCellStyles(org.apache.poi.ss.usermodel.Cell rowCell, Field cellField) {

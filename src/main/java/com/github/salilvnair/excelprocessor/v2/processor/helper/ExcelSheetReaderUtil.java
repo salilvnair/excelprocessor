@@ -15,9 +15,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Salil V Nair
@@ -229,5 +232,36 @@ public class ExcelSheetReaderUtil {
     public static InputStream resourceStream(String folder, String fileName) {
         ClassLoader classLoader = ExcelSheetReader.class.getClassLoader();
         return classLoader.getResourceAsStream(folder+"/"+fileName);
+    }
+
+    public static boolean containsMultipleHyperLinks(String input) {
+        return countURLsInString(input) > 1;
+    }
+
+    public static int countURLsInString(String input) {
+        String urlRegex = "\\b(?:https?|ftp)://\\S+\\b";
+        Pattern pattern = Pattern.compile(urlRegex);
+        Matcher matcher = pattern.matcher(input);
+        int count = 0;
+        while (matcher.find()) {
+            count++;
+        }
+        return count;
+    }
+
+    public static List<String> extractHyperlinks(String input) {
+        // Regular expression to match URLs
+        String urlRegex = "\\b(?:https?|ftp)://\\S+\\b";
+        Pattern pattern = Pattern.compile(urlRegex);
+        Matcher matcher = pattern.matcher(input);
+
+        // Create a StringBuilder to store the extracted hyperlinks
+        List<String> urls = new ArrayList<>();
+
+        // Iterate through the matches and append them to the StringBuilder
+        while (matcher.find()) {
+            urls.add(matcher.group());
+        }
+        return urls;
     }
 }

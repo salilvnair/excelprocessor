@@ -1,12 +1,16 @@
 package com.github.salilvnair.excelprocessor.v2.context;
 
+import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetWriterException;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +24,7 @@ public class ExcelSheetContext {
     private String fileName;
     private String filePath;
     private Workbook workbook;
+    private File template;
     private String sheetName;
     private List<String> ignoreHeaders;
     private List<Integer> ignoreHeaderRows;
@@ -58,6 +63,14 @@ public class ExcelSheetContext {
 
     public void setExcelFile(File excelFile) {
         this.excelFile = excelFile;
+    }
+
+    public File template() {
+        return template;
+    }
+
+    public void setTemplate(File template) {
+        this.template = template;
     }
 
     public Map<String, List<? extends BaseSheet>> excelSheets() {
@@ -224,6 +237,28 @@ public class ExcelSheetContext {
 
         public ExcelSheetContextBuilder excelFile(File excelFile) {
             excelSheetContext.setExcelFile(excelFile);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder filePath(String filePath) {
+            excelSheetContext.setFilePath(filePath);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder template(File templateFile) {
+            Workbook workbook = null;
+            try {
+                FileInputStream inputS = new FileInputStream(templateFile);
+                workbook = ExcelSheetWriterUtil.generateWorkbook(inputS, templateFile.getAbsolutePath());
+
+            }
+            catch (Exception e) {
+                if(!excelSheetContext.suppressExceptions()) {
+                    throw new ExcelSheetWriterException(e);
+                }
+            }
+            excelSheetContext.setTemplate(templateFile);
+            excelSheetContext.setWorkbook(workbook);
             return this;
         }
 
