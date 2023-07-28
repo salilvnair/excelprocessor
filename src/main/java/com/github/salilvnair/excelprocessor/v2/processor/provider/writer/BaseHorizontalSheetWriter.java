@@ -29,11 +29,12 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         if(context.template() == null) {
             row = workbookSheet.createRow(headerRowIndex);
-            for (int c = headerColumnIndex; c < cellFields.size(); c++) {
+            for (int c = 0; c < cellFields.size(); c++) {
                 Field cellField = cells.get(c);
                 Cell cell = cellField.getAnnotation(Cell.class);
                 Object fieldValue = cell.value();
-                org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
+                int createColumnIndex = c + headerColumnIndex;
+                org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(createColumnIndex);
                 writeDataToHeaderCell(sheet, cell, rowCell, fieldValue);
                 applyCellStyles(rowCell, cellField);
             }
@@ -48,11 +49,12 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
             BaseSheet sheetDataObj = sheetData.get(r);
             int createRowIndex = r + valueRowIndex;
             Row row = workbookSheet.createRow(createRowIndex);
-            for (int c = headerColumnIndex; c < cellFields.size(); c++) {
+            for (int c = 0; c < cellFields.size(); c++) {
                 Field cellField = cells.get(c);
                 Cell cellInfo = cellField.getAnnotation(Cell.class);
                 Object fieldValue = ReflectionUtil.getFieldValue(sheetDataObj, cellField);
-                org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
+                int createColumnIndex = c + headerColumnIndex;
+                org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(createColumnIndex);
                 writeDataToCell(sheet, cellInfo, rowCell, fieldValue);
                 applyCellStyles(rowCell, cellField);
                 FormulaEvaluator evaluator = workbookSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
@@ -68,10 +70,11 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         if(context.template() == null) {
             row = workbookSheet.createRow(headerRowIndex);
-            for (int c = headerColumnIndex; c < headers.size(); c++) {
+            for (int c = 0; c < headers.size(); c++) {
                 String header = new ArrayList<>(headers).get(c);
                 Object fieldValue = headerKeyedCellValueMap.get(header);
-                org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
+                int createColumnIndex = c + headerColumnIndex;
+                org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(createColumnIndex);
                 convertAndSetCellValue(rowCell, fieldValue);
             }
         }
@@ -83,13 +86,13 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         int valueRowIndex = sheet.valueRowAt()!=-1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         for (int r = 0; r < sheetData.size(); r++) {
-            BaseSheet sheetDataObj = sheetData.get(r);
             int createRowIndex = r + valueRowIndex;
             Row row = workbookSheet.createRow(createRowIndex);
-            for (int c = headerColumnIndex; c < headers.size(); c++) {
+            for (int c = 0; c < headers.size(); c++) {
                 String header = new ArrayList<>(headers).get(c);
                 Object fieldValue = headerKeyedCellValueMap.get(header);
-                org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
+                int createColumnIndex = c + headerColumnIndex;
+                org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(createColumnIndex);
                 convertAndSetCellValue(rowCell, fieldValue);
             }
         }

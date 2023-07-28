@@ -15,7 +15,9 @@ import java.util.List;
 @Sheet(
         value="College",
         type = ExcelFileType.Extension.XLSX,
-        excelTaskValidator = CollegeSheetTaskValidator.class
+        excelTaskValidator = CollegeSheetTaskValidator.class,
+        headerRowAt = 2,
+        headerColumnAt = "B"
 )
 public class CollegeSheet extends BaseSheet {
     @Cell("Name")
