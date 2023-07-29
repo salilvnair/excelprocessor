@@ -38,8 +38,6 @@ public @interface Cell {
 
     int pictureWidthInPixels() default 100;
 
-    int columnWidthInUnits() default -1;
-
     PictureType pictureType() default PictureType.JPEG;
 
     PictureSourceType pictureSource() default PictureSourceType.FILE_PATH;
@@ -47,28 +45,6 @@ public @interface Cell {
     PictureAnchorType pictureAnchorType() default PictureAnchorType.MOVE_AND_RESIZE;
 
     double pictureResizeScale() default 1.0;
-
-    boolean hasForegroundColor() default false;
-
-    boolean hasBackgroundColor() default false;
-
-    boolean hasFillPattern() default false;
-
-    boolean hasBorderStyle() default false;
-
-    boolean hasBorderColor() default false;
-
-    boolean wrapText() default false;
-
-    IndexedColors foregroundColor() default IndexedColors.AUTOMATIC;
-
-    IndexedColors backgroundColor() default IndexedColors.AUTOMATIC;
-
-    short fillPattern() default 1;
-
-    short borderStyle() default 0;
-
-    IndexedColors borderColor() default IndexedColors.AUTOMATIC;
 
     boolean hyperLink() default false;
     String hyperLinkText() default "";

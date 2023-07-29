@@ -5,6 +5,6 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellV
 
 import java.util.List;
 
-public interface IExcelValidator {
+public interface ExcelValidator {
 	List<CellValidationMessage> validate(Object currentInstance, CellValidatorContext validatorContext);
 }

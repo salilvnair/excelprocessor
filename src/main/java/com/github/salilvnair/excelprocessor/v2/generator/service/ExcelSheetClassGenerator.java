@@ -47,7 +47,7 @@ public class ExcelSheetClassGenerator {
         AnnotationUtil.changeValue(sheet, "headerColumnEndsAt", sheetInfo.headerColumnEndsAt());
         AnnotationUtil.changeValue(sheet, "ignoreHeaderPatterns", sheetInfo.ignoreHeaderPatterns());
         List<? extends BaseSheet> readList = reader.read(dynamicHeaderSheet.getClass(), sheetContext);
-        return classTemplate(sheetInfo, sheet.value(), sheet.vertical(), readList.get(0).sheetHeaders(), readList.get(0).cells(), sheet.headerRowAt(), sheet.headerColumnAt());
+        return classTemplate2(sheetInfo, sheet.value(), sheet.vertical(), readList.get(0).sheetHeaders(), readList.get(0).cells(), sheet.headerRowAt(), sheet.headerColumnAt());
     }
 
     public static Set<String> findDuplicates(List<String> list) {
@@ -66,8 +66,9 @@ public class ExcelSheetClassGenerator {
         Map<String, String> javaFieldNameKeyedSheetHeaderMap = new LinkedHashMap<>();
         List<String> javaFieldNames = new ArrayList<>();
         headerKeyedCellInfoMap.forEach((header, cellInfo) -> {
-            header = ExcelSheetReaderUtil.cleanHeaderString(header);
-            String javaVar = constructValidJavaVariableNameFromHeader(header);
+            String originalHeader = cellInfo.originalHeader();
+            originalHeader = ExcelSheetReaderUtil.cleanHeaderString(originalHeader);
+            String javaVar = constructValidJavaVariableNameFromHeader(originalHeader);
             javaFieldNames.add(javaVar);
             javaFieldNameKeyedSheetHeaderMap.put(javaVar, header);
         });
@@ -90,8 +91,8 @@ public class ExcelSheetClassGenerator {
             CellInfo cellInfo = headerKeyedCellInfoMap.get(sheetHeaderKey);
             String typeString = cellInfo.cellTypeString();
             typeString = typeString == null ? CellInfo.CELL_TYPE_STRING : sheetInfo.allCellTypeToString() ? CellInfo.CELL_TYPE_STRING : typeString;
-            if(containsDuplicateHeader(cellInfo) || allDuplicateHeaders.contains(sheetHeaderKey)) {
-                sheetHeaderKey = cellInfo.originalHeader();
+            sheetHeaderKey = cellInfo.originalHeader();
+            if(allDuplicateHeaders.contains(cellInfo.originalHeader())) {
                 if(vertical) {
                     sb.append("    @Cell(value=\"").append(sheetHeaderKey).append("\", row=").append(cellInfo.rowIndex() + 1).append(")\n");
                 }
@@ -136,12 +137,88 @@ public class ExcelSheetClassGenerator {
         return sb.toString();
     }
 
+    private static String classTemplate2(SheetInfo sheetInfo, String sheetName, boolean vertical, List<String> sheetHeaders, Map<String, CellInfo> headerKeyedCellInfoMap, int headerRowNumber, String headerColumn) {
+        StringBuilder sb  = new StringBuilder();
+        boolean containsDuplicateHeaders = containsDuplicateHeaders(headerKeyedCellInfoMap);
+        Set<String> allDuplicateHeaders = findDuplicates(sheetHeaders);
+        String className = ExcelSheetReaderUtil.toCamelCase(sheetName);
+        className = ExcelSheetReaderUtil.deleteJavaInValidVariables(className);
+        String hasDuplicateHeaderString = "";
+        if(containsDuplicateHeaders) {
+            hasDuplicateHeaderString=", duplicateHeaders=true";
+        }
+        if(vertical) {
+            sb.append("@Sheet(value=\"").append(sheetName).append("\"").append(", vertical=true").append(hasDuplicateHeaderString).append(", headerRowAt=").append(headerRowNumber).append(", headerColumnAt=\"").append(headerColumn).append("\")\n");
+        }
+        else {
+            sb.append("@Sheet(value=\"").append(sheetName).append("\"").append(hasDuplicateHeaderString).append(", headerRowAt=").append(headerRowNumber).append(", headerColumnAt=\"").append(headerColumn).append("\")\n");
+        }
+        String parentBaseSheet = "BaseSheet";
+        sb.append("public class ").append(className).append("Sheet extends ").append(parentBaseSheet).append(" {\n");
+        for(String header: headerKeyedCellInfoMap.keySet()) {
+            CellInfo cellInfo = headerKeyedCellInfoMap.get(header);
+            String originalHeader = cellInfo.originalHeader();
+            String typeString = cellInfo.cellTypeString();
+            typeString = typeString == null ? CellInfo.CELL_TYPE_STRING : sheetInfo.allCellTypeToString() ? CellInfo.CELL_TYPE_STRING : typeString;
+            if(allDuplicateHeaders.contains(cellInfo.originalHeader())) {
+                if(vertical) {
+                    sb.append("    @Cell(value=\"").append(originalHeader).append("\", row=").append(cellInfo.rowIndex() + 1).append(")\n");
+                }
+                else {
+                    sb.append("    @Cell(value=\"").append(originalHeader).append("\", column=\"").append(ExcelSheetReader.toIndentName(cellInfo.columnIndex() + 1)).append("\")\n");
+                }
+            }
+            else {
+                sb.append("    @Cell(\"").append(originalHeader).append("\")\n");
+            }
+            String field = originalHeader;
+            field = ExcelSheetReaderUtil.cleanHeaderString(field);
+            field = constructValidJavaVariableNameFromHeader(field);
+            if(sheetInfo.useOriginalHeader()) {
+                field = constructValidJavaVariableNameFromHeader(originalHeader);
+            }
+            sb.append("    private ").append(typeString).append(" ").append(field).append(";");
+            sb.append("\n");
+        }
+        if(sheetInfo.skipGettersAndSetters()) {
+            sb.append("}\n");
+            return sb.toString();
+        }
+        sb.append("\n");
+        sb.append("  //getters and setters");
+        sb.append("\n");
+        for(String header: headerKeyedCellInfoMap.keySet()) {
+            CellInfo cellInfo = headerKeyedCellInfoMap.get(header);
+            String originalHeader = cellInfo.originalHeader();
+            String typeString = cellInfo.cellTypeString();
+            typeString = typeString == null ? CellInfo.CELL_TYPE_STRING : sheetInfo.allCellTypeToString() ? CellInfo.CELL_TYPE_STRING : typeString;
+            String field = originalHeader;
+            field = ExcelSheetReaderUtil.cleanHeaderString(field);
+            field = constructValidJavaVariableNameFromHeader(field);
+            if(sheetInfo.useOriginalHeader()) {
+                field = constructValidJavaVariableNameFromHeader(originalHeader);
+            }
+            String upperCaseFieldString = field.substring(0,1).toUpperCase()+field.substring(1);
+            sb.append("    public ").append(typeString).append(" get").append(upperCaseFieldString).append("() {");
+            sb.append("\n       return this.").append(field).append(";");
+            sb.append("\n    }\n");
+            sb.append("    public void set").append(upperCaseFieldString).append("(").append(typeString).append(" ").append(field).append(") {");
+            sb.append("\n        this.").append(field).append(" = ").append(field).append(";");
+            sb.append("\n    }\n");
+        }
+        sb.append("}\n");
+        return sb.toString();
+    }
+
     private static boolean containsDuplicateHeader(CellInfo cellInfo) {
         return !cellInfo.originalHeader().equals(cellInfo.getHeader());
     }
 
     private static boolean containsDuplicateHeaders(Map<String, CellInfo> headerKeyedCellInfoMap) {
-        return headerKeyedCellInfoMap.entrySet().stream().anyMatch(entry -> !entry.getValue().originalHeader().equals(entry.getValue().getHeader()));
+        List<String> headers = headerKeyedCellInfoMap.values().stream().map(CellInfo::originalHeader).collect(Collectors.toList());
+        Set<String> uniqueHeaders = new HashSet<>(headers);
+        return headers.size() != uniqueHeaders.size();
+//        return headerKeyedCellInfoMap.entrySet().stream().anyMatch(entry -> !entry.getValue().originalHeader().equals(entry.getValue().getHeader()));
     }
 
     private static String constructValidJavaVariableNameFromHeader(String header) {

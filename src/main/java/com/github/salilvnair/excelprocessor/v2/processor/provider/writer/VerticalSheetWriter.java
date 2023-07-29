@@ -27,6 +27,7 @@ public class VerticalSheetWriter extends BaseExcelSheetWriter {
         org.apache.poi.ss.usermodel.Sheet workbookSheet = workbook.createSheet(sheet.value());
         List<Field> cells = new ArrayList<>(cellFields);
         Row row = null;
+        context.setSheetData(sheetData);
         for (int r = 0; r < cellFields.size(); r++) {
             row = workbookSheet.createRow(r);
             Field cellField = cells.get(r);
@@ -35,15 +36,16 @@ public class VerticalSheetWriter extends BaseExcelSheetWriter {
                 Object fieldValue = cell.value();
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
                 writeDataToHeaderCell(sheet, cell, rowCell, fieldValue);
-                applyCellStyles(rowCell, cellField);
+                applyHeaderCellStyles(sheet, cell, rowCell, cellField, fieldValue, context);
             }
             for (int c = 0; c < sheetData.size(); c++) {
                 BaseSheet sheetDataObj = sheetData.get(c);
+                context.setSheetDataObj(sheetDataObj);
                 Cell cell = cellField.getAnnotation(Cell.class);
                 Object fieldValue = ReflectionUtil.getFieldValue(sheetDataObj, cellField);
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c+1);
-                writeDataToCell(sheet, cell, rowCell, fieldValue);
-                applyCellStyles(rowCell, cellField);
+                writeDataToCell(sheet, cell, rowCell, cellField, fieldValue);
+                applyDataCellStyles(sheet, cell, rowCell, cellField, fieldValue, context);
             }
         }
         context.setWorkbook(workbook);

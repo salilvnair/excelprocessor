@@ -6,14 +6,9 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellUtil;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +31,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
                 int createColumnIndex = c + headerColumnIndex;
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(createColumnIndex);
                 writeDataToHeaderCell(sheet, cell, rowCell, fieldValue);
-                applyCellStyles(rowCell, cellField);
+                applyHeaderCellStyles(sheet, cell, rowCell, cellField, fieldValue, context);
             }
         }
     }
@@ -45,8 +40,10 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         int headerRowIndex = sheet.headerRowAt() - 1;
         int valueRowIndex = sheet.valueRowAt()!=-1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
+        context.setSheetData(sheetData);
         for (int r = 0; r < sheetData.size(); r++) {
             BaseSheet sheetDataObj = sheetData.get(r);
+            context.setSheetDataObj(sheetDataObj);
             int createRowIndex = r + valueRowIndex;
             Row row = workbookSheet.createRow(createRowIndex);
             for (int c = 0; c < cellFields.size(); c++) {
@@ -55,8 +52,8 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
                 Object fieldValue = ReflectionUtil.getFieldValue(sheetDataObj, cellField);
                 int createColumnIndex = c + headerColumnIndex;
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(createColumnIndex);
-                writeDataToCell(sheet, cellInfo, rowCell, fieldValue);
-                applyCellStyles(rowCell, cellField);
+                writeDataToCell(sheet, cellInfo, rowCell, cellField, fieldValue);
+                applyDataCellStyles(sheet, cellInfo, rowCell, cellField, fieldValue, context);
                 FormulaEvaluator evaluator = workbookSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
                 evaluator.evaluateFormulaCell(rowCell);
             }

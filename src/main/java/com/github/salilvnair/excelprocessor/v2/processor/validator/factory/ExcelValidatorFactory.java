@@ -4,7 +4,7 @@ import com.github.salilvnair.excelprocessor.v2.annotation.AllowedValues;
 import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.ExcelSheetValidatorType;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.core.IExcelValidator;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.core.ExcelValidator;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.provider.*;
 
 import java.lang.reflect.Field;
@@ -18,8 +18,8 @@ import java.util.List;
 public class ExcelValidatorFactory {
     private ExcelValidatorFactory(){}
 
-    public static List<IExcelValidator> generate(Object classInstance, ExcelSheetValidatorType excelSheetValidatorType) {
-        List<IExcelValidator> validators = new ArrayList<>();
+    public static List<ExcelValidator> generate(Object classInstance, ExcelSheetValidatorType excelSheetValidatorType) {
+        List<ExcelValidator> validators = new ArrayList<>();
         if(ExcelSheetValidatorType.ROW.equals(excelSheetValidatorType)) {
             validators = generateRowValidators(classInstance);
         }
@@ -35,15 +35,15 @@ public class ExcelValidatorFactory {
         return validators;
     }
 
-    private static List<IExcelValidator> generateSheetValidators(Object classInstance) {
-        List<IExcelValidator> validators = new ArrayList<>();
+    private static List<ExcelValidator> generateSheetValidators(Object classInstance) {
+        List<ExcelValidator> validators = new ArrayList<>();
         List<?> nodeList = (List<?>) classInstance;
         validators.add(new SheetValidator(nodeList));
         return validators;
     }
 
-    private static List<IExcelValidator> generateCellValidators(Field field) {
-        List<IExcelValidator> validators = new ArrayList<>();
+    private static List<ExcelValidator> generateCellValidators(Field field) {
+        List<ExcelValidator> validators = new ArrayList<>();
 
         CellValidation cellValidation = field.getAnnotation(CellValidation.class);
         if(cellValidation != null) {
@@ -58,16 +58,16 @@ public class ExcelValidatorFactory {
         return validators;
     }
 
-    private static Collection<? extends IExcelValidator> generateAllowedValueValidators(Field field, CellValidation cellValidation) {
-        List<IExcelValidator> validators = new ArrayList<>();
+    private static Collection<? extends ExcelValidator> generateAllowedValueValidators(Field field, CellValidation cellValidation) {
+        List<ExcelValidator> validators = new ArrayList<>();
         if(cellValidation.required()) {
             validators.add(new AllowedValueValidator(field));
         }
         return validators;
     }
 
-    private static List<IExcelValidator> generateCellValidators(Field field, CellValidation cellValidation) {
-        List<IExcelValidator> validators = new ArrayList<>();
+    private static List<ExcelValidator> generateCellValidators(Field field, CellValidation cellValidation) {
+        List<ExcelValidator> validators = new ArrayList<>();
         if(cellValidation.required()) {
             validators.add(new RequiredValidator(field));
         }
@@ -101,14 +101,14 @@ public class ExcelValidatorFactory {
         return validators;
     }
 
-    private static List<IExcelValidator> generateRowValidators(Object classInstance) {
-        List<IExcelValidator> validators = new ArrayList<>();
+    private static List<ExcelValidator> generateRowValidators(Object classInstance) {
+        List<ExcelValidator> validators = new ArrayList<>();
         validators.add(new RowValidator(classInstance));
         return validators;
     }
 
-    private static List<IExcelValidator> generateSectionValidators(Field sectionField) {
-        List<IExcelValidator> validators = new ArrayList<>();
+    private static List<ExcelValidator> generateSectionValidators(Field sectionField) {
+        List<ExcelValidator> validators = new ArrayList<>();
         validators.add(new SectionValidator(sectionField));
         return validators;
     }

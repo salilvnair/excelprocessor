@@ -35,7 +35,13 @@ public class ExcelSheetReaderUtil {
 
     public static String deleteJavaInValidVariables(String before) {
         String javaInValidVariables = "[^0-9a-zA-Z]";
-        return before.replaceAll(javaInValidVariables, "");
+        String validJavaString = before.replaceAll(javaInValidVariables, "");
+        int index = 0;
+        while(index < validJavaString.length() && Character.isDigit(validJavaString.charAt(index))) {
+            index ++;
+        }
+        validJavaString = index == 0 ? validJavaString : validJavaString.substring(index) + validJavaString.substring(0 , index);
+        return validJavaString;
     }
 
     public static String toCamelCase(String s) {

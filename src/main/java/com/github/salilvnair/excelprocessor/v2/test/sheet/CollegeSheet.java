@@ -1,13 +1,10 @@
 package com.github.salilvnair.excelprocessor.v2.test.sheet;
 
 
-import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
-import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
-import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
+import com.github.salilvnair.excelprocessor.v2.annotation.*;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.test.sheet.task.CollegeSheetTaskValidator;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
-import com.github.salilvnair.excelprocessor.v2.type.PictureAnchorType;
 import com.github.salilvnair.excelprocessor.v2.type.PictureSourceType;
 
 import java.util.List;
@@ -16,10 +13,11 @@ import java.util.List;
         value="College",
         type = ExcelFileType.Extension.XLSX,
         excelTaskValidator = CollegeSheetTaskValidator.class,
-        headerRowAt = 2,
+        headerRowAt = 1,
         headerColumnAt = "B"
 )
 public class CollegeSheet extends BaseSheet {
+    @DataCellStyle(customTask = "highlightYellowIfValueIsEmpty")
     @Cell("Name")
     private String name;
     @CellValidation(customTask = "defaultUniversity")
@@ -34,23 +32,23 @@ public class CollegeSheet extends BaseSheet {
     @Cell(value = "University Webpage URL", hyperLink = true, hyperLinkText = "Click here to open")
     private String universityHomepageURL;
 
+    @HeaderCellStyle(columnWidthInUnits = 50*256)
     @Cell(value="Images",
         pictureResizeScale=-1,
         multiPicture = true,
         pictureHeightInPixels = 30,
         pictureWidthInPixels = 30,
         pictureMarginInPixels = 5,
-        columnWidthInUnits = 50*256,
         pictureSource= PictureSourceType.BYTE_ARRAY)
     private List<Byte[]> images;
 
+    @HeaderCellStyle(columnWidthInUnits = 50*256)
     @Cell(value="Image",
         pictureResizeScale=-1,
         picture = true,
         pictureHeightInPixels = 30,
         pictureWidthInPixels = 30,
         pictureMarginInPixels = 5,
-        columnWidthInUnits = 50*256,
         pictureSource= PictureSourceType.BYTE_ARRAY)
     private Byte[] image;
 

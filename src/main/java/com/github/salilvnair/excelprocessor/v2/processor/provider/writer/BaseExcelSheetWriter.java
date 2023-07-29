@@ -1,6 +1,9 @@
 package com.github.salilvnair.excelprocessor.v2.processor.provider.writer;
 
+import com.github.salilvnair.excelprocessor.v2.annotation.DataCellStyle;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.DataCellStyleWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.HeaderCellStyleWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.type.PictureSourceType;
 import com.github.salilvnair.excelprocessor.v2.type.PictureType;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
@@ -36,8 +39,8 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         processCommonCellData(sheetInfo, cellInfo, rowCell, value);
     }
 
-    protected void writeDataToCell(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
-        initCellProperties(sheetInfo, cellInfo, rowCell, value);
+    protected void writeDataToCell(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, Object value) {
+        initCellProperties(sheetInfo, cellInfo, rowCell, cellField, value);
         if(cellInfo.hyperLink()) {
             processHyperLink(sheetInfo, cellInfo, rowCell, value);
         }
@@ -49,9 +52,13 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         }
     }
 
-    private void initCellProperties(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value) {
-        if(cellInfo.columnWidthInUnits() != -1) {
-            rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), cellInfo.columnWidthInUnits());
+    private void initCellProperties(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, Object value) {
+        DataCellStyle dataCellStyle = cellField.getAnnotation(DataCellStyle.class);
+        if(dataCellStyle == null) {
+            return;
+        }
+        if(dataCellStyle.columnWidthInUnits() != -1) {
+            rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), dataCellStyle.columnWidthInUnits());
         }
     }
 
@@ -203,30 +210,12 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         return formulaBuilder.toString();
     }
 
-    protected void applyCellStyles(org.apache.poi.ss.usermodel.Cell rowCell, Field cellField) {
-        Cell cellAnnotatedField = cellField.getAnnotation(Cell.class);
-        CellUtil.setCellStyleProperty(rowCell, CellUtil.WRAP_TEXT, cellAnnotatedField.wrapText());
-        if(cellAnnotatedField.hasBorderStyle()) {
-            CellUtil.setCellStyleProperty(rowCell, CellUtil.BORDER_TOP, cellAnnotatedField.borderStyle());
-            CellUtil.setCellStyleProperty(rowCell, CellUtil.BORDER_RIGHT, cellAnnotatedField.borderStyle());
-            CellUtil.setCellStyleProperty(rowCell, CellUtil.BORDER_BOTTOM, cellAnnotatedField.borderStyle());
-            CellUtil.setCellStyleProperty(rowCell, CellUtil.BORDER_LEFT, cellAnnotatedField.borderStyle());
-        }
-        if(cellAnnotatedField.hasBorderColor()) {
-            CellUtil.setCellStyleProperty(rowCell, CellUtil.TOP_BORDER_COLOR, cellAnnotatedField.borderColor().getIndex());
-            CellUtil.setCellStyleProperty(rowCell, CellUtil.RIGHT_BORDER_COLOR, cellAnnotatedField.borderColor().getIndex());
-            CellUtil.setCellStyleProperty(rowCell, CellUtil.BOTTOM_BORDER_COLOR, cellAnnotatedField.borderColor().getIndex());
-            CellUtil.setCellStyleProperty(rowCell, CellUtil.LEFT_BORDER_COLOR, cellAnnotatedField.borderColor().getIndex());
-        }
-        if(cellAnnotatedField.hasFillPattern()) {
-            CellUtil.setCellStyleProperty(rowCell, CellUtil.FILL_PATTERN, cellAnnotatedField.fillPattern());
-        }
-        if(cellAnnotatedField.hasBackgroundColor()) {
-            CellUtil.setCellStyleProperty(rowCell, CellUtil.FILL_BACKGROUND_COLOR, cellAnnotatedField.backgroundColor().getIndex());
-        }
-        if(cellAnnotatedField.hasForegroundColor()) {
-            CellUtil.setCellStyleProperty(rowCell, CellUtil.FILL_FOREGROUND_COLOR, cellAnnotatedField.foregroundColor().getIndex());
-        }
+    protected void applyHeaderCellStyles(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, Object fieldValue, ExcelSheetWriterContext context) {
+        HeaderCellStyleWriterUtil.applyCellStyles(sheet, cell, rowCell, cellField, fieldValue, context);
+    }
+
+    protected void applyDataCellStyles(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, Object fieldValue, ExcelSheetWriterContext context) {
+        DataCellStyleWriterUtil.applyCellStyles(sheet, cell, rowCell, cellField, fieldValue, context);
     }
 
     public void copyRowStyle(Workbook workbook, org.apache.poi.ss.usermodel.Sheet oldSheet, org.apache.poi.ss.usermodel.Sheet newSheet, int oldRowNum, int newRowNum, int oldCellNum, int newCellNum) {

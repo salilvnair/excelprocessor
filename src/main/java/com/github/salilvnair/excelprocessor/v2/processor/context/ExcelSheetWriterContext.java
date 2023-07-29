@@ -1,7 +1,12 @@
 package com.github.salilvnair.excelprocessor.v2.processor.context;
 
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import lombok.*;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Workbook;
+
+import java.lang.reflect.Field;
+import java.util.List;
 
 /**
  * @author Salil V Nair
@@ -21,6 +26,16 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
 
     private boolean containsExistingWorkbook;
 
+    private Cell rowCell;
+
+    private Field cellField;
+
+    private Object cellValue;
+
+    private List<? extends BaseSheet> sheetData;
+
+    private BaseSheet sheetDataObj;
+
     public Workbook workbook() {
         return super.getWorkbook();
     }
@@ -37,6 +52,34 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
     }
     public Workbook existingWorkbook() {
         return this.existingWorkbook;
+    }
+
+
+    public Cell rowCell() {
+        return  rowCell;
+    }
+
+    public Field cellField() {
+        return  cellField;
+    }
+
+    public Object cellValue() {
+        return cellValue;
+    }
+
+    public List<? extends BaseSheet> sheetData() {
+        return  sheetData;
+    }
+
+    public BaseSheet sheetDataObj() {
+        return  sheetDataObj;
+    }
+
+    public <T> T sheet(Class<T> clazz) {
+        if(clazz.isInstance(sheetDataObj)) {
+            return clazz.cast(sheetDataObj);
+        }
+        return null;
     }
 
 }

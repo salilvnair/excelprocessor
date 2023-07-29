@@ -52,7 +52,7 @@ public class ExcelProcessorTestSuite {
     private static List<? extends BaseSheet> prepareCollegeSheet() {
         List<CollegeSheet> sheetData = new ArrayList<>();
         CollegeSheet collegeSheet = new CollegeSheet();
-        collegeSheet.setName("SRM");
+//        collegeSheet.setName("SRM");
         collegeSheet.setState("Chennai");
         collegeSheet.setUniversity("Anna University");
         collegeSheet.setNoOfStudents(5000L);
@@ -68,16 +68,17 @@ public class ExcelProcessorTestSuite {
 
     private static void generateClassTemplate(String fileName) throws Exception {
         ExcelSheetContext.ExcelSheetContextBuilder builder = ExcelSheetContext.builder();
-        builder.fileName(fileName);
-        InputStream inputS = ExcelSheetReaderUtil.resourceStream(com.github.salilvnair.excelprocessor.v1.test.ExcelProcessorTestSuite.TEST_EXCEL_FOLDER, fileName);
-        Workbook workbook = ExcelSheetReaderUtil.generateWorkbook(inputS, fileName);
-        builder.workbook(workbook);
+//        builder.fileName(fileName);
+//        InputStream inputS = ExcelSheetReaderUtil.resourceStream(com.github.salilvnair.excelprocessor.v1.test.ExcelProcessorTestSuite.TEST_EXCEL_FOLDER, fileName);
+//        Workbook workbook = ExcelSheetReaderUtil.generateWorkbook(inputS, fileName);
+//        builder.workbook(workbook);
+        builder.excelFile(new File("/Users/salilvnair/workspace/dbv/Bulk_Order_Correction_Download_Upload.xlsx"));
         ExcelSheetContext sheetContext = builder.build();
         SheetInfo.SheetInfoBuilder sheetInfoBuilder = SheetInfo.builder();
         sheetInfoBuilder
-                .name("MaterialRelations")
-                .headerRowAt(1)
-                .headerColumnAt("A");
+                .name("Bulk Order correction download")
+                .headerRowAt(2)
+                .headerColumnAt("B");
         System.out.println(ExcelSheetClassGenerator.generate(sheetContext, sheetInfoBuilder.build()));
     }
 

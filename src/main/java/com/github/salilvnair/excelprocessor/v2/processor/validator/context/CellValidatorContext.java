@@ -3,7 +3,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.validator.context;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.core.IExcelValidator;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.core.ExcelValidator;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 
 import java.lang.reflect.Field;
@@ -20,7 +20,7 @@ public class CellValidatorContext {
     private Field field;
     private ExcelSheetContext sheetContext;
     private ExcelSheetReaderContext readerContext;
-    private IExcelValidator validator;
+    private ExcelValidator validator;
     private Map<String,Object> userValidatorMap;
     private Map<String,List<String>> validValuesDataSet;
     private Map<String,String> userDefinedMessageDataSet;
@@ -91,11 +91,11 @@ public class CellValidatorContext {
         this.sheet = sheet;
     }
 
-    public IExcelValidator validator() {
+    public ExcelValidator validator() {
         return validator;
     }
 
-    public void setValidator(IExcelValidator validator) {
+    public void setValidator(ExcelValidator validator) {
         this.validator = validator;
     }
 

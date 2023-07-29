@@ -3,7 +3,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.validator.helper;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.ExcelSheetValidatorType;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.core.IExcelValidator;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.core.ExcelValidator;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.factory.ExcelValidatorFactory;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 
@@ -15,7 +15,7 @@ import java.util.List;
  * @author Salil V Nair
  */
 public class ExcelSheetValidatorUtil {
-    private List<IExcelValidator> excelValidators;
+    private List<ExcelValidator> excelValidators;
 
     private CellValidatorContext validatorContext;
 
@@ -41,18 +41,18 @@ public class ExcelSheetValidatorUtil {
 
     public List<CellValidationMessage> validate(Object requestInstance, CellValidatorContext validatorContext) {
         List<CellValidationMessage> errors = new ArrayList<>();
-        for (IExcelValidator v : excelValidators()) {
+        for (ExcelValidator v : excelValidators()) {
             errors.addAll(v.validate(requestInstance,validatorContext));
         }
         return errors;
     }
 
-    public List<IExcelValidator> excelValidators() {
+    public List<ExcelValidator> excelValidators() {
         return excelValidators;
     }
 
-    public void setRowValidators(List<IExcelValidator> IExcelValidators) {
-        this.excelValidators = IExcelValidators;
+    public void setRowValidators(List<ExcelValidator> ExcelValidators) {
+        this.excelValidators = ExcelValidators;
     }
 
     private void init(Object object,ExcelSheetValidatorType sheetValidatorType) {
