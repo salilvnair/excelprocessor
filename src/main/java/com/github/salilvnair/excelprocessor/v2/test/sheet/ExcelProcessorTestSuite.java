@@ -68,15 +68,11 @@ public class ExcelProcessorTestSuite {
 
     private static void generateClassTemplate(String fileName) throws Exception {
         ExcelSheetContext.ExcelSheetContextBuilder builder = ExcelSheetContext.builder();
-//        builder.fileName(fileName);
-//        InputStream inputS = ExcelSheetReaderUtil.resourceStream(com.github.salilvnair.excelprocessor.v1.test.ExcelProcessorTestSuite.TEST_EXCEL_FOLDER, fileName);
-//        Workbook workbook = ExcelSheetReaderUtil.generateWorkbook(inputS, fileName);
-//        builder.workbook(workbook);
-        builder.excelFile(new File("/Users/salilvnair/workspace/dbv/Bulk_Order_Correction_Download_Upload.xlsx"));
+        builder.excelFile(new File("/Users/salilvnair/workspace/dbv/data.xlsx"));
         ExcelSheetContext sheetContext = builder.build();
         SheetInfo.SheetInfoBuilder sheetInfoBuilder = SheetInfo.builder();
         sheetInfoBuilder
-                .name("Bulk Order correction download")
+                .name("Sheet1")
                 .headerRowAt(2)
                 .headerColumnAt("B");
         System.out.println(ExcelSheetClassGenerator.generate(sheetContext, sheetInfoBuilder.build()));
