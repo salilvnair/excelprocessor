@@ -16,8 +16,10 @@ import java.util.List;
         headerRowAt = 1,
         headerColumnAt = "B"
 )
+@DataCellStyle(
+        customTask = "highlightYellowIfValueIsEmpty"
+)
 public class CollegeSheet extends BaseSheet {
-    @DataCellStyle(customTask = "highlightYellowIfValueIsEmpty")
     @Cell("Name")
     private String name;
     @CellValidation(customTask = "defaultUniversity")

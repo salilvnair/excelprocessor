@@ -30,7 +30,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
                 Object fieldValue = cell.value();
                 int createColumnIndex = c + headerColumnIndex;
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(createColumnIndex);
-                writeDataToHeaderCell(sheet, cell, rowCell, fieldValue);
+                writeDataToHeaderCell(sheet, cell, rowCell, fieldValue, context);
                 applyHeaderCellStyles(sheet, cell, rowCell, cellField, fieldValue, context);
             }
         }
@@ -52,7 +52,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
                 Object fieldValue = ReflectionUtil.getFieldValue(sheetDataObj, cellField);
                 int createColumnIndex = c + headerColumnIndex;
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(createColumnIndex);
-                writeDataToCell(sheet, cellInfo, rowCell, cellField, fieldValue);
+                writeDataToCell(sheet, cellInfo, rowCell, cellField, fieldValue, context);
                 applyDataCellStyles(sheet, cellInfo, rowCell, cellField, fieldValue, context);
                 FormulaEvaluator evaluator = workbookSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
                 evaluator.evaluateFormulaCell(rowCell);

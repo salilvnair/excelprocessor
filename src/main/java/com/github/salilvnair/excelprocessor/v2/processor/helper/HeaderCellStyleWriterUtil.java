@@ -5,7 +5,6 @@ import com.github.salilvnair.excelprocessor.v2.annotation.HeaderCellStyle;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.util.CellUtil;
 
 import java.lang.reflect.Field;
 
@@ -17,7 +16,7 @@ public class HeaderCellStyleWriterUtil {
         applyStaticCellStyles(sheet, cell, rowCell, cellField, writerContext);
     }
     public static void applyStaticCellStyles(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, ExcelSheetWriterContext writerContext) {
-        HeaderCellStyle headerCellStyle = cellField.getAnnotation(HeaderCellStyle.class);
+        HeaderCellStyle headerCellStyle = extractHeaderCellStyle(cellField, writerContext.getSheetDataObj());
         if(headerCellStyle == null) {
             return;
         }
@@ -46,6 +45,14 @@ public class HeaderCellStyleWriterUtil {
             cellStyle.setFillForegroundColor(headerCellStyle.foregroundColor().getIndex());
         }
         rowCell.setCellStyle(cellStyle);
+    }
+
+    public static HeaderCellStyle extractHeaderCellStyle(Field annotatedField, Object annotatedClassObject) {
+        HeaderCellStyle headerCellStyle = annotatedField.getAnnotation(HeaderCellStyle.class);
+        if(headerCellStyle == null) {
+            headerCellStyle = annotatedClassObject.getClass().getAnnotation(HeaderCellStyle.class);
+        }
+        return headerCellStyle;
     }
     
 }

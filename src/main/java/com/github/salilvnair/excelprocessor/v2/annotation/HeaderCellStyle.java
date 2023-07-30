@@ -11,17 +11,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
+@Target({ElementType.TYPE, ElementType.FIELD})
 public @interface HeaderCellStyle {
-	boolean conditional() default false;
+    boolean conditional() default false;
 
-	String condition() default "";
+    String condition() default "";
 
     boolean applyStyleBeforeTask() default false;
 
-	String customTask() default "";
+    String customTask() default "";
 
-	String[] customTasks() default {};
+    String[] customTasks() default {};
 
     boolean hasForegroundColor() default false;
 

@@ -8,10 +8,6 @@ import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.writer.task.helper.ExcelCellStyleTaskExecutor;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.util.CellUtil;
-
 import java.lang.reflect.Field;
 
 public class DataCellStyleWriterUtil {
@@ -19,7 +15,7 @@ public class DataCellStyleWriterUtil {
 
 
     public static void applyCellStyles(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, Object fieldValue, ExcelSheetWriterContext writerContext) {
-        DataCellStyle dataCellStyle = cellField.getAnnotation(DataCellStyle.class);
+        DataCellStyle dataCellStyle = extractDataCellStyle(cellField, writerContext.getSheetDataObj());
         if(dataCellStyle == null) {
             return;
         }
@@ -38,7 +34,7 @@ public class DataCellStyleWriterUtil {
     }
 
     private static void executeCustomTaskWithCellStyle(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, ExcelSheetWriterContext writerContext) {
-        DataCellStyle dataCellStyle = cellField.getAnnotation(DataCellStyle.class);
+        DataCellStyle dataCellStyle = extractDataCellStyle(cellField, writerContext.getSheetDataObj());
         if(dataCellStyle == null) {
             return;
         }
@@ -60,7 +56,7 @@ public class DataCellStyleWriterUtil {
     }
 
     private static void applyConditionalCellStyle(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, ExcelSheetWriterContext writerContext) {
-        DataCellStyle dataCellStyle = cellField.getAnnotation(DataCellStyle.class);
+        DataCellStyle dataCellStyle =  extractDataCellStyle(cellField, writerContext.getSheetDataObj());
         if(dataCellStyle == null) {
             return;
         }
@@ -71,7 +67,7 @@ public class DataCellStyleWriterUtil {
     }
 
     public static void applyStaticCellStyles(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, ExcelSheetWriterContext writerContext) {
-        DataCellStyle dataCellStyle = cellField.getAnnotation(DataCellStyle.class);
+        DataCellStyle dataCellStyle =  extractDataCellStyle(cellField, writerContext.getSheetDataObj());
         if(dataCellStyle == null) {
             return;
         }
@@ -102,6 +98,14 @@ public class DataCellStyleWriterUtil {
             cellStyle.setFillForegroundColor(dataCellStyle.foregroundColor().getIndex());
         }
         rowCell.setCellStyle(cellStyle);
+    }
+
+    public static DataCellStyle extractDataCellStyle(Field annotatedField, Object annotatedClassObject) {
+        DataCellStyle dataCellStyle = annotatedField.getAnnotation(DataCellStyle.class);
+        if(dataCellStyle == null) {
+            dataCellStyle = annotatedClassObject.getClass().getAnnotation(DataCellStyle.class);
+        }
+        return dataCellStyle;
     }
     
 }

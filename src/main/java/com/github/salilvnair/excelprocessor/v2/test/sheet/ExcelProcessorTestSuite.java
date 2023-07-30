@@ -54,8 +54,8 @@ public class ExcelProcessorTestSuite {
         CollegeSheet collegeSheet = new CollegeSheet();
 //        collegeSheet.setName("SRM");
         collegeSheet.setState("Chennai");
-        collegeSheet.setUniversity("Anna University");
-        collegeSheet.setNoOfStudents(5000L);
+//        collegeSheet.setUniversity("Anna University");
+//        collegeSheet.setNoOfStudents(5000L);
         collegeSheet.setUniversityHomepageURL("https://www.salilvnair.com, https://www.google.com");
         sheetData.add(collegeSheet);
         return sheetData;
