@@ -16,9 +16,9 @@ import java.util.List;
         headerRowAt = 1,
         headerColumnAt = "B"
 )
-//@DataCellStyle(
-//        customTask = "highlightYellowIfValueIsEmpty"
-//)
+@DataCellStyle(
+        customTask = "highlightYellowIfValueIsEmpty"
+)
 public class CollegeSheet extends BaseSheet {
     @Cell("Name")
     private String name;
@@ -34,7 +34,7 @@ public class CollegeSheet extends BaseSheet {
     @Cell(value = "University Webpage URL", hyperLink = true, hyperLinkText = "Click here to open")
     private String universityHomepageURL;
 
-    //@HeaderCellStyle(columnWidthInUnits = 50*256)
+    @HeaderCellStyle(columnWidthInUnits = 50*256)
     @Cell(value="Images",
         pictureResizeScale=-1,
         multiPicture = true,
@@ -44,7 +44,7 @@ public class CollegeSheet extends BaseSheet {
         pictureSource= PictureSourceType.BYTE_ARRAY)
     private List<Byte[]> images;
 
-    //@HeaderCellStyle(columnWidthInUnits = 50*256)
+    @HeaderCellStyle(columnWidthInUnits = 50*256)
     @Cell(value="Image",
         pictureResizeScale=-1,
         picture = true,
