@@ -18,10 +18,11 @@ import java.util.Set;
 
 public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
 
-    protected void writeDataToHeader(Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, List<Field> cells, Sheet sheet, ExcelSheetWriterContext context) {
+    protected void writeDataToHeader(List<? extends BaseSheet> sheetData, Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, List<Field> cells, Sheet sheet, ExcelSheetWriterContext context) {
         Row row;
         int headerRowIndex = sheet.headerRowAt() - 1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
+        context.setSheetData(sheetData);
         if(context.template() == null) {
             row = workbookSheet.createRow(headerRowIndex);
             for (int c = 0; c < cellFields.size(); c++) {

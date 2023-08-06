@@ -23,7 +23,7 @@ public class HorizontalSheetWriter extends BaseHorizontalSheetWriter {
         Workbook workbook = writerContext.containsExistingWorkbook() ? writerContext.existingWorkbook() : writerContext.template() == null ? ExcelSheetWriterUtil.generateWorkbook(sheet) : writerContext.template();
         org.apache.poi.ss.usermodel.Sheet workbookSheet =  writerContext.template() == null ? workbook.createSheet(sheet.value()): workbook.getSheet(sheet.value());
         List<Field> cells = new ArrayList<>(cellFields);
-        writeDataToHeader(cellFields, workbookSheet, cells, sheet, writerContext);
+        writeDataToHeader(sheetData, cellFields, workbookSheet, cells, sheet, writerContext);
         writeDataToBody(sheetData, cellFields, workbookSheet, cells, sheet, writerContext);
         writerContext.setWorkbook(workbook);
     }

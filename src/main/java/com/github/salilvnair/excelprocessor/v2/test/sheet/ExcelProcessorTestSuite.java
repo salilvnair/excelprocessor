@@ -29,9 +29,9 @@ public class ExcelProcessorTestSuite {
                                                 .builder()
                 .filePath("/Users/salilvnair/workspace/dbv")
                 .fileName("pictureText2.xlsx")
-                .template(new File("/Users/salilvnair/workspace/dbv/pictureText.xlsx"))
+                //.template(new File("/Users/salilvnair/workspace/dbv/pictureText.xlsx"))
                  .build();
-        pictureSheetWriter(sheetData, excelSheetContext);
+        sheetWriter(sheetData, excelSheetContext);
         //generateClassTemplate("consistof.xlsx");
     }
 

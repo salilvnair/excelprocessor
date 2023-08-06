@@ -13,6 +13,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWrite
 import com.github.salilvnair.excelprocessor.v2.processor.provider.core.BaseExcelProcessor;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.*;
@@ -77,15 +78,17 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         else if(cellInfo.multiPicture()) {
             List<Object> imageValues = (List<Object>) value;
             int i = 0;
-            for(Object imageValue: imageValues) {
-                int r = rowCell.getRow().getRowNum();
-                int c = rowCell.getColumnIndex();
-                int dx1 = Units.pixelToEMU(i * (cellInfo.pictureWidthInPixels()) + cellInfo.pictureMarginInPixels());
-                int dy1 = Units.pixelToEMU(0);
-                int dx2 = Units.pixelToEMU((i + 1) * cellInfo.pictureWidthInPixels());
-                int dy2 = Units.pixelToEMU(cellInfo.pictureHeightInPixels());
-                drawImageOnExcelSheet(rowCell.getSheet(), r, r, c, c, dx1, dy1, dx2, dy2, imageValue, cellInfo);
-                i++;
+            if(CollectionUtils.isNotEmpty(imageValues)) {
+                for(Object imageValue: imageValues) {
+                    int r = rowCell.getRow().getRowNum();
+                    int c = rowCell.getColumnIndex();
+                    int dx1 = Units.pixelToEMU(i * (cellInfo.pictureWidthInPixels()) + cellInfo.pictureMarginInPixels());
+                    int dy1 = Units.pixelToEMU(0);
+                    int dx2 = Units.pixelToEMU((i + 1) * cellInfo.pictureWidthInPixels());
+                    int dy2 = Units.pixelToEMU(cellInfo.pictureHeightInPixels());
+                    drawImageOnExcelSheet(rowCell.getSheet(), r, r, c, c, dx1, dy1, dx2, dy2, imageValue, cellInfo);
+                    i++;
+                }
             }
         }
     }
@@ -259,6 +262,9 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
                 InputStream is = Files.newInputStream(Paths.get((String) pictureSource));
                 bytes = IOUtils.toByteArray(is);
                 is.close();
+            }
+            if(bytes == null) {
+                return;
             }
             int pictureType = Workbook.PICTURE_TYPE_JPEG;
             if(cell.pictureType().equals(PictureType.PNG)){

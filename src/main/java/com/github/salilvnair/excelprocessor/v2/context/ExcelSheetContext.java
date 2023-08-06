@@ -7,10 +7,13 @@ import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReader
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -258,6 +261,66 @@ public class ExcelSheetContext {
                 }
             }
             excelSheetContext.setTemplate(templateFile);
+            excelSheetContext.setWorkbook(workbook);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder template(InputStream inputStream, String fileNameWithExtension) {
+            Workbook workbook = null;
+            try {
+                workbook = ExcelSheetWriterUtil.generateWorkbook(inputStream, fileNameWithExtension);
+
+            }
+            catch (Exception e) {
+                if(!excelSheetContext.suppressExceptions()) {
+                    throw new ExcelSheetWriterException(e);
+                }
+            }
+            excelSheetContext.setWorkbook(workbook);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder template(InputStream inputStream, ExcelFileType excelFileType) {
+            Workbook workbook = null;
+            try {
+                workbook = ExcelSheetWriterUtil.generateWorkbook(inputStream, excelFileType);
+
+            }
+            catch (Exception e) {
+                if(!excelSheetContext.suppressExceptions()) {
+                    throw new ExcelSheetWriterException(e);
+                }
+            }
+            excelSheetContext.setWorkbook(workbook);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder template(byte[] bytes, String fileNameWithExtension) {
+            Workbook workbook = null;
+            try {
+                workbook = ExcelSheetWriterUtil.generateWorkbook(new ByteArrayInputStream(bytes), fileNameWithExtension);
+
+            }
+            catch (Exception e) {
+                if(!excelSheetContext.suppressExceptions()) {
+                    throw new ExcelSheetWriterException(e);
+                }
+            }
+            excelSheetContext.setWorkbook(workbook);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder template(byte[] bytes, ExcelFileType excelFileType) {
+            Workbook workbook = null;
+            try {
+                workbook = ExcelSheetWriterUtil.generateWorkbook(new ByteArrayInputStream(bytes), excelFileType);
+
+            }
+            catch (Exception e) {
+                if(!excelSheetContext.suppressExceptions()) {
+                    throw new ExcelSheetWriterException(e);
+                }
+            }
             excelSheetContext.setWorkbook(workbook);
             return this;
         }

@@ -4,6 +4,7 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.HeaderCellStyle;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 
 import java.lang.reflect.Field;
@@ -16,7 +17,7 @@ public class HeaderCellStyleWriterUtil {
         applyStaticCellStyles(sheet, cell, rowCell, cellField, writerContext);
     }
     public static void applyStaticCellStyles(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, ExcelSheetWriterContext writerContext) {
-        HeaderCellStyle headerCellStyle = extractHeaderCellStyle(cellField, writerContext.getSheetDataObj());
+        HeaderCellStyle headerCellStyle = extractHeaderCellStyle(cellField, writerContext);
         if(headerCellStyle == null) {
             return;
         }
@@ -47,10 +48,12 @@ public class HeaderCellStyleWriterUtil {
         rowCell.setCellStyle(cellStyle);
     }
 
-    public static HeaderCellStyle extractHeaderCellStyle(Field annotatedField, Object annotatedClassObject) {
+    public static HeaderCellStyle extractHeaderCellStyle(Field annotatedField, ExcelSheetWriterContext writerContext) {
         HeaderCellStyle headerCellStyle = annotatedField.getAnnotation(HeaderCellStyle.class);
         if(headerCellStyle == null) {
-            headerCellStyle = annotatedClassObject.getClass().getAnnotation(HeaderCellStyle.class);
+            if(CollectionUtils.isNotEmpty(writerContext.getSheetData())) {
+                headerCellStyle = writerContext.getSheetData().get(0).getClass().getAnnotation(HeaderCellStyle.class);
+            }
         }
         return headerCellStyle;
     }

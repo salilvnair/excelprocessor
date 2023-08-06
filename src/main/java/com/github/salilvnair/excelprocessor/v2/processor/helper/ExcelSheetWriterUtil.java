@@ -39,6 +39,21 @@ public class ExcelSheetWriterUtil {
         return workbook;
     }
 
+    public static Workbook generateWorkbook(InputStream inputStream, ExcelFileType fileType) throws Exception {
+        Workbook workbook;
+        if (ExcelFileType.XLSX.equals(fileType) || ExcelFileType.XLSM.equals(fileType)) {
+            workbook = new XSSFWorkbook(inputStream);
+        }
+        else if (ExcelFileType.XLS.equals(fileType)) {
+            workbook = new HSSFWorkbook(inputStream);
+        }
+        else {
+            throw new IllegalArgumentException("The specified file is not Excel file");
+        }
+        inputStream.close();
+        return workbook;
+    }
+
     public static void write(Workbook workbook, String fileName, String filePath) throws Exception{
         File destinationFile = null;
         synchronized (staticFileCreatorObjectLock) {

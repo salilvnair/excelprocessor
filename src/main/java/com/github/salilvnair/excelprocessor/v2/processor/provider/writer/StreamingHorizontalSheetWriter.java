@@ -28,7 +28,7 @@ public class StreamingHorizontalSheetWriter extends BaseHorizontalSheetWriter {
         SXSSFSheet sxssfSheet = context.template() == null ? sxssfWorkbook.createSheet(sheet.value()): sxssfWorkbook.getSheet(sheet.value());
         sxssfSheet.setRandomAccessWindowSize(100);
         List<Field> cells = new ArrayList<>(cellFields);
-        writeDataToHeader(cellFields, sxssfSheet, cells, sheet, context);
+        writeDataToHeader(sheetData, cellFields, sxssfSheet, cells, sheet, context);
         writeDataToBody(sheetData, cellFields, sxssfSheet, cells, sheet, context);
         context.setWorkbook(sxssfWorkbook);
         context.setStreamingWorkbook(true);
