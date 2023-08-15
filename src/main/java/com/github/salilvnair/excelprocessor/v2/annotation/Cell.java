@@ -26,6 +26,8 @@ public @interface Cell {
 
 	String column() default "";
 
+    String[] metaData() default {};
+
 	int row() default -1;
 
     boolean picture() default false;
