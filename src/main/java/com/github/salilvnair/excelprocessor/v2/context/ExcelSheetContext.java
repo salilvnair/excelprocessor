@@ -3,7 +3,6 @@ package com.github.salilvnair.excelprocessor.v2.context;
 import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetWriterException;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
-import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
@@ -14,10 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Salil V Nair
@@ -32,6 +28,8 @@ public class ExcelSheetContext {
     private List<String> ignoreHeaders;
     private List<Integer> ignoreHeaderRows;
     private List<String> ignoreHeaderColumns;
+    private Set<String> orderedHeaders;
+    private Map<String, String> dynamicHeaderDisplayNames;
     private List<? extends BaseSheet> sheet;
     private List<CellValidationMessage> sheetValidationMessages;
     private Map<String, List<? extends BaseSheet>> excelSheets;
@@ -194,6 +192,28 @@ public class ExcelSheetContext {
         this.ignoreHeaders = ignoreHeaders;
     }
 
+    public Set<String> orderedHeaders() {
+        if(orderedHeaders == null) {
+            orderedHeaders = new HashSet<>();
+        }
+        return orderedHeaders;
+    }
+
+    public void setOrderedHeaders(Set<String> orderedHeaders) {
+        this.orderedHeaders = orderedHeaders;
+    }
+
+    public Map<String, String> dynamicHeaderDisplayNames() {
+        if(dynamicHeaderDisplayNames == null) {
+            dynamicHeaderDisplayNames = new HashMap<>();
+        }
+        return dynamicHeaderDisplayNames;
+    }
+
+    public void setDynamicHeaderDisplayNames(Map<String, String> dynamicHeaderDisplayNames) {
+        this.dynamicHeaderDisplayNames = dynamicHeaderDisplayNames;
+    }
+
     public List<Integer> ignoreHeaderRows() {
         return ignoreHeaderRows;
     }
@@ -342,6 +362,16 @@ public class ExcelSheetContext {
 
         public ExcelSheetContextBuilder ignoreHeaderRows(List<Integer> rows) {
             excelSheetContext.setIgnoreHeaderRows(rows);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder orderedHeaders(Set<String> orderedHeaders) {
+            excelSheetContext.setOrderedHeaders(orderedHeaders);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder dynamicHeaderDisplayNames(Map<String, String> dynamicHeaderDisplayNames) {
+            excelSheetContext.setDynamicHeaderDisplayNames(dynamicHeaderDisplayNames);
             return this;
         }
 

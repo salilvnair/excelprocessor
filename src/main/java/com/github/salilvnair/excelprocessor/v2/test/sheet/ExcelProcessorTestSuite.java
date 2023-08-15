@@ -28,7 +28,7 @@ public class ExcelProcessorTestSuite {
         ExcelSheetContext excelSheetContext = ExcelSheetContext
                                                 .builder()
                 .filePath("/Users/salilvnair/workspace/dbv")
-                .fileName("pictureText2.xlsx")
+                .fileName("picTest.xlsx")
                 //.template(new File("/Users/salilvnair/workspace/dbv/pictureText.xlsx"))
                  .build();
         sheetWriter(sheetData, excelSheetContext);

@@ -6,14 +6,12 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
@@ -63,17 +61,20 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
 
     protected void writeDynamicDataToHeader(Map<String, Object> headerKeyedCellValueMap, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
         Row row;
-        Set<String> headers = headerKeyedCellValueMap.keySet();
+        Set<String> headers = CollectionUtils.isNotEmpty(context.getOrderedHeaders()) ?  context.getOrderedHeaders(): headerKeyedCellValueMap.keySet();
         int headerRowIndex = sheet.headerRowAt() - 1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         if(context.template() == null) {
             row = workbookSheet.createRow(headerRowIndex);
             for (int c = 0; c < headers.size(); c++) {
                 String header = new ArrayList<>(headers).get(c);
-                Object fieldValue = headerKeyedCellValueMap.get(header);
+                Map<String, String> dynamicHeaderDisplayNames = context.getDynamicHeaderDisplayNames();
+                if(CollectionUtils.isNotEmpty(Collections.singleton(dynamicHeaderDisplayNames))) {
+                    header = dynamicHeaderDisplayNames.getOrDefault(header, header);
+                }
                 int createColumnIndex = c + headerColumnIndex;
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(createColumnIndex);
-                convertAndSetCellValue(rowCell, fieldValue);
+                convertAndSetCellValue(rowCell, header);
             }
         }
     }

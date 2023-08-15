@@ -7,6 +7,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Salil V Nair
@@ -35,6 +37,10 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
     private List<? extends BaseSheet> sheetData;
 
     private BaseSheet sheetDataObj;
+
+    private Set<String> orderedHeaders;
+
+    private Map<String, String> dynamicHeaderDisplayNames;
 
     public Workbook workbook() {
         return super.getWorkbook();
