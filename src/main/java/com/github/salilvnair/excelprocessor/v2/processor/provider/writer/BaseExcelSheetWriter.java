@@ -217,8 +217,16 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         HeaderCellStyleWriterUtil.applyCellStyles(sheet, cell, rowCell, cellField, fieldValue, context);
     }
 
+    protected void applyDynamicHeaderCellStyles(Sheet sheet, String header, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext context) {
+        HeaderCellStyleWriterUtil.applyDynamicCellStyles(sheet, header, rowCell, context);
+    }
+
     protected void applyDataCellStyles(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, Object fieldValue, ExcelSheetWriterContext context) {
         DataCellStyleWriterUtil.applyCellStyles(sheet, cell, rowCell, cellField, fieldValue, context);
+    }
+
+    protected void applyDynamicHeaderDataCellStyles(Sheet sheet, String header, org.apache.poi.ss.usermodel.Cell rowCell, Object fieldValue, ExcelSheetWriterContext context) {
+        DataCellStyleWriterUtil.applyDynamicCellStyles(sheet, header, rowCell, fieldValue, context);
     }
 
     public void copyRowStyle(Workbook workbook, org.apache.poi.ss.usermodel.Sheet oldSheet, org.apache.poi.ss.usermodel.Sheet newSheet, int oldRowNum, int newRowNum, int oldCellNum, int newCellNum) {

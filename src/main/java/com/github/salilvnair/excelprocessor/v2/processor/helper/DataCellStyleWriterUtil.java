@@ -4,11 +4,17 @@ import com.github.salilvnair.excelprocessor.util.ObjectUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.DataCellStyle;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
+import com.github.salilvnair.excelprocessor.v2.annotation.StyleTemplateCell;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
+import com.github.salilvnair.excelprocessor.v2.model.DataCellStyleInfo;
+import com.github.salilvnair.excelprocessor.v2.model.StyleTemplateCellInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.writer.task.helper.ExcelCellStyleTaskExecutor;
+import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
+import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.poi.ss.usermodel.CellStyle;
 import java.lang.reflect.Field;
+import java.util.Map;
 
 public class DataCellStyleWriterUtil {
     private DataCellStyleWriterUtil(){}
@@ -33,6 +39,55 @@ public class DataCellStyleWriterUtil {
         }
     }
 
+    public static void applyDynamicCellStyles(Sheet sheet, String header, org.apache.poi.ss.usermodel.Cell rowCell, Object fieldValue, ExcelSheetWriterContext writerContext) {
+        Map<String, DataCellStyleInfo> dynamicHeaderDataCellStyleInfo = writerContext.getDynamicHeaderDataCellStyleInfo();
+        DataCellStyleInfo dataCellStyleInfo = null;
+        if(dynamicHeaderDataCellStyleInfo == null || !dynamicHeaderDataCellStyleInfo.containsKey(header)) {
+            BaseSheet sheetDataObj = writerContext.getSheetDataObj();
+            if(sheetDataObj != null) {
+                DataCellStyle dataCellStyle  = sheetDataObj.getClass().getAnnotation(DataCellStyle.class);
+                dataCellStyleInfo = extractDataCellStyleInfo(dataCellStyle);
+            }
+            else {
+                return;
+            }
+        }
+        else {
+            dataCellStyleInfo = dynamicHeaderDataCellStyleInfo.get(header);
+        }
+        writerContext.setRowCell(rowCell);
+        writerContext.setCellValue(fieldValue);
+        if(dataCellStyleInfo.conditional) {
+            applyConditionalDynamicCellStyle(sheet, header, dataCellStyleInfo, rowCell, writerContext);
+        }
+        else if(!StringUtils.isEmpty(dataCellStyleInfo.customTask) || dataCellStyleInfo.customTasks.length > 0) {
+            executeCustomTaskWithDynamicCellStyle(sheet, header, dataCellStyleInfo, rowCell, writerContext);
+        }
+        else {
+            applyStaticDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
+        }
+    }
+
+    private static DataCellStyleInfo extractDataCellStyleInfo(DataCellStyle dataCellStyle) {
+        DataCellStyleInfo dataCellStyleInfo = new DataCellStyleInfo();
+        dataCellStyleInfo.conditional = dataCellStyle.conditional();
+        dataCellStyleInfo.condition = dataCellStyle.condition();
+        dataCellStyleInfo.borderStyle = dataCellStyle.borderStyle();
+        dataCellStyleInfo.borderColor = dataCellStyle.borderColor();
+        dataCellStyleInfo.applyDefaultStyles = dataCellStyle.applyDefaultStyles();
+        dataCellStyleInfo.customTask = dataCellStyle.customTask();
+        dataCellStyleInfo.backgroundColor = dataCellStyle.backgroundColor();
+        dataCellStyleInfo.fillPattern = dataCellStyle.fillPattern();
+        dataCellStyleInfo.foregroundColor = dataCellStyle.foregroundColor();
+        dataCellStyleInfo.hasBackgroundColor = dataCellStyle.hasBackgroundColor();
+        dataCellStyleInfo.hasBorderColor = dataCellStyle.hasBorderColor();
+        dataCellStyleInfo.hasBorderStyle = dataCellStyle.hasBorderStyle();
+        dataCellStyleInfo.hasForegroundColor = dataCellStyle.hasForegroundColor();
+        dataCellStyleInfo.columnWidthInUnits = dataCellStyle.columnWidthInUnits();
+        dataCellStyleInfo.wrapText = dataCellStyle.wrapText();
+        return dataCellStyleInfo;
+    }
+
     private static void executeCustomTaskWithCellStyle(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, ExcelSheetWriterContext writerContext) {
         DataCellStyle dataCellStyle = extractDataCellStyle(cellField, writerContext.getSheetDataObj());
         if(dataCellStyle == null) {
@@ -44,13 +99,34 @@ public class DataCellStyleWriterUtil {
         executeCustomTask(dataCellStyle, sheet, cell, rowCell, cellField, writerContext);
     }
 
+    private static void executeCustomTaskWithDynamicCellStyle(Sheet sheet, String header, DataCellStyleInfo dataCellStyleInfo, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext writerContext) {
+        if(dataCellStyleInfo == null) {
+            return;
+        }
+        if(dataCellStyleInfo.applyDefaultStyles) {
+            applyStaticDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
+        }
+        executeCustomTask(dataCellStyleInfo, sheet, rowCell, writerContext);
+    }
+
     private static void executeCustomTask(DataCellStyle dataCellStyle, Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, ExcelSheetWriterContext writerContext) {
         if(!StringUtils.isEmpty(dataCellStyle.customTask())) {
-            ExcelCellStyleTaskExecutor.execute(dataCellStyle.customTask(), sheet.excelTaskValidator(), writerContext);
+            ExcelCellStyleTaskExecutor.execute(dataCellStyle.customTask(), sheet.excelTask(), writerContext);
         }
         else {
             for (String customTask : dataCellStyle.customTasks()) {
-                ExcelCellStyleTaskExecutor.execute(customTask, sheet.excelTaskValidator(), writerContext);
+                ExcelCellStyleTaskExecutor.execute(customTask, sheet.excelTask(), writerContext);
+            }
+        }
+    }
+
+    private static void executeCustomTask(DataCellStyleInfo dataCellStyle, Sheet sheet, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext writerContext) {
+        if(!StringUtils.isEmpty(dataCellStyle.customTask)) {
+            ExcelCellStyleTaskExecutor.execute(dataCellStyle.customTask, sheet.excelTask(), writerContext);
+        }
+        else {
+            for (String customTask : dataCellStyle.customTasks) {
+                ExcelCellStyleTaskExecutor.execute(customTask, sheet.excelTask(), writerContext);
             }
         }
     }
@@ -60,9 +136,19 @@ public class DataCellStyleWriterUtil {
         if(dataCellStyle == null) {
             return;
         }
-        Object object = ExcelCellStyleTaskExecutor.execute(dataCellStyle.condition(), sheet.excelTaskValidator(), writerContext);
+        Object object = ExcelCellStyleTaskExecutor.execute(dataCellStyle.condition(), sheet.excelTask(), writerContext);
         if(ObjectUtil.nonNullOrBooleanTrue(object)) {
             applyStaticCellStyles(sheet, cell, rowCell, cellField, writerContext);
+        }
+    }
+
+    private static void applyConditionalDynamicCellStyle(Sheet sheet, String header, DataCellStyleInfo dataCellStyleInfo, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext writerContext) {
+        if(dataCellStyleInfo == null) {
+            return;
+        }
+        Object object = ExcelCellStyleTaskExecutor.execute(dataCellStyleInfo.condition, sheet.excelTask(), writerContext);
+        if(ObjectUtil.nonNullOrBooleanTrue(object)) {
+            applyStaticDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
         }
     }
 
@@ -71,7 +157,23 @@ public class DataCellStyleWriterUtil {
         if(dataCellStyle == null) {
             return;
         }
-        CellStyle cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+        CellStyle cellStyle = null;
+
+        if(writerContext.styleTemplate()!=null) {
+            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+            StyleTemplateCell styleTemplateCell = dataCellStyle.styleTemplateCell();
+            int rowIndex = styleTemplateCell.row()  - 1;
+            int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCell.column())  - 1;
+            CellStyle templateCellStyle = writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getCellStyle();
+            cellStyle.cloneStyleFrom(templateCellStyle);
+            // Copy cell width
+            rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), writerContext.styleTemplate().getSheet(sheet.value()).getColumnWidth(writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getColumnIndex()));
+            // Copy text wrapping
+            cellStyle.setWrapText(templateCellStyle.getWrapText());
+        }
+        else {
+            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+        }
 
         cellStyle.setWrapText(dataCellStyle.wrapText());
         if(dataCellStyle.hasBorderStyle()) {
@@ -96,6 +198,56 @@ public class DataCellStyleWriterUtil {
         if(dataCellStyle.hasForegroundColor()) {
             cellStyle.setFillPattern(dataCellStyle.fillPattern());
             cellStyle.setFillForegroundColor(dataCellStyle.foregroundColor().getIndex());
+        }
+        rowCell.setCellStyle(cellStyle);
+    }
+
+
+    public static void applyStaticDynamicCellStyles(Sheet sheet, String header, DataCellStyleInfo dataCellStyleInfo, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext writerContext) {
+        if(dataCellStyleInfo == null) {
+            return;
+        }
+        CellStyle cellStyle = null;
+
+        if(writerContext.styleTemplate()!=null) {
+            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+            StyleTemplateCellInfo styleTemplateCellInfo = dataCellStyleInfo.styleTemplateCellInfo;
+            int rowIndex = styleTemplateCellInfo.row  - 1;
+            int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCellInfo.column)  - 1;
+            CellStyle templateCellStyle = writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getCellStyle();
+            cellStyle.cloneStyleFrom(templateCellStyle);
+            // Copy cell width
+            rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), writerContext.styleTemplate().getSheet(sheet.value()).getColumnWidth(writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getColumnIndex()));
+            // Copy text wrapping
+            cellStyle.setWrapText(templateCellStyle.getWrapText());
+        }
+        else {
+            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+        }
+
+        cellStyle.setWrapText(dataCellStyleInfo.wrapText);
+        if(dataCellStyleInfo.hasBorderStyle) {
+            cellStyle.setBorderTop(dataCellStyleInfo.borderStyle);
+            cellStyle.setBorderRight(dataCellStyleInfo.borderStyle);
+            cellStyle.setBorderBottom(dataCellStyleInfo.borderStyle);
+            cellStyle.setBorderLeft(dataCellStyleInfo.borderStyle);
+        }
+        if(dataCellStyleInfo.hasBorderColor) {
+            cellStyle.setTopBorderColor(dataCellStyleInfo.borderColor.getIndex());
+            cellStyle.setRightBorderColor(dataCellStyleInfo.borderColor.getIndex());
+            cellStyle.setBottomBorderColor(dataCellStyleInfo.borderColor.getIndex());
+            cellStyle.setLeftBorderColor(dataCellStyleInfo.borderColor.getIndex());
+        }
+
+        if(dataCellStyleInfo.hasBackgroundColor) {
+            cellStyle.setFillPattern(dataCellStyleInfo.fillPattern);
+            cellStyle.setFillForegroundColor(dataCellStyleInfo.backgroundColor.getIndex());
+            cellStyle.setFillBackgroundColor(dataCellStyleInfo.backgroundColor.getIndex());
+        }
+
+        if(dataCellStyleInfo.hasForegroundColor) {
+            cellStyle.setFillPattern(dataCellStyleInfo.fillPattern);
+            cellStyle.setFillForegroundColor(dataCellStyleInfo.foregroundColor.getIndex());
         }
         rowCell.setCellStyle(cellStyle);
     }

@@ -1,8 +1,10 @@
 package com.github.salilvnair.excelprocessor.v2.test.sheet;
 
+import com.github.salilvnair.excelprocessor.util.MapGenerator;
 import com.github.salilvnair.excelprocessor.util.StopWatch;
 import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.generator.service.ExcelSheetClassGenerator;
+import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetReaderFactory;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetWriterFactory;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
@@ -10,6 +12,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellV
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+import com.github.salilvnair.excelprocessor.v2.test.sheet.dynamic.DynamicCollegeSheet;
 import com.github.salilvnair.excelprocessor.v2.type.SheetInfo;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -17,22 +20,12 @@ import org.apache.poi.util.IOUtils;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class ExcelProcessorTestSuite {
     public static void main(String[] args) throws Exception {
-        List<? extends BaseSheet> sheetData = prepareCollegeSheet();
-        ExcelSheetContext excelSheetContext = ExcelSheetContext
-                                                .builder()
-                .filePath("/Users/salilvnair/workspace/dbv")
-                .fileName("picTest.xlsx")
-                //.template(new File("/Users/salilvnair/workspace/dbv/pictureText.xlsx"))
-                 .build();
-        sheetWriter(sheetData, excelSheetContext);
-        //generateClassTemplate("consistof.xlsx");
+        dynamicSheetWriter();
     }
 
     private static void pictureSheetWriter(List<? extends BaseSheet> sheetData, ExcelSheetContext excelSheetContext) throws Exception {
@@ -98,4 +91,49 @@ public class ExcelProcessorTestSuite {
         System.out.println("excelprocessor v2 took " + StopWatch.elapsed(TimeUnit.MILLISECONDS) + " millisecond(s)");
         return sheetData;
     }
+
+    public static void dynamicSheetWriter() throws Exception {
+        File template = new File("/Users/salilvnair/workspace/dbv/dynamicSheetTemplate.xlsx");
+        Map<String, HeaderCellStyleInfo> headerCellStyleInfoMap = new HashMap<>();
+        HeaderCellStyleInfo headerCellStyleInfo = new HeaderCellStyleInfo();
+        headerCellStyleInfo.styleTemplateCellInfo.row = 1;
+        headerCellStyleInfo.styleTemplateCellInfo.column = "B";
+        headerCellStyleInfoMap.put("university", headerCellStyleInfo);
+        ExcelSheetContext excelSheetContext = ExcelSheetContext
+                                                    .builder()
+                                                    .filePath("/Users/salilvnair/workspace/dbv")
+                                                    .fileName("dynamicCollegeSheet.xlsx")
+                                                    .styleTemplate(template)
+                                                    .dynamicHeaderCellStyleInfo(headerCellStyleInfoMap)
+                                                    .build();
+        Map<String, String> dynamicHeaderDisplayNames = prepareDynamicHeaderDisplayNames();
+        excelSheetContext.setDynamicHeaderDisplayNames(dynamicHeaderDisplayNames);
+        List<DynamicCollegeSheet> dynamicCollegeSheets = prepareDynamicCollegeSheet();
+        sheetWriter(dynamicCollegeSheets, excelSheetContext);
+    }
+
+    private static Map<String, String> prepareDynamicHeaderDisplayNames() {
+        return MapGenerator.immutable().generate("name", "Name", "university", "University", "noOfStudents", "# of students");
+    }
+
+    private static List<DynamicCollegeSheet> prepareDynamicCollegeSheet() {
+        List<DynamicCollegeSheet> dynamicCollegeSheets = new ArrayList<>();
+        DynamicCollegeSheet dynamicCollegeSheet = new DynamicCollegeSheet();
+        LinkedHashMap<String, Object> dynamicHeaderKeyedCellValueMap = new LinkedHashMap<>();
+        dynamicHeaderKeyedCellValueMap.put("name", "Salil");
+        dynamicHeaderKeyedCellValueMap.put("university", "VMU");
+        dynamicHeaderKeyedCellValueMap.put("noOfStudents", 5000);
+        dynamicCollegeSheet.setDynamicHeaderKeyedCellValueMap(dynamicHeaderKeyedCellValueMap);
+        dynamicCollegeSheets.add(dynamicCollegeSheet);
+
+        dynamicHeaderKeyedCellValueMap = new LinkedHashMap<>();
+        dynamicHeaderKeyedCellValueMap.put("name", null);
+        dynamicHeaderKeyedCellValueMap.put("university", "MIT");
+        dynamicHeaderKeyedCellValueMap.put("noOfStudents", 10000);
+        dynamicCollegeSheet.setDynamicHeaderKeyedCellValueMap(dynamicHeaderKeyedCellValueMap);
+        dynamicCollegeSheets.add(dynamicCollegeSheet);
+        return dynamicCollegeSheets;
+    }
+
+
 }

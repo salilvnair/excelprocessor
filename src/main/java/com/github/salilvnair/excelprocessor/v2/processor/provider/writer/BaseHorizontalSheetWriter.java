@@ -61,20 +61,22 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
 
     protected void writeDynamicDataToHeader(Map<String, Object> headerKeyedCellValueMap, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
         Row row;
-        Set<String> headers = CollectionUtils.isNotEmpty(context.getOrderedHeaders()) ?  context.getOrderedHeaders(): headerKeyedCellValueMap.keySet();
+        Set<String> headerKeys = CollectionUtils.isNotEmpty(context.getOrderedHeaders()) ?  context.getOrderedHeaders(): headerKeyedCellValueMap.keySet();
         int headerRowIndex = sheet.headerRowAt() - 1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         if(context.template() == null) {
             row = workbookSheet.createRow(headerRowIndex);
-            for (int c = 0; c < headers.size(); c++) {
-                String header = new ArrayList<>(headers).get(c);
+            for (int c = 0; c < headerKeys.size(); c++) {
+                String headerKey = new ArrayList<>(headerKeys).get(c);
                 Map<String, String> dynamicHeaderDisplayNames = context.getDynamicHeaderDisplayNames();
+                String headerDisplayName = headerKey;
                 if(CollectionUtils.isNotEmpty(Collections.singleton(dynamicHeaderDisplayNames))) {
-                    header = dynamicHeaderDisplayNames.getOrDefault(header, header);
+                    headerDisplayName = dynamicHeaderDisplayNames.getOrDefault(headerKey, headerKey);
                 }
                 int createColumnIndex = c + headerColumnIndex;
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(createColumnIndex);
-                convertAndSetCellValue(rowCell, header);
+                convertAndSetCellValue(rowCell, headerDisplayName);
+                applyDynamicHeaderCellStyles(sheet, headerKey, rowCell, context);
             }
         }
     }
@@ -85,6 +87,8 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         int valueRowIndex = sheet.valueRowAt()!=-1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         for (int r = 0; r < sheetData.size(); r++) {
+            BaseSheet sheetDataObj = sheetData.get(r);
+            context.setSheetDataObj(sheetDataObj);
             int createRowIndex = r + valueRowIndex;
             Row row = workbookSheet.createRow(createRowIndex);
             for (int c = 0; c < headers.size(); c++) {
@@ -93,6 +97,9 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
                 int createColumnIndex = c + headerColumnIndex;
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(createColumnIndex);
                 convertAndSetCellValue(rowCell, fieldValue);
+                applyDynamicHeaderDataCellStyles(sheet, header, rowCell, fieldValue, context);
+                FormulaEvaluator evaluator = workbookSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+                evaluator.evaluateFormulaCell(rowCell);
             }
         }
     }

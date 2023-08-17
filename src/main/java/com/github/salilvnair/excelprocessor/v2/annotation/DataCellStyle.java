@@ -44,4 +44,6 @@ public @interface DataCellStyle {
     IndexedColors borderColor() default IndexedColors.AUTOMATIC;
 
     int columnWidthInUnits() default -1;
+
+    StyleTemplateCell styleTemplateCell() default @StyleTemplateCell;
 }

@@ -16,7 +16,8 @@ public class DynamicHorizontalSheetWriter extends BaseHorizontalSheetWriter {
     void write(List<? extends BaseSheet> sheetData, ExcelSheetWriterContext writerContext) {
         DynamicHeaderSheet dynamicHeaderSheet = (DynamicHeaderSheet) sheetData.get(0);
         Sheet sheet = dynamicHeaderSheet.getClass().getAnnotation(Sheet.class);
-
+        writerContext.setSheetData(sheetData);
+        writerContext.setSheetDataObj(dynamicHeaderSheet);
         Map<String, Object> headerKeyedCellValueMap = dynamicHeaderSheet.dynamicHeaderKeyedCellValueMap();
 
         Workbook workbook = writerContext.containsExistingWorkbook() ? writerContext.existingWorkbook() : writerContext.template() == null ? ExcelSheetWriterUtil.generateWorkbook(sheet) : writerContext.template();

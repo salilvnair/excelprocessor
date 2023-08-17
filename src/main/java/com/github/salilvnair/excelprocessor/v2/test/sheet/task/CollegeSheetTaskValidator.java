@@ -27,25 +27,4 @@ public class CollegeSheetTaskValidator extends AbstractExcelTaskValidator {
         }
         return null;
     }
-
-    public void highlightYellowIfValueIsEmpty(ExcelSheetWriterContext context) throws DecoderException {
-
-        if(context.cellValue() == null) {
-            Cell rowCell = context.rowCell();
-            CellStyle cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-
-            cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            cellStyle.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
-
-//            String rgbS = "FFF000";
-//            byte[] rgbB = Hex.decodeHex(rgbS); // get byte array from hex string
-//            Color color = new XSSFColor(rgbB, null); //IndexedColorMap has no usage until now. So it can be set null.
-//
-//            cellStyle.setFillForegroundColor(color);
-//            cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-            rowCell.setCellStyle(cellStyle);
-        }
-    }
-
 }

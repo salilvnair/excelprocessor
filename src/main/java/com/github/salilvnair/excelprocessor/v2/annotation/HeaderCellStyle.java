@@ -41,7 +41,10 @@ public @interface HeaderCellStyle {
 
     BorderStyle borderStyle() default BorderStyle.NONE;
 
+    StyleTemplateCell styleTemplateCell() default @StyleTemplateCell;
+
     IndexedColors borderColor() default IndexedColors.AUTOMATIC;
 
     int columnWidthInUnits() default -1;
+
 }

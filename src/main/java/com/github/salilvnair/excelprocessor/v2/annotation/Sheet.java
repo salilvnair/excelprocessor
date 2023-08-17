@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import com.github.salilvnair.excelprocessor.v2.processor.validator.task.core.AbstractExcelTaskValidator;
+import com.github.salilvnair.excelprocessor.v2.task.AbstractExcelTask;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -14,6 +15,7 @@ public @interface Sheet {
 	String value() default "";
 	String type() default ExcelFileType.Extension.XLS;
 	Class<? extends AbstractExcelTaskValidator> excelTaskValidator() default DefaultTaskValidator.class;
+    Class<? extends AbstractExcelTask> excelTask() default DefaultTask.class;
 	boolean vertical() default false;
 	boolean ignoreUnknown() default true;
 	String customTask() default "";
@@ -44,6 +46,7 @@ public @interface Sheet {
 	boolean dynamicHeaders() default false;
 	String userDefinedMessage() default "";
 	final class DefaultTaskValidator extends AbstractExcelTaskValidator {};
+	final class DefaultTask extends AbstractExcelTask {};
     SectionHint[] sectionHints() default {};
     boolean streamingWorkbook() default false;
 }

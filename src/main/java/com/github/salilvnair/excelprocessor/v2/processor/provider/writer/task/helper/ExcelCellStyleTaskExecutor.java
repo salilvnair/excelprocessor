@@ -5,15 +5,16 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.task.core.AbstractExcelTaskValidator;
+import com.github.salilvnair.excelprocessor.v2.task.AbstractExcelTask;
 
 /**
  * @author Salil V Nair
  */
 public class ExcelCellStyleTaskExecutor {
-    public static Object execute(String methodName, Class<? extends AbstractExcelTaskValidator> taskClass, ExcelSheetWriterContext writerContext) {
+    public static Object execute(String methodName, Class<? extends AbstractExcelTask> taskClass, ExcelSheetWriterContext writerContext) {
         if(!taskClass.getName().equals(Sheet.DefaultTaskValidator.class.getName())) {
             try {
-                AbstractExcelTaskValidator task = taskClass.newInstance();
+                AbstractExcelTask task = taskClass.newInstance();
                 task.setMethodName(methodName);
                 return ReflectionUtil.invokeMethod(task, task.getMethodName(), writerContext);
             }

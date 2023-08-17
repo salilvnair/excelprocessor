@@ -1,6 +1,8 @@
 package com.github.salilvnair.excelprocessor.v2.context;
 
 import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetWriterException;
+import com.github.salilvnair.excelprocessor.v2.model.DataCellStyleInfo;
+import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetWriterUtil;
@@ -23,6 +25,7 @@ public class ExcelSheetContext {
     private String fileName;
     private String filePath;
     private Workbook workbook;
+    private Workbook styleTemplateWorkbook;
     private File template;
     private String sheetName;
     private List<String> ignoreHeaders;
@@ -30,6 +33,8 @@ public class ExcelSheetContext {
     private List<String> ignoreHeaderColumns;
     private Set<String> orderedHeaders;
     private Map<String, String> dynamicHeaderDisplayNames;
+    private Map<String, DataCellStyleInfo> dynamicHeaderDataCellStyleInfo;
+    private Map<String, HeaderCellStyleInfo> dynamicHeaderCellStyleInfo;
     private List<? extends BaseSheet> sheet;
     private List<CellValidationMessage> sheetValidationMessages;
     private Map<String, List<? extends BaseSheet>> excelSheets;
@@ -56,6 +61,14 @@ public class ExcelSheetContext {
 
     public void setWorkbook(Workbook workbook) {
         this.workbook = workbook;
+    }
+
+    public Workbook styleTemplateWorkbook() {
+        return styleTemplateWorkbook;
+    }
+
+    public void setStyleTemplateWorkbook(Workbook styleTemplateWorkbook) {
+        this.styleTemplateWorkbook = styleTemplateWorkbook;
     }
 
     public File excelFile() {
@@ -203,6 +216,28 @@ public class ExcelSheetContext {
         this.orderedHeaders = orderedHeaders;
     }
 
+    public Map<String, DataCellStyleInfo> dynamicHeaderDataCellStyleInfo() {
+        if(dynamicHeaderDataCellStyleInfo == null) {
+            dynamicHeaderDataCellStyleInfo = new HashMap<>();
+        }
+        return dynamicHeaderDataCellStyleInfo;
+    }
+
+    public void setDynamicHeaderDataCellStyleInfo(Map<String, DataCellStyleInfo> dynamicHeaderDataCellStyleInfo) {
+        this.dynamicHeaderDataCellStyleInfo = dynamicHeaderDataCellStyleInfo;
+    }
+
+    public Map<String, HeaderCellStyleInfo> dynamicHeaderCellStyleInfo() {
+        if(dynamicHeaderCellStyleInfo == null) {
+            dynamicHeaderCellStyleInfo = new HashMap<>();
+        }
+        return dynamicHeaderCellStyleInfo;
+    }
+
+    public void setDynamicHeaderCellStyleInfo(Map<String, HeaderCellStyleInfo> dynamicHeaderCellStyleInfo) {
+        this.dynamicHeaderCellStyleInfo = dynamicHeaderCellStyleInfo;
+    }
+
     public Map<String, String> dynamicHeaderDisplayNames() {
         if(dynamicHeaderDisplayNames == null) {
             dynamicHeaderDisplayNames = new HashMap<>();
@@ -285,6 +320,32 @@ public class ExcelSheetContext {
             return this;
         }
 
+        public ExcelSheetContextBuilder dynamicHeaderCellStyleInfo(Map<String, HeaderCellStyleInfo> dynamicHeaderCellStyleInfo) {
+            excelSheetContext.setDynamicHeaderCellStyleInfo(dynamicHeaderCellStyleInfo);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder dynamicHeaderDataCellStyleInfo(Map<String, DataCellStyleInfo> dynamicHeaderDataCellStyleInfo) {
+            excelSheetContext.setDynamicHeaderDataCellStyleInfo(dynamicHeaderDataCellStyleInfo);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder styleTemplate(File styleTemplate) {
+            Workbook workbook = null;
+            try {
+                FileInputStream inputS = new FileInputStream(styleTemplate);
+                workbook = ExcelSheetWriterUtil.generateWorkbook(inputS, styleTemplate.getAbsolutePath());
+
+            }
+            catch (Exception e) {
+                if(!excelSheetContext.suppressExceptions()) {
+                    throw new ExcelSheetWriterException(e);
+                }
+            }
+            excelSheetContext.setStyleTemplateWorkbook(workbook);
+            return this;
+        }
+
         public ExcelSheetContextBuilder template(InputStream inputStream, String fileNameWithExtension) {
             Workbook workbook = null;
             try {
@@ -297,6 +358,21 @@ public class ExcelSheetContext {
                 }
             }
             excelSheetContext.setWorkbook(workbook);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder styleTemplate(InputStream inputStream, String fileNameWithExtension) {
+            Workbook workbook = null;
+            try {
+                workbook = ExcelSheetWriterUtil.generateWorkbook(inputStream, fileNameWithExtension);
+
+            }
+            catch (Exception e) {
+                if(!excelSheetContext.suppressExceptions()) {
+                    throw new ExcelSheetWriterException(e);
+                }
+            }
+            excelSheetContext.setStyleTemplateWorkbook(workbook);
             return this;
         }
 
@@ -315,6 +391,21 @@ public class ExcelSheetContext {
             return this;
         }
 
+        public ExcelSheetContextBuilder styleTemplate(InputStream inputStream, ExcelFileType excelFileType) {
+            Workbook workbook = null;
+            try {
+                workbook = ExcelSheetWriterUtil.generateWorkbook(inputStream, excelFileType);
+
+            }
+            catch (Exception e) {
+                if(!excelSheetContext.suppressExceptions()) {
+                    throw new ExcelSheetWriterException(e);
+                }
+            }
+            excelSheetContext.setStyleTemplateWorkbook(workbook);
+            return this;
+        }
+
         public ExcelSheetContextBuilder template(byte[] bytes, String fileNameWithExtension) {
             Workbook workbook = null;
             try {
@@ -330,6 +421,21 @@ public class ExcelSheetContext {
             return this;
         }
 
+        public ExcelSheetContextBuilder styleTemplate(byte[] bytes, String fileNameWithExtension) {
+            Workbook workbook = null;
+            try {
+                workbook = ExcelSheetWriterUtil.generateWorkbook(new ByteArrayInputStream(bytes), fileNameWithExtension);
+
+            }
+            catch (Exception e) {
+                if(!excelSheetContext.suppressExceptions()) {
+                    throw new ExcelSheetWriterException(e);
+                }
+            }
+            excelSheetContext.setStyleTemplateWorkbook(workbook);
+            return this;
+        }
+
         public ExcelSheetContextBuilder template(byte[] bytes, ExcelFileType excelFileType) {
             Workbook workbook = null;
             try {
@@ -342,6 +448,21 @@ public class ExcelSheetContext {
                 }
             }
             excelSheetContext.setWorkbook(workbook);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder styleTemplate(byte[] bytes, ExcelFileType excelFileType) {
+            Workbook workbook = null;
+            try {
+                workbook = ExcelSheetWriterUtil.generateWorkbook(new ByteArrayInputStream(bytes), excelFileType);
+
+            }
+            catch (Exception e) {
+                if(!excelSheetContext.suppressExceptions()) {
+                    throw new ExcelSheetWriterException(e);
+                }
+            }
+            excelSheetContext.setStyleTemplateWorkbook(workbook);
             return this;
         }
 

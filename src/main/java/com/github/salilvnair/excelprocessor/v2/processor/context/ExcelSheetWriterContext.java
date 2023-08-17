@@ -1,5 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.processor.context;
 
+import com.github.salilvnair.excelprocessor.v2.model.DataCellStyleInfo;
+import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import lombok.*;
 import org.apache.poi.ss.usermodel.Cell;
@@ -22,6 +24,8 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
 
     private Workbook template;
 
+    private Workbook styleTemplate;
+
     private Workbook existingWorkbook;
 
     private boolean streamingWorkbook;
@@ -42,6 +46,10 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
 
     private Map<String, String> dynamicHeaderDisplayNames;
 
+    private Map<String, DataCellStyleInfo> dynamicHeaderDataCellStyleInfo;
+
+    private Map<String, HeaderCellStyleInfo> dynamicHeaderCellStyleInfo;
+
     public Workbook workbook() {
         return super.getWorkbook();
     }
@@ -55,6 +63,10 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
 
     public Workbook template() {
         return this.template;
+    }
+
+    public Workbook styleTemplate() {
+        return this.styleTemplate;
     }
     public Workbook existingWorkbook() {
         return this.existingWorkbook;

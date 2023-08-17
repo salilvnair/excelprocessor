@@ -87,8 +87,11 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
                 .containsExistingWorkbook(existingWorkbook)
                 .existingWorkbook(existingWorkbook ? sheetContext.workbook() : null)
                 .template(workbook)
+                .styleTemplate(sheetContext.styleTemplateWorkbook())
                 .orderedHeaders(sheetContext.orderedHeaders())
                 .dynamicHeaderDisplayNames(sheetContext.dynamicHeaderDisplayNames())
+                .dynamicHeaderCellStyleInfo(sheetContext.dynamicHeaderCellStyleInfo())
+                .dynamicHeaderDataCellStyleInfo(sheetContext.dynamicHeaderDataCellStyleInfo())
                 .build();
     }
 }
