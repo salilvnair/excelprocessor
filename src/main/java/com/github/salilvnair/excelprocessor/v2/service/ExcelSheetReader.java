@@ -3,7 +3,7 @@ package com.github.salilvnair.excelprocessor.v2.service;
 import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
+import com.github.salilvnair.excelprocessor.v2.model.ExcelInfo;
 
 import java.util.Collections;
 import java.util.List;

@@ -2,6 +2,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.validator.context;
 
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
+import com.github.salilvnair.excelprocessor.v2.model.CellValidationInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.ExcelValidator;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
@@ -24,6 +25,7 @@ public class CellValidatorContext {
     private Map<String,Object> userValidatorMap;
     private Map<String,List<String>> validValuesDataSet;
     private Map<String,String> userDefinedMessageDataSet;
+    private Map<String, CellValidationInfo> headerKeyedCellValidationInfo;
 
 
     public List<? extends BaseSheet> getCurrentSheet() {
@@ -81,6 +83,17 @@ public class CellValidatorContext {
 
     public void setUserDefinedMessageDataSet(Map<String, String> userDefinedMessageDataSet) {
         this.userDefinedMessageDataSet = userDefinedMessageDataSet;
+    }
+
+    public Map<String, CellValidationInfo> headerKeyedCellValidationInfo() {
+        if(headerKeyedCellValidationInfo==null) {
+            headerKeyedCellValidationInfo = new HashMap<>();
+        }
+        return headerKeyedCellValidationInfo;
+    }
+
+    public void setHeaderKeyedCellValidationInfo(Map<String, CellValidationInfo> headerKeyedCellValidationInfo) {
+        this.headerKeyedCellValidationInfo = headerKeyedCellValidationInfo;
     }
 
     public Sheet sheet() {

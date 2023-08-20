@@ -1,6 +1,6 @@
 package com.github.salilvnair.excelprocessor.v2.sheet;
 
-import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
+import com.github.salilvnair.excelprocessor.v2.model.CellInfo;
 
 import java.util.*;
 import java.util.stream.Collectors;

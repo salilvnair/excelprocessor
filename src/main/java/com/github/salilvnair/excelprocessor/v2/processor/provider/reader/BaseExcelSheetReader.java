@@ -2,11 +2,11 @@ package com.github.salilvnair.excelprocessor.v2.processor.provider.reader;
 
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.core.BaseExcelProcessor;
-import com.github.salilvnair.excelprocessor.v2.processor.validator.provider.PatternValidator;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.provider.fixed.PatternValidator;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
-import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
+import com.github.salilvnair.excelprocessor.v2.model.CellInfo;
+import com.github.salilvnair.excelprocessor.v2.model.ExcelInfo;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFColor;

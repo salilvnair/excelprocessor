@@ -1,7 +1,9 @@
 package com.github.salilvnair.excelprocessor.v2.context;
 
 import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetWriterException;
+import com.github.salilvnair.excelprocessor.v2.model.CellValidationInfo;
 import com.github.salilvnair.excelprocessor.v2.model.DataCellStyleInfo;
+import com.github.salilvnair.excelprocessor.v2.model.FieldInfo;
 import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
@@ -45,6 +47,8 @@ public class ExcelSheetContext {
     private Map<String,Object> userValidatorMap;
     private Map<String,List<String>> validValuesDataSet;
     private Map<String,String> userDefinedMessageDataSet;
+    private Map<String,CellValidationInfo> headerKeyedCellValidationInfo;
+    private Map<String, FieldInfo> headerFieldInfo;
     private boolean suppressExceptions;
 
     public String fileName() {
@@ -180,6 +184,25 @@ public class ExcelSheetContext {
 
     public void setUserDefinedMessageDataSet(Map<String, String> userDefinedMessageDataSet) {
         this.userDefinedMessageDataSet = userDefinedMessageDataSet;
+    }
+
+    public Map<String, CellValidationInfo> headerKeyedCellValidationInfo() {
+        if(headerKeyedCellValidationInfo==null) {
+            headerKeyedCellValidationInfo = new HashMap<>();
+        }
+        return headerKeyedCellValidationInfo;
+    }
+
+    public void setHeaderKeyedCellValidationInfo(Map<String, CellValidationInfo> headerKeyedCellValidationInfo) {
+        this.headerKeyedCellValidationInfo = headerKeyedCellValidationInfo;
+    }
+
+    public Map<String, FieldInfo> headerFieldInfo() {
+        return headerFieldInfo;
+    }
+
+    public void setHeaderFieldInfo(Map<String, FieldInfo> headerFieldInfo) {
+        this.headerFieldInfo = headerFieldInfo;
     }
 
     public static ExcelSheetContextBuilder builder() {
@@ -514,6 +537,17 @@ public class ExcelSheetContext {
             excelSheetContext.setUserDefinedMessageDataSet(userDefinedMessageDataSet);
             return this;
         }
+
+        public ExcelSheetContextBuilder headerKeyedCellValidationInfo(Map<String, CellValidationInfo> headerKeyedCellValidationInfo) {
+            excelSheetContext.setHeaderKeyedCellValidationInfo(headerKeyedCellValidationInfo);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder headerFieldInfo(Map<String, FieldInfo> headerFieldInfo) {
+            excelSheetContext.setHeaderFieldInfo(headerFieldInfo);
+            return this;
+        }
+
 
         public ExcelSheetContextBuilder suppressExceptions() {
             excelSheetContext.setSuppressExceptions(true);

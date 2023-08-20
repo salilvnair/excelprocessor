@@ -1,37 +1,31 @@
-package com.github.salilvnair.excelprocessor.v2.processor.validator.provider;
+package com.github.salilvnair.excelprocessor.v2.processor.validator.provider.fixed;
 
-import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
+import com.github.salilvnair.excelprocessor.util.ObjectUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.BaseCellValidator;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.type.ValidatorType;
 
 import java.lang.reflect.Field;
 
+public class RequiredValidator extends BaseCellValidator {
 
-public class AlphaNumericValidator extends BaseCellValidator {
-    private final Field field;
-    public AlphaNumericValidator(Field field) {
+    public RequiredValidator(Field field) {
         super(field);
-        this.field = field;
     }
 
     @Override
     protected boolean violated(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
-        CellValidation cellValidation = field.getAnnotation(CellValidation.class);
-        if(allowNullOrAllowEmptyCheck(fieldValue, cellValidation)) {
-            return false;
-        }
-        return !PatternValidator.match("[A-Za-z0-9]+", fieldValue+"");
+        return ObjectUtil.isNull(fieldValue) || ObjectUtil.isEmptyString(fieldValue);
     }
 
     @Override
     protected ValidatorType validatorType() {
-        return ValidatorType.ALPHANUMERIC;
+        return ValidatorType.REQUIRED;
     }
 
     @Override
     protected String defaultMessage(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
         String headerKey = headerKey(fieldValue, currentInstance, validatorContext);
-        return headerKey+" is not a valid alphanumeric number.";
+        return headerKey+" cannot be null or empty.";
     }
 }

@@ -1,40 +1,37 @@
-package com.github.salilvnair.excelprocessor.v2.processor.validator.provider;
+package com.github.salilvnair.excelprocessor.v2.processor.validator.provider.fixed;
 
-import com.github.salilvnair.excelprocessor.util.ReflectionUtil;
+import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.BaseCellValidator;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.type.ValidatorType;
-import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.lang.reflect.Field;
-import java.util.List;
 
 
-public class UniqueValidator extends BaseCellValidator {
+public class AlphaNumericValidator extends BaseCellValidator {
     private final Field field;
-    public UniqueValidator(Field field) {
+    public AlphaNumericValidator(Field field) {
         super(field);
         this.field = field;
     }
 
     @Override
     protected boolean violated(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
-        List<? extends BaseSheet> sheetDataList = validatorContext.getCurrentSheet();
-        if(CollectionUtils.isNotEmpty(sheetDataList)) {
-            return sheetDataList.stream().anyMatch(sheetData -> fieldValue.equals(ReflectionUtil.getFieldValue(sheetData, field)));
+        CellValidation cellValidation = field.getAnnotation(CellValidation.class);
+        if(allowNullOrAllowEmptyCheck(fieldValue, cellValidation)) {
+            return false;
         }
-        return false;
+        return !PatternValidator.match("[A-Za-z0-9]+", fieldValue+"");
     }
 
     @Override
     protected ValidatorType validatorType() {
-        return ValidatorType.UNIQUE;
+        return ValidatorType.ALPHANUMERIC;
     }
 
     @Override
     protected String defaultMessage(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
         String headerKey = headerKey(fieldValue, currentInstance, validatorContext);
-        return headerKey+" should be unique!";
+        return headerKey+" is not a valid alphanumeric number.";
     }
 }

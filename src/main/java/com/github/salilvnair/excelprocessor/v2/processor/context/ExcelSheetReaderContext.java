@@ -2,9 +2,10 @@ package com.github.salilvnair.excelprocessor.v2.processor.context;
 
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
+import com.github.salilvnair.excelprocessor.v2.model.FieldInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.core.BaseExcelProcessor;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
+import com.github.salilvnair.excelprocessor.v2.model.CellInfo;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
     private boolean extractMultiOrientedMap;
     private Map<String, List<? extends BaseSheet>> multiOrientedSheetMap;
     private Map<String, List<? extends BaseSheet>> scatteredSheetMap;
+    private Map<String, FieldInfo> headerFieldInfoMap;
     private Map<String, ExcelSheetReaderContext> multiOrientedReaderContexts;
     private String valueColumnBeginsAt;
     private String valueColumnEndsAt;
@@ -161,6 +163,14 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
 
     public void setScatteredSheetMap(Map<String, List<? extends BaseSheet>> scatteredSheetMap) {
         this.scatteredSheetMap = scatteredSheetMap;
+    }
+
+    public Map<String, FieldInfo> headerFieldInfoMap() {
+        return headerFieldInfoMap;
+    }
+
+    public void setHeaderFieldInfoMap(Map<String, FieldInfo> headerFieldInfoMap) {
+        this.headerFieldInfoMap = headerFieldInfoMap;
     }
 
     public Map<String, ExcelSheetReaderContext> multiOrientedReaderContexts() {

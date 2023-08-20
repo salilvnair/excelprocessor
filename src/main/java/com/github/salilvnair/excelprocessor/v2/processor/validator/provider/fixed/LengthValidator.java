@@ -1,4 +1,4 @@
-package com.github.salilvnair.excelprocessor.v2.processor.validator.provider;
+package com.github.salilvnair.excelprocessor.v2.processor.validator.provider.fixed;
 
 import com.github.salilvnair.excelprocessor.v2.annotation.CellValidation;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;

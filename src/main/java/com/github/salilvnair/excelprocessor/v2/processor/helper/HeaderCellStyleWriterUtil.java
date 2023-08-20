@@ -21,9 +21,9 @@ public class HeaderCellStyleWriterUtil {
     }
 
     public static void applyDynamicCellStyles(Sheet sheet, String header, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext writerContext) {
-        Map<String, HeaderCellStyleInfo> dynamicHeaderDataCellStyleInfo = writerContext.getDynamicHeaderCellStyleInfo();
+        Map<String, HeaderCellStyleInfo> dynamicHeaderCellStyleInfo = writerContext.getDynamicHeaderCellStyleInfo();
         HeaderCellStyleInfo headerCellStyleInfo = null;
-        if(dynamicHeaderDataCellStyleInfo == null || !dynamicHeaderDataCellStyleInfo.containsKey(header)) {
+        if(dynamicHeaderCellStyleInfo == null || !dynamicHeaderCellStyleInfo.containsKey(header)) {
             BaseSheet sheetDataObj = writerContext.getSheetDataObj();
             if(sheetDataObj != null) {
                 HeaderCellStyle headerCellStyle  = sheetDataObj.getClass().getAnnotation(HeaderCellStyle.class);
@@ -34,7 +34,7 @@ public class HeaderCellStyleWriterUtil {
             }
         }
         else {
-            headerCellStyleInfo = dynamicHeaderDataCellStyleInfo.get(header);
+            headerCellStyleInfo = dynamicHeaderCellStyleInfo.get(header);
         }
 
         applyStaticDynamicCellStyles(sheet, header, headerCellStyleInfo, rowCell, writerContext);
@@ -98,9 +98,9 @@ public class HeaderCellStyleWriterUtil {
 
         if(writerContext.styleTemplate()!=null) {
             cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-            StyleTemplateCellInfo styleTemplateCellInfo = headerCellStyleInfo.styleTemplateCellInfo;
-            int rowIndex = styleTemplateCellInfo.row  - 1;
-            int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCellInfo.column)  - 1;
+            StyleTemplateCellInfo styleTemplateCellInfo = headerCellStyleInfo.getStyleTemplateCellInfo();
+            int rowIndex = styleTemplateCellInfo.getRow()  - 1;
+            int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCellInfo.getColumn())  - 1;
             CellStyle templateCellStyle = writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getCellStyle();
             cellStyle.cloneStyleFrom(templateCellStyle);
             // Copy cell width
@@ -112,29 +112,29 @@ public class HeaderCellStyleWriterUtil {
             cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
         }
 
-        cellStyle.setWrapText(headerCellStyleInfo.wrapText);
-        if(headerCellStyleInfo.hasBorderStyle) {
-            cellStyle.setBorderTop(headerCellStyleInfo.borderStyle);
-            cellStyle.setBorderRight(headerCellStyleInfo.borderStyle);
-            cellStyle.setBorderBottom(headerCellStyleInfo.borderStyle);
-            cellStyle.setBorderLeft(headerCellStyleInfo.borderStyle);
+        cellStyle.setWrapText(headerCellStyleInfo.isWrapText());
+        if(headerCellStyleInfo.isHasBorderStyle()) {
+            cellStyle.setBorderTop(headerCellStyleInfo.getBorderStyle());
+            cellStyle.setBorderRight(headerCellStyleInfo.getBorderStyle());
+            cellStyle.setBorderBottom(headerCellStyleInfo.getBorderStyle());
+            cellStyle.setBorderLeft(headerCellStyleInfo.getBorderStyle());
         }
-        if(headerCellStyleInfo.hasBorderColor) {
-            cellStyle.setTopBorderColor(headerCellStyleInfo.borderColor.getIndex());
-            cellStyle.setRightBorderColor(headerCellStyleInfo.borderColor.getIndex());
-            cellStyle.setBottomBorderColor(headerCellStyleInfo.borderColor.getIndex());
-            cellStyle.setLeftBorderColor(headerCellStyleInfo.borderColor.getIndex());
-        }
-
-        if(headerCellStyleInfo.hasBackgroundColor) {
-            cellStyle.setFillPattern(headerCellStyleInfo.fillPattern);
-            cellStyle.setFillForegroundColor(headerCellStyleInfo.backgroundColor.getIndex());
-            cellStyle.setFillBackgroundColor(headerCellStyleInfo.backgroundColor.getIndex());
+        if(headerCellStyleInfo.isHasBorderColor()) {
+            cellStyle.setTopBorderColor(headerCellStyleInfo.getBorderColor().getIndex());
+            cellStyle.setRightBorderColor(headerCellStyleInfo.getBorderColor().getIndex());
+            cellStyle.setBottomBorderColor(headerCellStyleInfo.getBorderColor().getIndex());
+            cellStyle.setLeftBorderColor(headerCellStyleInfo.getBorderColor().getIndex());
         }
 
-        if(headerCellStyleInfo.hasForegroundColor) {
-            cellStyle.setFillPattern(headerCellStyleInfo.fillPattern);
-            cellStyle.setFillForegroundColor(headerCellStyleInfo.foregroundColor.getIndex());
+        if(headerCellStyleInfo.isHasBackgroundColor()) {
+            cellStyle.setFillPattern(headerCellStyleInfo.getFillPattern());
+            cellStyle.setFillForegroundColor(headerCellStyleInfo.getBackgroundColor().getIndex());
+            cellStyle.setFillBackgroundColor(headerCellStyleInfo.getBackgroundColor().getIndex());
+        }
+
+        if(headerCellStyleInfo.isHasForegroundColor()) {
+            cellStyle.setFillPattern(headerCellStyleInfo.getFillPattern());
+            cellStyle.setFillForegroundColor(headerCellStyleInfo.getForegroundColor().getIndex());
         }
         rowCell.setCellStyle(cellStyle);
     }
@@ -154,20 +154,20 @@ public class HeaderCellStyleWriterUtil {
             return null;
         }
         HeaderCellStyleInfo headerCellStyleInfo = new HeaderCellStyleInfo();
-        headerCellStyleInfo.conditional = headerCellStyle.conditional();
-        headerCellStyleInfo.condition = headerCellStyle.condition();
-        headerCellStyleInfo.borderStyle = headerCellStyle.borderStyle();
-        headerCellStyleInfo.borderColor = headerCellStyle.borderColor();
-        headerCellStyleInfo.customTask = headerCellStyle.customTask();
-        headerCellStyleInfo.backgroundColor = headerCellStyle.backgroundColor();
-        headerCellStyleInfo.fillPattern = headerCellStyle.fillPattern();
-        headerCellStyleInfo.foregroundColor = headerCellStyle.foregroundColor();
-        headerCellStyleInfo.hasBackgroundColor = headerCellStyle.hasBackgroundColor();
-        headerCellStyleInfo.hasBorderColor = headerCellStyle.hasBorderColor();
-        headerCellStyleInfo.hasBorderStyle = headerCellStyle.hasBorderStyle();
-        headerCellStyleInfo.hasForegroundColor = headerCellStyle.hasForegroundColor();
-        headerCellStyleInfo.columnWidthInUnits = headerCellStyle.columnWidthInUnits();
-        headerCellStyleInfo.wrapText = headerCellStyle.wrapText();
+        headerCellStyleInfo.setConditional(headerCellStyle.conditional());
+        headerCellStyleInfo.setCondition(headerCellStyle.condition());
+        headerCellStyleInfo.setBorderStyle(headerCellStyle.borderStyle());
+        headerCellStyleInfo.setBorderColor(headerCellStyle.borderColor());
+        headerCellStyleInfo.setCustomTask(headerCellStyle.customTask());
+        headerCellStyleInfo.setBackgroundColor(headerCellStyle.backgroundColor());
+        headerCellStyleInfo.setFillPattern(headerCellStyle.fillPattern());
+        headerCellStyleInfo.setForegroundColor(headerCellStyle.foregroundColor());
+        headerCellStyleInfo.setHasBackgroundColor(headerCellStyle.hasBackgroundColor());
+        headerCellStyleInfo.setHasBorderColor(headerCellStyle.hasBorderColor());
+        headerCellStyleInfo.setHasBorderStyle(headerCellStyle.hasBorderStyle());
+        headerCellStyleInfo.setHasForegroundColor(headerCellStyle.hasForegroundColor());
+        headerCellStyleInfo.setColumnWidthInUnits(headerCellStyle.columnWidthInUnits());
+        headerCellStyleInfo.setWrapText(headerCellStyle.wrapText());
         return headerCellStyleInfo;
     }
 
@@ -176,8 +176,8 @@ public class HeaderCellStyleWriterUtil {
             return null;
         }
         StyleTemplateCellInfo styleTemplateCellInfo = new StyleTemplateCellInfo();
-        styleTemplateCellInfo.column = styleTemplateCell.column();
-        styleTemplateCellInfo.row = styleTemplateCell.row();
+        styleTemplateCellInfo.setColumn(styleTemplateCell.column());
+        styleTemplateCellInfo.setRow(styleTemplateCell.row());
         return styleTemplateCellInfo;
     }
     

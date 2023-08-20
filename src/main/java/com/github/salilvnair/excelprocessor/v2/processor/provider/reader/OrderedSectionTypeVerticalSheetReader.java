@@ -14,7 +14,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.service.DynamicHeaderSh
 import com.github.salilvnair.excelprocessor.v2.processor.service.StaticHeaderSheetReader;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
+import com.github.salilvnair.excelprocessor.v2.model.CellInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -178,7 +178,7 @@ public class OrderedSectionTypeVerticalSheetReader extends BaseVerticalSheetRead
                         Map<String, CellInfo> value = entry.getValue();
                         BaseSheet classObject = null;
                         if(sheet.dynamicHeaders()) {
-                            classObject = DynamicHeaderSheetReader.dynamicCellValueResolver(clazz, headerStringList, value, key, finalDynamicCellField);
+                            classObject = DynamicHeaderSheetReader.dynamicCellValueResolver(clazz, headerStringList, value, key, finalDynamicCellField, context);
                         }
                         else {
                             Set<String> processedHeader = new HashSet<>();

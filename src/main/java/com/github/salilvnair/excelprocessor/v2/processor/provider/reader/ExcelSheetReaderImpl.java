@@ -16,7 +16,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellV
 import com.github.salilvnair.excelprocessor.v2.processor.validator.helper.ExcelSheetValidator;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
+import com.github.salilvnair.excelprocessor.v2.model.ExcelInfo;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -277,6 +277,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         }
         ExcelSheetReaderContext readerContext = _read(clazz, context, multiOriented);
         readerContext.setSheetName(sheetName);
+        readerContext.setHeaderFieldInfoMap(context.headerFieldInfo());
         readerContext.setExtractMultiOrientedMap(multiOriented);
         return readerContext;
     }
@@ -288,6 +289,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         readerContext.setIgnoreHeaderRows(context.ignoreHeaderRows());
         readerContext.setIgnoreHeaderColumns(context.ignoreHeaderColumns());
         readerContext.setSuppressExceptions(context.suppressExceptions());
+        readerContext.setHeaderFieldInfoMap(context.headerFieldInfo());
         BaseExcelSheetReader sheetReader = _sheetReader(readerContext, clazz, context, multiOriented);
         if (sheetReader != null) {
             sheetReader.read(clazz, readerContext);
@@ -374,14 +376,12 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         }
         Sheet sheet = clazz.getAnnotation(Sheet.class);
         List<? extends BaseSheet> rows = readerContext.getSheetData();
-        if(sheet.dynamicHeaders()) {
-            return Collections.emptyList();
-        }
         return ExcelSheetValidator
                 .init(validatorContext)
                 .setUserValidatorMap(sheetContext.userValidatorMap())
                 .setValidValuesDataSet(sheetContext.validValuesDataSet())
                 .setUserDefinedMessageDataSet(sheetContext.userDefinedMessageDataSet())
+                .setHeaderKeyedCellValidationInfo(sheetContext.headerKeyedCellValidationInfo())
                 .rows(rows)
                 .validate();
     }

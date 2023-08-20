@@ -9,10 +9,9 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.helper.TypeConvertor;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
-import com.github.salilvnair.excelprocessor.v2.processor.model.SectionRangeAddress;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
+import com.github.salilvnair.excelprocessor.v2.model.CellInfo;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.lang.reflect.Field;

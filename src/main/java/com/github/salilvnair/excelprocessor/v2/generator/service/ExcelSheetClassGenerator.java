@@ -9,8 +9,8 @@ import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReader
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.sheet.DynamicHeaderSheet;
-import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
-import com.github.salilvnair.excelprocessor.v2.type.SheetInfo;
+import com.github.salilvnair.excelprocessor.v2.model.CellInfo;
+import com.github.salilvnair.excelprocessor.v2.model.SheetInfo;
 
 import java.util.*;
 import java.util.stream.Collectors;

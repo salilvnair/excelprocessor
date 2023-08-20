@@ -1,4 +1,4 @@
-package com.github.salilvnair.excelprocessor.v2.type;
+package com.github.salilvnair.excelprocessor.v2.model;
 
 import org.apache.poi.ss.usermodel.Color;
 

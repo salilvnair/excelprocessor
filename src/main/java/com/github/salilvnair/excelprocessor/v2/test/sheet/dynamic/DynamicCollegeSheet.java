@@ -13,7 +13,7 @@ import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
 )
 @HeaderCellStyle
 @Sheet(
-        value="DynamicCollegeSheet",
+        value="College",
         type = ExcelFileType.Extension.XLSX,
         excelTask = DynamicSheetTask.class,
         dynamicHeaders = true

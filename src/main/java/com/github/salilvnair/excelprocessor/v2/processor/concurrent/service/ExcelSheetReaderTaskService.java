@@ -6,7 +6,7 @@ import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.processor.concurrent.type.TaskType;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
+import com.github.salilvnair.excelprocessor.v2.model.CellInfo;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.List;

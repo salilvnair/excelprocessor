@@ -1,6 +1,7 @@
 package com.github.salilvnair.excelprocessor.v2.processor.validator.context;
 
 import com.github.salilvnair.excelprocessor.v2.processor.validator.type.ValidatorType;
+import com.google.gson.Gson;
 
 public class CellValidationMessage {
     private String header;
@@ -92,5 +93,10 @@ public class CellValidationMessage {
 
     public void setOriginalHeader(String originalHeader) {
         this.originalHeader = originalHeader;
+    }
+
+    @Override
+    public String toString() {
+        return "\n"+new Gson().toJson(this);
     }
 }

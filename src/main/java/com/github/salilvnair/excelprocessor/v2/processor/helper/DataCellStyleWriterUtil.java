@@ -57,10 +57,10 @@ public class DataCellStyleWriterUtil {
         }
         writerContext.setRowCell(rowCell);
         writerContext.setCellValue(fieldValue);
-        if(dataCellStyleInfo.conditional) {
+        if(dataCellStyleInfo.isConditional()) {
             applyConditionalDynamicCellStyle(sheet, header, dataCellStyleInfo, rowCell, writerContext);
         }
-        else if(!StringUtils.isEmpty(dataCellStyleInfo.customTask) || dataCellStyleInfo.customTasks.length > 0) {
+        else if(!StringUtils.isEmpty(dataCellStyleInfo.getCustomTask()) || dataCellStyleInfo.getCustomTasks().length > 0) {
             executeCustomTaskWithDynamicCellStyle(sheet, header, dataCellStyleInfo, rowCell, writerContext);
         }
         else {
@@ -70,21 +70,21 @@ public class DataCellStyleWriterUtil {
 
     private static DataCellStyleInfo extractDataCellStyleInfo(DataCellStyle dataCellStyle) {
         DataCellStyleInfo dataCellStyleInfo = new DataCellStyleInfo();
-        dataCellStyleInfo.conditional = dataCellStyle.conditional();
-        dataCellStyleInfo.condition = dataCellStyle.condition();
-        dataCellStyleInfo.borderStyle = dataCellStyle.borderStyle();
-        dataCellStyleInfo.borderColor = dataCellStyle.borderColor();
-        dataCellStyleInfo.applyDefaultStyles = dataCellStyle.applyDefaultStyles();
-        dataCellStyleInfo.customTask = dataCellStyle.customTask();
-        dataCellStyleInfo.backgroundColor = dataCellStyle.backgroundColor();
-        dataCellStyleInfo.fillPattern = dataCellStyle.fillPattern();
-        dataCellStyleInfo.foregroundColor = dataCellStyle.foregroundColor();
-        dataCellStyleInfo.hasBackgroundColor = dataCellStyle.hasBackgroundColor();
-        dataCellStyleInfo.hasBorderColor = dataCellStyle.hasBorderColor();
-        dataCellStyleInfo.hasBorderStyle = dataCellStyle.hasBorderStyle();
-        dataCellStyleInfo.hasForegroundColor = dataCellStyle.hasForegroundColor();
-        dataCellStyleInfo.columnWidthInUnits = dataCellStyle.columnWidthInUnits();
-        dataCellStyleInfo.wrapText = dataCellStyle.wrapText();
+        dataCellStyleInfo.setConditional(dataCellStyle.conditional());
+        dataCellStyleInfo.setCondition(dataCellStyle.condition());
+        dataCellStyleInfo.setBorderStyle(dataCellStyle.borderStyle());
+        dataCellStyleInfo.setBorderColor(dataCellStyle.borderColor());
+        dataCellStyleInfo.setApplyDefaultStyles(dataCellStyle.applyDefaultStyles());
+        dataCellStyleInfo.setCustomTask(dataCellStyle.customTask());
+        dataCellStyleInfo.setBackgroundColor(dataCellStyle.backgroundColor());
+        dataCellStyleInfo.setFillPattern(dataCellStyle.fillPattern());
+        dataCellStyleInfo.setForegroundColor(dataCellStyle.foregroundColor());
+        dataCellStyleInfo.setHasBackgroundColor(dataCellStyle.hasBackgroundColor());
+        dataCellStyleInfo.setHasBorderColor(dataCellStyle.hasBorderColor());
+        dataCellStyleInfo.setHasBorderStyle(dataCellStyle.hasBorderStyle());
+        dataCellStyleInfo.setHasForegroundColor(dataCellStyle.hasForegroundColor());
+        dataCellStyleInfo.setColumnWidthInUnits(dataCellStyle.columnWidthInUnits());
+        dataCellStyleInfo.setWrapText(dataCellStyle.wrapText());
         return dataCellStyleInfo;
     }
 
@@ -103,7 +103,7 @@ public class DataCellStyleWriterUtil {
         if(dataCellStyleInfo == null) {
             return;
         }
-        if(dataCellStyleInfo.applyDefaultStyles) {
+        if(dataCellStyleInfo.isApplyDefaultStyles()) {
             applyStaticDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
         }
         executeCustomTask(dataCellStyleInfo, sheet, rowCell, writerContext);
@@ -121,11 +121,11 @@ public class DataCellStyleWriterUtil {
     }
 
     private static void executeCustomTask(DataCellStyleInfo dataCellStyle, Sheet sheet, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext writerContext) {
-        if(!StringUtils.isEmpty(dataCellStyle.customTask)) {
-            ExcelCellStyleTaskExecutor.execute(dataCellStyle.customTask, sheet.excelTask(), writerContext);
+        if(!StringUtils.isEmpty(dataCellStyle.getCustomTask())) {
+            ExcelCellStyleTaskExecutor.execute(dataCellStyle.getCustomTask(), sheet.excelTask(), writerContext);
         }
         else {
-            for (String customTask : dataCellStyle.customTasks) {
+            for (String customTask : dataCellStyle.getCustomTasks()) {
                 ExcelCellStyleTaskExecutor.execute(customTask, sheet.excelTask(), writerContext);
             }
         }
@@ -146,7 +146,7 @@ public class DataCellStyleWriterUtil {
         if(dataCellStyleInfo == null) {
             return;
         }
-        Object object = ExcelCellStyleTaskExecutor.execute(dataCellStyleInfo.condition, sheet.excelTask(), writerContext);
+        Object object = ExcelCellStyleTaskExecutor.execute(dataCellStyleInfo.getCondition(), sheet.excelTask(), writerContext);
         if(ObjectUtil.nonNullOrBooleanTrue(object)) {
             applyStaticDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
         }
@@ -211,9 +211,9 @@ public class DataCellStyleWriterUtil {
 
         if(writerContext.styleTemplate()!=null) {
             cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-            StyleTemplateCellInfo styleTemplateCellInfo = dataCellStyleInfo.styleTemplateCellInfo;
-            int rowIndex = styleTemplateCellInfo.row  - 1;
-            int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCellInfo.column)  - 1;
+            StyleTemplateCellInfo styleTemplateCellInfo = dataCellStyleInfo.getStyleTemplateCellInfo();
+            int rowIndex = styleTemplateCellInfo.getRow()  - 1;
+            int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCellInfo.getColumn())  - 1;
             CellStyle templateCellStyle = writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getCellStyle();
             cellStyle.cloneStyleFrom(templateCellStyle);
             // Copy cell width
@@ -225,29 +225,29 @@ public class DataCellStyleWriterUtil {
             cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
         }
 
-        cellStyle.setWrapText(dataCellStyleInfo.wrapText);
-        if(dataCellStyleInfo.hasBorderStyle) {
-            cellStyle.setBorderTop(dataCellStyleInfo.borderStyle);
-            cellStyle.setBorderRight(dataCellStyleInfo.borderStyle);
-            cellStyle.setBorderBottom(dataCellStyleInfo.borderStyle);
-            cellStyle.setBorderLeft(dataCellStyleInfo.borderStyle);
+        cellStyle.setWrapText(dataCellStyleInfo.isWrapText());
+        if(dataCellStyleInfo.isHasBorderStyle()) {
+            cellStyle.setBorderTop(dataCellStyleInfo.getBorderStyle());
+            cellStyle.setBorderRight(dataCellStyleInfo.getBorderStyle());
+            cellStyle.setBorderBottom(dataCellStyleInfo.getBorderStyle());
+            cellStyle.setBorderLeft(dataCellStyleInfo.getBorderStyle());
         }
-        if(dataCellStyleInfo.hasBorderColor) {
-            cellStyle.setTopBorderColor(dataCellStyleInfo.borderColor.getIndex());
-            cellStyle.setRightBorderColor(dataCellStyleInfo.borderColor.getIndex());
-            cellStyle.setBottomBorderColor(dataCellStyleInfo.borderColor.getIndex());
-            cellStyle.setLeftBorderColor(dataCellStyleInfo.borderColor.getIndex());
-        }
-
-        if(dataCellStyleInfo.hasBackgroundColor) {
-            cellStyle.setFillPattern(dataCellStyleInfo.fillPattern);
-            cellStyle.setFillForegroundColor(dataCellStyleInfo.backgroundColor.getIndex());
-            cellStyle.setFillBackgroundColor(dataCellStyleInfo.backgroundColor.getIndex());
+        if(dataCellStyleInfo.isHasBorderColor()) {
+            cellStyle.setTopBorderColor(dataCellStyleInfo.getBorderColor().getIndex());
+            cellStyle.setRightBorderColor(dataCellStyleInfo.getBorderColor().getIndex());
+            cellStyle.setBottomBorderColor(dataCellStyleInfo.getBorderColor().getIndex());
+            cellStyle.setLeftBorderColor(dataCellStyleInfo.getBorderColor().getIndex());
         }
 
-        if(dataCellStyleInfo.hasForegroundColor) {
-            cellStyle.setFillPattern(dataCellStyleInfo.fillPattern);
-            cellStyle.setFillForegroundColor(dataCellStyleInfo.foregroundColor.getIndex());
+        if(dataCellStyleInfo.isHasBackgroundColor()) {
+            cellStyle.setFillPattern(dataCellStyleInfo.getFillPattern());
+            cellStyle.setFillForegroundColor(dataCellStyleInfo.getBackgroundColor().getIndex());
+            cellStyle.setFillBackgroundColor(dataCellStyleInfo.getBackgroundColor().getIndex());
+        }
+
+        if(dataCellStyleInfo.isHasForegroundColor()) {
+            cellStyle.setFillPattern(dataCellStyleInfo.getFillPattern());
+            cellStyle.setFillForegroundColor(dataCellStyleInfo.getForegroundColor().getIndex());
         }
         rowCell.setCellStyle(cellStyle);
     }

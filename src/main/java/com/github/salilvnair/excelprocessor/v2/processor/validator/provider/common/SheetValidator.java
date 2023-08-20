@@ -1,4 +1,4 @@
-package com.github.salilvnair.excelprocessor.v2.processor.validator.provider;
+package com.github.salilvnair.excelprocessor.v2.processor.validator.provider.common;
 
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;

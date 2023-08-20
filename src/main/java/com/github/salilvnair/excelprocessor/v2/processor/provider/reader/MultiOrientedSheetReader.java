@@ -6,7 +6,7 @@ import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetReaderExcepti
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetFactory;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import com.github.salilvnair.excelprocessor.v2.type.ExcelInfo;
+import com.github.salilvnair.excelprocessor.v2.model.ExcelInfo;
 
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +74,7 @@ public class MultiOrientedSheetReader extends  BaseExcelSheetReader {
     private ExcelSheetReaderContext copyReaderContextAndGenerateMultiOrientedReaderContext(MultiOrientedSheet multiOrientedSheet, Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context) {
         ExcelSheetReaderContext multiOrientedReaderContext = new ExcelSheetReaderContext();
         multiOrientedReaderContext.setSheetName(multiOrientedSheet.name());
+        multiOrientedReaderContext.setHeaderFieldInfoMap(context.headerFieldInfoMap());
         multiOrientedReaderContext.setIgnoreHeaders(context.ignoreHeaders());
         multiOrientedReaderContext.setIgnoreHeaderRows(context.ignoreHeaderRows());
         multiOrientedReaderContext.setIgnoreHeaderColumns(context.ignoreHeaderColumns());

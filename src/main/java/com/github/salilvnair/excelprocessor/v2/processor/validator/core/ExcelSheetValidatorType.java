@@ -7,5 +7,6 @@ public enum ExcelSheetValidatorType {
     SHEET,
     ROW,
     SECTION,
-    CELL
+    CELL,
+    DYNAMIC_CELL
 }

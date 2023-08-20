@@ -24,7 +24,7 @@ public class ExcelSheetValidatorUtil {
     }
 
     public ExcelSheetValidatorUtil(Object object, ExcelSheetValidatorType sheetValidatorType) {
-        this.setRowValidators(ExcelValidatorFactory.generate(object,sheetValidatorType));
+        this.setExcelValidators(ExcelValidatorFactory.generate(object,sheetValidatorType));
     }
 
     public List<CellValidationMessage> validate(BaseSheet row) {
@@ -51,12 +51,12 @@ public class ExcelSheetValidatorUtil {
         return excelValidators;
     }
 
-    public void setRowValidators(List<ExcelValidator> ExcelValidators) {
+    public void setExcelValidators(List<ExcelValidator> ExcelValidators) {
         this.excelValidators = ExcelValidators;
     }
 
     private void init(Object object,ExcelSheetValidatorType sheetValidatorType) {
-        this.setRowValidators(ExcelValidatorFactory.generate(object,sheetValidatorType));
+        this.setExcelValidators(ExcelValidatorFactory.generate(object,sheetValidatorType));
     }
 
     public CellValidatorContext validatorContext() {

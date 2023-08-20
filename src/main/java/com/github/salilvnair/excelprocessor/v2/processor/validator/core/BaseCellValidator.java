@@ -9,7 +9,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellV
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.type.ValidatorType;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
-import com.github.salilvnair.excelprocessor.v2.type.CellInfo;
+import com.github.salilvnair.excelprocessor.v2.model.CellInfo;
 
 import java.lang.reflect.Field;
 import java.util.*;

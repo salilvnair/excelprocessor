@@ -1,5 +1,6 @@
 package com.github.salilvnair.excelprocessor.v2.processor.validator.helper;
 
+import com.github.salilvnair.excelprocessor.v2.model.CellValidationInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
@@ -48,6 +49,12 @@ public final class ExcelSheetValidator {
     public ExcelSheetValidator setUserDefinedMessageDataSet(Map<String,String> userDefinedMessageDataSet) {
         initValidatorContext();
         validatorContext.setUserDefinedMessageDataSet(userDefinedMessageDataSet);
+        return this;
+    }
+
+    public ExcelSheetValidator setHeaderKeyedCellValidationInfo(Map<String, CellValidationInfo> headerKeyedCellValidationInfo) {
+        initValidatorContext();
+        validatorContext.setHeaderKeyedCellValidationInfo(headerKeyedCellValidationInfo);
         return this;
     }
 

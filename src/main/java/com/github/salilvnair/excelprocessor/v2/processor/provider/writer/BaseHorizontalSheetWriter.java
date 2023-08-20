@@ -6,6 +6,7 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+import com.github.salilvnair.excelprocessor.v2.sheet.DynamicHeaderSheet;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
@@ -81,14 +82,22 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         }
     }
 
-    protected void writeDynamicDataToBody(List<? extends BaseSheet> sheetData, Map<String, Object> headerKeyedCellValueMap, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
-        Set<String> headers = headerKeyedCellValueMap.keySet();
+    protected void writeDynamicDataToBody(List<? extends BaseSheet> sheetData, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
         int headerRowIndex = sheet.headerRowAt() - 1;
         int valueRowIndex = sheet.valueRowAt()!=-1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         for (int r = 0; r < sheetData.size(); r++) {
             BaseSheet sheetDataObj = sheetData.get(r);
+            if(sheetDataObj == null) {
+                continue;
+            }
             context.setSheetDataObj(sheetDataObj);
+            DynamicHeaderSheet dynamicHeaderSheet = (DynamicHeaderSheet) sheetDataObj;
+            Map<String, Object> headerKeyedCellValueMap = dynamicHeaderSheet.dynamicHeaderKeyedCellValueMap();
+            if(headerKeyedCellValueMap == null || headerKeyedCellValueMap.isEmpty()) {
+                continue;
+            }
+            Set<String> headers = headerKeyedCellValueMap.keySet();
             int createRowIndex = r + valueRowIndex;
             Row row = workbookSheet.createRow(createRowIndex);
             for (int c = 0; c < headers.size(); c++) {

@@ -1,39 +1,49 @@
 package com.github.salilvnair.excelprocessor.v2.model;
 
+import lombok.*;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 
+@Builder(toBuilder = true)
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class HeaderCellStyleInfo {
-    public boolean conditional = false;
+    private boolean conditional = false;
 
-    public String condition = "";
+    private String condition = "";
 
-    public String customTask = "";
+    private String customTask = "";
 
-    public String[] customTasks = {};
+    private String[] customTasks = {};
 
-    public boolean hasForegroundColor = false;
+    private boolean hasForegroundColor = false;
 
-    public boolean hasBackgroundColor = false;
+    private boolean hasBackgroundColor = false;
 
-    public boolean hasBorderStyle = false;
+    private boolean hasBorderStyle = false;
 
-    public boolean hasBorderColor = false;
+    private boolean hasBorderColor = false;
 
-    public boolean wrapText = false;
+    private boolean wrapText = false;
 
-    public IndexedColors foregroundColor = IndexedColors.AUTOMATIC;
+    private IndexedColors foregroundColor = IndexedColors.AUTOMATIC;
 
-    public IndexedColors backgroundColor = IndexedColors.AUTOMATIC;
+    private IndexedColors backgroundColor = IndexedColors.AUTOMATIC;
 
-    public FillPatternType fillPattern = FillPatternType.SOLID_FOREGROUND;
+    private FillPatternType fillPattern = FillPatternType.SOLID_FOREGROUND;
 
-    public BorderStyle borderStyle = BorderStyle.NONE;
+    private BorderStyle borderStyle = BorderStyle.NONE;
 
-    public IndexedColors borderColor = IndexedColors.AUTOMATIC;
+    private IndexedColors borderColor = IndexedColors.AUTOMATIC;
 
-    public int columnWidthInUnits = -1;
+    private int columnWidthInUnits = -1;
 
-    public StyleTemplateCellInfo styleTemplateCellInfo = new StyleTemplateCellInfo();
+    private StyleTemplateCellInfo styleTemplateCellInfo = new StyleTemplateCellInfo();
+
+    public static HeaderCellStyleInfo.HeaderCellStyleInfoBuilder defaultValueBuilder() {
+        return new HeaderCellStyleInfo().toBuilder();
+    }
 }
