@@ -13,8 +13,4 @@ public class UserDefinedMessageInfo {
     private String message = "";
     private String messageId = "";
     private String messageType = MessageType.ERROR.name();
-
-    public static UserDefinedMessageInfo.UserDefinedMessageInfoBuilder defaultValueBuilder() {
-        return new UserDefinedMessageInfo().toBuilder();
-    }
 }

@@ -33,8 +33,4 @@ public class CellValidationInfo {
     private String messageType = MessageType.ERROR.name();
     private UserDefinedMessageInfo[] userDefinedMessages= {};
     private AllowedValuesInfo allowedValuesInfo;
-
-    public static CellValidationInfo.CellValidationInfoBuilder defaultValueBuilder() {
-        return new CellValidationInfo().toBuilder();
-    }
 }

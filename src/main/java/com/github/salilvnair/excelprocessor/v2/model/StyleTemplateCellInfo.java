@@ -10,8 +10,4 @@ import lombok.*;
 public class StyleTemplateCellInfo {
     private int row = 1;
     private String column ="A";
-
-    public static StyleTemplateCellInfo.StyleTemplateCellInfoBuilder defaultValueBuilder() {
-        return new StyleTemplateCellInfo().toBuilder();
-    }
 }

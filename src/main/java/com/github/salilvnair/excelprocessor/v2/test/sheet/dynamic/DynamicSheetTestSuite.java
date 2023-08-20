@@ -30,8 +30,8 @@ public class DynamicSheetTestSuite {
         String filePath = "/Users/salilvnair/workspace/git/salilvnair/excelprocessor/src/main/resources/excel/DynamicallyGeneratedExcelProcessorTest.xlsx";
         builder.excelFile(new File(filePath));
         StopWatch.start();
-        AllowedValuesInfo allowedValuesInfo = AllowedValuesInfo.defaultValueBuilder().showValuesInMessage(true).allowNull(true).value(new String[]{"RJ", "KL"}).build();
-        CellValidationInfo cellValidationInfo = CellValidationInfo.defaultValueBuilder().required(true).allowedValuesInfo(allowedValuesInfo).build();
+        AllowedValuesInfo allowedValuesInfo = new AllowedValuesInfo().toBuilder().showValuesInMessage(true).allowNull(true).value(new String[]{"RJ", "KL"}).build();
+        CellValidationInfo cellValidationInfo = new CellValidationInfo().toBuilder().required(true).allowedValuesInfo(allowedValuesInfo).build();
         Map<String, CellValidationInfo> cellValidationInfoMap = MapGenerator.immutable().generate("State", cellValidationInfo);
         Map<String, FieldInfo> headerFieldInfo = MapGenerator.immutable().generate("# of students", FieldInfo.builder().type(FieldType.LONG.typeStringValue()).build());
         builder.headerKeyedCellValidationInfo(cellValidationInfoMap);

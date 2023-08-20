@@ -43,10 +43,5 @@ public class DataCellStyleInfo {
 
     private int columnWidthInUnits = -1;
 
-
     private StyleTemplateCellInfo styleTemplateCellInfo = new StyleTemplateCellInfo();
-
-    public static DataCellStyleInfo.DataCellStyleInfoBuilder defaultValueBuilder() {
-        return new DataCellStyleInfo().toBuilder();
-    }
 }

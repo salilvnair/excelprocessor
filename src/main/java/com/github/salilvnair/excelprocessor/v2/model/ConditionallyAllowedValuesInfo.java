@@ -20,8 +20,4 @@ public class ConditionallyAllowedValuesInfo {
     private String message = "";
     private String messageId = "";
     private String messageType = MessageType.ERROR.name();
-
-    public static ConditionallyAllowedValuesInfo.ConditionallyAllowedValuesInfoBuilder defaultValueBuilder() {
-        return new ConditionallyAllowedValuesInfo().toBuilder();
-    }
 }

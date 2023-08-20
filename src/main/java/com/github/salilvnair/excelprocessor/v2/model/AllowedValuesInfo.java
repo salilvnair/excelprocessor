@@ -23,7 +23,4 @@ public class AllowedValuesInfo {
     private String messageType = MessageType.ERROR.name();
     private ConditionallyAllowedValuesInfo[] conditionallyAllowedValues = {};
 
-    public static AllowedValuesInfo.AllowedValuesInfoBuilder defaultValueBuilder() {
-        return new AllowedValuesInfo().toBuilder();
-    }
 }

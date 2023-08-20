@@ -42,8 +42,4 @@ public class HeaderCellStyleInfo {
     private int columnWidthInUnits = -1;
 
     private StyleTemplateCellInfo styleTemplateCellInfo = new StyleTemplateCellInfo();
-
-    public static HeaderCellStyleInfo.HeaderCellStyleInfoBuilder defaultValueBuilder() {
-        return new HeaderCellStyleInfo().toBuilder();
-    }
 }
