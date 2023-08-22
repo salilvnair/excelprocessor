@@ -40,6 +40,7 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
     private int valueRowBeginsAt=-1;
     private int valueRowEndsAt=-1;
     private boolean suppressExceptions;
+    private boolean suppressTaskExceptions;
 
     public Map<Integer, Map<String, CellInfo>> rowIndexKeyedHeaderKeyCellInfoMap() {
         if(rowIndexKeyedHeaderKeyCellInfoMap == null) {
@@ -249,5 +250,13 @@ public class ExcelSheetReaderContext extends BaseExcelSheetContext {
 
     public void setSuppressExceptions(boolean suppressExceptions) {
         this.suppressExceptions = suppressExceptions;
+    }
+
+    public boolean suppressTaskExceptions() {
+        return suppressTaskExceptions;
+    }
+
+    public void setSuppressTaskExceptions(boolean suppressTaskExceptions) {
+        this.suppressTaskExceptions = suppressTaskExceptions;
     }
 }

@@ -2,6 +2,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.provider.writer.task.h
 
 import com.github.salilvnair.excelprocessor.util.ReflectionUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
+import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetWriterException;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.task.AbstractExcelTask;
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,7 +22,9 @@ public class ExcelCellStyleTaskExecutor {
                 return ReflectionUtil.invokeMethod(task, task.getMethodName(), writerContext);
             }
             catch (Exception ex) {
-                ex.printStackTrace();
+                if(!writerContext.suppressTaskExceptions()) {
+                    throw new ExcelSheetWriterException(ex);
+                }
             }
         }
         return null;

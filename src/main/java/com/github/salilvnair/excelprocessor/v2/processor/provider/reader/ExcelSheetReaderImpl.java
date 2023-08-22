@@ -177,6 +177,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         readerContext.setIgnoreHeaderRows(context.ignoreHeaderRows());
         readerContext.setIgnoreHeaderColumns(context.ignoreHeaderColumns());
         readerContext.setSuppressExceptions(context.suppressExceptions());
+        readerContext.setSuppressTaskExceptions(context.suppressTaskExceptions());
         MultiOrientedSheet multiOrientedSheet = clazz.getAnnotation(MultiOrientedSheet.class);
         BaseExcelSheetReader sheetReader = _sheetReader(readerContext, clazz, context, multiOrientedSheet!=null);
         if (sheetReader != null) {
@@ -289,6 +290,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         readerContext.setIgnoreHeaderRows(context.ignoreHeaderRows());
         readerContext.setIgnoreHeaderColumns(context.ignoreHeaderColumns());
         readerContext.setSuppressExceptions(context.suppressExceptions());
+        readerContext.setSuppressTaskExceptions(context.suppressTaskExceptions());
         readerContext.setHeaderFieldInfoMap(context.headerFieldInfo());
         BaseExcelSheetReader sheetReader = _sheetReader(readerContext, clazz, context, multiOriented);
         if (sheetReader != null) {

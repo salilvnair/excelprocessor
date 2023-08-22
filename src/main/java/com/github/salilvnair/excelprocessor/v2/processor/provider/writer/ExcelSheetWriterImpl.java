@@ -88,6 +88,8 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
                 .template(workbook)
                 .styleTemplate(sheetContext.styleTemplateWorkbook())
                 .taskMetadata(sheetContext.taskMetadata())
+                .suppressExceptions(sheetContext.suppressExceptions())
+                .suppressTaskExceptions(sheetContext.suppressTaskExceptions())
                 .orderedHeaders(sheetContext.orderedHeaders())
                 .dynamicHeaderDisplayNames(sheetContext.dynamicHeaderDisplayNames())
                 .dynamicHeaderCellStyleInfo(sheetContext.dynamicHeaderCellStyleInfo())

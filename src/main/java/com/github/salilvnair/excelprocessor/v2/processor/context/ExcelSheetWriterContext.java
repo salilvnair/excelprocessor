@@ -54,6 +54,10 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
 
     private List<Object> taskMetadata;
 
+    private boolean suppressExceptions;
+
+    private boolean suppressTaskExceptions;
+
     public Workbook workbook() {
         return super.getWorkbook();
     }
@@ -98,6 +102,14 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
     }
     public List<Object> taskMetadata() {
         return  taskMetadata;
+    }
+
+    public boolean suppressExceptions() {
+        return suppressExceptions;
+    }
+
+    public boolean suppressTaskExceptions() {
+        return suppressTaskExceptions;
     }
 
     public <T> T sheet(Class<T> clazz) {

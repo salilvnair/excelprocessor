@@ -50,6 +50,7 @@ public class ExcelSheetContext {
     private Map<String,CellValidationInfo> headerKeyedCellValidationInfo;
     private Map<String, FieldInfo> headerFieldInfo;
     private boolean suppressExceptions;
+    private boolean suppressTaskExceptions = true;
     private List<Object> taskMetadata;
 
     public String fileName() {
@@ -303,6 +304,14 @@ public class ExcelSheetContext {
 
     public void setSuppressExceptions(boolean suppressExceptions) {
         this.suppressExceptions = suppressExceptions;
+    }
+
+    public boolean suppressTaskExceptions() {
+        return suppressTaskExceptions;
+    }
+
+    public void setSuppressTaskExceptions(boolean suppressTaskExceptions) {
+        this.suppressTaskExceptions = suppressTaskExceptions;
     }
 
     public String filePath() {
