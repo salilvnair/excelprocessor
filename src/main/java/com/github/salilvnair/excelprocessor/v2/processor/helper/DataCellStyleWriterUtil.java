@@ -103,6 +103,7 @@ public class DataCellStyleWriterUtil {
         if(dataCellStyleInfo == null) {
             return;
         }
+        writerContext.setHeader(header);
         if(dataCellStyleInfo.isApplyDefaultStyles()) {
             applyStaticDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
         }
@@ -146,6 +147,7 @@ public class DataCellStyleWriterUtil {
         if(dataCellStyleInfo == null) {
             return;
         }
+        writerContext.setHeader(header);
         Object object = ExcelCellStyleTaskExecutor.execute(dataCellStyleInfo.getCondition(), sheet.excelTask(), writerContext);
         if(ObjectUtil.nonNullOrBooleanTrue(object)) {
             applyStaticDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);

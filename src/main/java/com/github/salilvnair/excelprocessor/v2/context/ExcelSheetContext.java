@@ -50,6 +50,7 @@ public class ExcelSheetContext {
     private Map<String,CellValidationInfo> headerKeyedCellValidationInfo;
     private Map<String, FieldInfo> headerFieldInfo;
     private boolean suppressExceptions;
+    private List<Object> taskMetadata;
 
     public String fileName() {
         return fileName;
@@ -203,6 +204,14 @@ public class ExcelSheetContext {
 
     public void setHeaderFieldInfo(Map<String, FieldInfo> headerFieldInfo) {
         this.headerFieldInfo = headerFieldInfo;
+    }
+
+    public List<Object> taskMetadata() {
+        return taskMetadata;
+    }
+
+    public void setTaskMetadata(List<Object> taskMetadata) {
+        this.taskMetadata = taskMetadata;
     }
 
     public static ExcelSheetContextBuilder builder() {
@@ -551,6 +560,11 @@ public class ExcelSheetContext {
 
         public ExcelSheetContextBuilder suppressExceptions() {
             excelSheetContext.setSuppressExceptions(true);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder taskMetadata(Object... taskMetadata) {
+            excelSheetContext.setTaskMetadata(Arrays.asList(taskMetadata));
             return this;
         }
 

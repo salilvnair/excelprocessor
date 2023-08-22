@@ -10,8 +10,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 
 public class DynamicSheetTask extends AbstractExcelTask {
 
-    public void highlightYellowIfValueIsEmpty(ExcelSheetWriterContext context) throws DecoderException {
-
+    public void highlightYellowIfValueIsEmpty(ExcelSheetWriterContext context, Object... taskMetadata) throws DecoderException {
         if(context.cellValue() == null) {
             Cell rowCell = context.rowCell();
             CellStyle cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();

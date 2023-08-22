@@ -38,6 +38,8 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
 
     private Object cellValue;
 
+    private String header;
+
     private List<? extends BaseSheet> sheetData;
 
     private BaseSheet sheetDataObj;
@@ -49,6 +51,8 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
     private Map<String, DataCellStyleInfo> dynamicHeaderDataCellStyleInfo;
 
     private Map<String, HeaderCellStyleInfo> dynamicHeaderCellStyleInfo;
+
+    private List<Object> taskMetadata;
 
     public Workbook workbook() {
         return super.getWorkbook();
@@ -91,6 +95,9 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
 
     public BaseSheet sheetDataObj() {
         return  sheetDataObj;
+    }
+    public List<Object> taskMetadata() {
+        return  taskMetadata;
     }
 
     public <T> T sheet(Class<T> clazz) {

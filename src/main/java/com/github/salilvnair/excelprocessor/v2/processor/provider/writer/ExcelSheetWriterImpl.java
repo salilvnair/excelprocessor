@@ -4,7 +4,6 @@ import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetWriterException;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetFactory;
-import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
@@ -88,6 +87,7 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
                 .existingWorkbook(existingWorkbook ? sheetContext.workbook() : null)
                 .template(workbook)
                 .styleTemplate(sheetContext.styleTemplateWorkbook())
+                .taskMetadata(sheetContext.taskMetadata())
                 .orderedHeaders(sheetContext.orderedHeaders())
                 .dynamicHeaderDisplayNames(sheetContext.dynamicHeaderDisplayNames())
                 .dynamicHeaderCellStyleInfo(sheetContext.dynamicHeaderCellStyleInfo())

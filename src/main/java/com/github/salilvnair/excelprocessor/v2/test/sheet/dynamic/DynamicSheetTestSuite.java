@@ -20,14 +20,14 @@ import java.util.*;
 
 public class DynamicSheetTestSuite {
     public static void main(String[] args) throws Exception {
-        //write();
-        read();
+        write();
+        //read();
     }
 
     public static List<? extends BaseSheet> read() throws Exception {
         ExcelSheetReader reader = ExcelSheetReaderFactory.generate();
         ExcelSheetContext.ExcelSheetContextBuilder builder = ExcelSheetContext.builder();
-        String filePath = "/Users/salilvnair/workspace/git/salilvnair/excelprocessor/src/main/resources/excel/DynamicallyGeneratedExcelProcessorTest.xlsx";
+        String filePath = "/Users/salilvnair/Workspace/Personal/github/salilvnair/excelprocessor/src/main/resources/excel/DynamicallyGeneratedExcelProcessorTest.xlsx";
         builder.excelFile(new File(filePath));
         StopWatch.start();
         AllowedValuesInfo allowedValuesInfo = new AllowedValuesInfo().toBuilder().showValuesInMessage(true).allowNull(true).value(new String[]{"RJ", "KL"}).build();
@@ -48,7 +48,7 @@ public class DynamicSheetTestSuite {
     }
 
     public static void write() throws Exception {
-        String path = "/Users/salilvnair/workspace/git/salilvnair/excelprocessor/src/main/resources/excel";
+        String path = "/Users/salilvnair/Workspace/Personal/github/salilvnair/excelprocessor/src/main/resources/excel";
         File template = new File(path+ "/"+"ExcelProcessorTestTemplate.xlsx");
         Map<String, HeaderCellStyleInfo> headerCellStyleInfoMap = new HashMap<>();
         HeaderCellStyleInfo headerCellStyleInfo = new HeaderCellStyleInfo();
@@ -61,6 +61,7 @@ public class DynamicSheetTestSuite {
                                                 .fileName("DynamicallyGeneratedExcelProcessorTest.xlsx")
                                                 .styleTemplate(template)
                                                 .dynamicHeaderCellStyleInfo(headerCellStyleInfoMap)
+                                                .taskMetadata(headerCellStyleInfoMap, "Test1", "Test2")
                                                 .build();
         Map<String, String> dynamicHeaderDisplayNames = prepareDynamicHeaderDisplayNames();
         excelSheetContext.setDynamicHeaderDisplayNames(dynamicHeaderDisplayNames);
