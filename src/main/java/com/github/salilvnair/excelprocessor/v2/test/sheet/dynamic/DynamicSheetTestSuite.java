@@ -33,7 +33,7 @@ public class DynamicSheetTestSuite {
         AllowedValuesInfo allowedValuesInfo = new AllowedValuesInfo().toBuilder().showValuesInMessage(true).allowNull(true).value(new String[]{"RJ", "KL"}).build();
         CellValidationInfo cellValidationInfo = new CellValidationInfo().toBuilder().required(true).allowedValuesInfo(allowedValuesInfo).build();
         Map<String, CellValidationInfo> cellValidationInfoMap = MapGenerator.immutable().generate("State", cellValidationInfo);
-        Map<String, FieldInfo> headerFieldInfo = MapGenerator.immutable().generate("# of students", FieldInfo.builder().type(FieldType.LONG.typeStringValue()).build());
+        Map<String, FieldInfo> headerFieldInfo = MapGenerator.immutable().generate("# of students", new FieldInfo().toBuilder().type(FieldType.LONG.typeStringValue()).build());
         builder.headerKeyedCellValidationInfo(cellValidationInfoMap);
         builder.headerFieldInfo(headerFieldInfo);
         ExcelSheetContext sheetContext = builder.build();

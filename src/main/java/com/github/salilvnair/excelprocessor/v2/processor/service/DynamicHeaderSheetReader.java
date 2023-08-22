@@ -57,7 +57,7 @@ public interface DynamicHeaderSheetReader {
         if(headerFieldInfoMap!=null && headerFieldInfoMap.containsKey(header)) {
             FieldInfo fieldInfo = headerFieldInfoMap.get(header);
             FieldType fieldType = FieldType.type(fieldInfo.getType());
-            value = TypeConvertor.convert(value, cellInfo.cellType(), fieldType.type());
+            value = TypeConvertor.convert(value, cellInfo.cellType(), fieldType.type(), fieldInfo);
         }
         return value;
     }

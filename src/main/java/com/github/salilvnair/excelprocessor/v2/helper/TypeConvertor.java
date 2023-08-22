@@ -2,6 +2,7 @@ package com.github.salilvnair.excelprocessor.v2.helper;
 
 import com.github.salilvnair.excelprocessor.util.DateParsingUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
+import com.github.salilvnair.excelprocessor.v2.model.FieldInfo;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 
@@ -55,6 +56,23 @@ public class TypeConvertor {
         return convertedValue;
     }
 
+    public static Object convert(Object value, Type sourceType, Type destinationType, FieldInfo fieldInfo) {
+        Object convertedValue = value;
+        if(fieldInfo!=null && sourceType==Date.class) {
+            if(fieldInfo.isDateString() || fieldInfo.isDateTimeString() || destinationType == String.class) {
+                convertedValue = resolveDateOrDateTimeString(value, sourceType, destinationType, fieldInfo);
+                return convertedValue;
+            }
+        }
+        if(value instanceof Double && destinationType==Date.class) {
+            convertedValue = DateUtil.getJavaDate((Double) value);
+        }
+        else if(value instanceof Number) {
+            convertedValue = convertNumber(value, sourceType, destinationType);
+        }
+        return convertedValue;
+    }
+
     private static Object resolveDateOrDateTimeString(Object value, Type sourceType, Type destinationType, Cell cell, Field cellField) {
         Object convertedValue = value;
         if(cell.dateString() || destinationType == String.class) {
@@ -63,6 +81,19 @@ public class TypeConvertor {
         }
         else if(cell.dateTimeString()) {
             DateParsingUtil.DateTimeFormat dateTimeFormat = cell.dateTimeFormat();
+            convertedValue = DateParsingUtil.getDesiredDateTimeFormat(dateTimeFormat, (Date)value);
+        }
+        return convertedValue;
+    }
+
+    private static Object resolveDateOrDateTimeString(Object value, Type sourceType, Type destinationType, FieldInfo fieldInfo) {
+        Object convertedValue = value;
+        if(fieldInfo.isDateString() || destinationType == String.class) {
+            DateParsingUtil.DateFormat dateFormat = DateParsingUtil.DateFormat.format(fieldInfo.getDateFormat());
+            convertedValue = DateParsingUtil.getDesiredDateFormat(dateFormat, (Date)value);
+        }
+        else if(fieldInfo.isDateTimeString()) {
+            DateParsingUtil.DateTimeFormat dateTimeFormat = DateParsingUtil.DateTimeFormat.format(fieldInfo.getDateTimeFormat());
             convertedValue = DateParsingUtil.getDesiredDateTimeFormat(dateTimeFormat, (Date)value);
         }
         return convertedValue;

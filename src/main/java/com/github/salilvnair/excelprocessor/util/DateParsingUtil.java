@@ -1,9 +1,8 @@
 package com.github.salilvnair.excelprocessor.util;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.type.MessageType;
+
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 
 public class DateParsingUtil {
@@ -91,6 +90,12 @@ public class DateParsingUtil {
 
 			return format;
 		}
+
+        public static DateFormat format(String name) {
+            Optional<DateFormat> typeEnum = Arrays.stream(DateFormat.values())
+                    .filter(comp -> comp.name().equals(name)).findFirst();
+            return typeEnum.orElse(DateFormat.SLASH_MM_DD_YYYY);
+        }
 
 		public class Value {
 			public static final String DASH_YY_M_D = "yy-M-d";
@@ -200,6 +205,12 @@ public class DateParsingUtil {
 		public String value() {
 			return dateTimeFormat;
 		}
+
+        public static DateTimeFormat format(String name) {
+            Optional<DateTimeFormat> typeEnum = Arrays.stream(DateTimeFormat.values())
+                    .filter(comp -> comp.name().equals(name)).findFirst();
+            return typeEnum.orElse(DateTimeFormat.SLASH_MM_DD_YYYY_HH_MM);
+        }
 
 		public static String[] getAllDateTimeformat() {
 			DateTimeFormat[] dateTimeformat = values();
