@@ -46,4 +46,6 @@ public @interface DataCellStyle {
     int columnWidthInUnits() default -1;
 
     StyleTemplateCell styleTemplateCell() default @StyleTemplateCell;
+
+    boolean ignoreStyleTemplate() default false;
 }

@@ -44,4 +44,6 @@ public class DataCellStyleInfo {
     private int columnWidthInUnits = -1;
 
     private StyleTemplateCellInfo styleTemplateCellInfo = new StyleTemplateCellInfo();
+
+    private boolean ignoreStyleTemplate = false;
 }

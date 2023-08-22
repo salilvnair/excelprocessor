@@ -85,6 +85,7 @@ public class DataCellStyleWriterUtil {
         dataCellStyleInfo.setHasForegroundColor(dataCellStyle.hasForegroundColor());
         dataCellStyleInfo.setColumnWidthInUnits(dataCellStyle.columnWidthInUnits());
         dataCellStyleInfo.setWrapText(dataCellStyle.wrapText());
+        dataCellStyleInfo.setIgnoreStyleTemplate(dataCellStyle.ignoreStyleTemplate());
         return dataCellStyleInfo;
     }
 
@@ -161,7 +162,7 @@ public class DataCellStyleWriterUtil {
         }
         CellStyle cellStyle = null;
 
-        if(writerContext.styleTemplate()!=null) {
+        if(writerContext.styleTemplate()!=null && !dataCellStyle.ignoreStyleTemplate()) {
             cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
             StyleTemplateCell styleTemplateCell = dataCellStyle.styleTemplateCell();
             int rowIndex = styleTemplateCell.row()  - 1;
@@ -211,7 +212,7 @@ public class DataCellStyleWriterUtil {
         }
         CellStyle cellStyle = null;
 
-        if(writerContext.styleTemplate()!=null) {
+        if(writerContext.styleTemplate()!=null && !dataCellStyleInfo.isIgnoreStyleTemplate()) {
             cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
             StyleTemplateCellInfo styleTemplateCellInfo = dataCellStyleInfo.getStyleTemplateCellInfo();
             int rowIndex = styleTemplateCellInfo.getRow()  - 1;

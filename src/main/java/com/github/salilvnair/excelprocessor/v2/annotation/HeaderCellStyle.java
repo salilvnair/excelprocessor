@@ -47,4 +47,6 @@ public @interface HeaderCellStyle {
 
     int columnWidthInUnits() default -1;
 
+    boolean ignoreStyleTemplate() default false;
+
 }
