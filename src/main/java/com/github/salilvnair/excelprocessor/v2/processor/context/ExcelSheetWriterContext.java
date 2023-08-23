@@ -3,6 +3,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.context;
 import com.github.salilvnair.excelprocessor.v2.model.DataCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+import com.github.salilvnair.excelprocessor.v2.task.AbstractExcelTask;
 import lombok.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -57,6 +58,8 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
     private boolean suppressExceptions;
 
     private boolean suppressTaskExceptions;
+
+    private AbstractExcelTask taskBean;
 
     public Workbook workbook() {
         return super.getWorkbook();

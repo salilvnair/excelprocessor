@@ -12,9 +12,9 @@ import org.apache.commons.collections4.CollectionUtils;
  */
 public class ExcelCellStyleTaskExecutor {
     public static Object execute(String methodName, Class<? extends AbstractExcelTask> taskClass, ExcelSheetWriterContext writerContext) {
-        if(!taskClass.getName().equals(Sheet.DefaultTaskValidator.class.getName())) {
+        if(!taskClass.getName().equals(Sheet.DefaultTaskValidator.class.getName()) || writerContext.getTaskBean()!=null) {
             try {
-                AbstractExcelTask task = taskClass.newInstance();
+                AbstractExcelTask task = writerContext.getTaskBean()!=null ? writerContext.getTaskBean() : taskClass.newInstance();
                 task.setMethodName(methodName);
                 if(CollectionUtils.isNotEmpty(writerContext.taskMetadata())) {
                     return ReflectionUtil.invokeMethod(task, task.getMethodName(), writerContext, writerContext.taskMetadata().toArray(new Object[0]));

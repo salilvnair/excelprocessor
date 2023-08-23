@@ -15,7 +15,7 @@ import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
 @Sheet(
         value="College",
         type = ExcelFileType.Extension.XLSX,
-        excelTask = DynamicSheetTask.class,
+//        excelTask = DynamicSheetTask.class,
         dynamicHeaders = true,
         useDefaultNumberType = true,
         readValuesAsString = true

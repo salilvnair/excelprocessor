@@ -3,6 +3,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.validator.helper;
 import com.github.salilvnair.excelprocessor.v2.model.CellValidationInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidatorContext;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.task.core.AbstractExcelTaskValidator;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 
 import java.util.Collections;
@@ -28,13 +29,13 @@ public final class ExcelSheetValidator {
         return new ExcelSheetValidator(validatorContext);
     }
 
-    public ExcelSheetValidator setUserValidatorMap(Map<String,Object> userValidatorMap) {
+    public ExcelSheetValidator userValidatorMap(Map<String,Object> userValidatorMap) {
         initValidatorContext();
         validatorContext.setUserValidatorMap(userValidatorMap);
         return this;
     }
 
-    public ExcelSheetValidator setValidValuesDataSet(Map<String,List<String>> validValuesDataSet) {
+    public ExcelSheetValidator validValuesDataSet(Map<String,List<String>> validValuesDataSet) {
         initValidatorContext();
         validatorContext.setValidValuesDataSet(validValuesDataSet);
         return this;
@@ -46,13 +47,13 @@ public final class ExcelSheetValidator {
         }
     }
 
-    public ExcelSheetValidator setUserDefinedMessageDataSet(Map<String,String> userDefinedMessageDataSet) {
+    public ExcelSheetValidator userDefinedMessageDataSet(Map<String,String> userDefinedMessageDataSet) {
         initValidatorContext();
         validatorContext.setUserDefinedMessageDataSet(userDefinedMessageDataSet);
         return this;
     }
 
-    public ExcelSheetValidator setHeaderKeyedCellValidationInfo(Map<String, CellValidationInfo> headerKeyedCellValidationInfo) {
+    public ExcelSheetValidator headerKeyedCellValidationInfo(Map<String, CellValidationInfo> headerKeyedCellValidationInfo) {
         initValidatorContext();
         validatorContext.setHeaderKeyedCellValidationInfo(headerKeyedCellValidationInfo);
         return this;
@@ -70,7 +71,21 @@ public final class ExcelSheetValidator {
     }
 
     public ExcelSheetValidator multiOriented(String sheetName) {
+        initValidatorContext();
         validatorContext.setSheetName(sheetName);
+        return this;
+    }
+
+    public ExcelSheetValidator taskValidatorBean(AbstractExcelTaskValidator abstractExcelTaskValidator) {
+        initValidatorContext();
+        validatorContext.setTaskValidatorBean(abstractExcelTaskValidator);
+        return this;
+    }
+
+
+    public ExcelSheetValidator taskMetadata(List<Object> taskMetadata) {
+        initValidatorContext();
+        validatorContext.setTaskMetadata(taskMetadata);
         return this;
     }
 

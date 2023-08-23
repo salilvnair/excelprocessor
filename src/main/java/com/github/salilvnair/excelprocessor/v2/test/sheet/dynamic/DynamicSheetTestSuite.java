@@ -5,7 +5,6 @@ import com.github.salilvnair.excelprocessor.util.StopWatch;
 import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.model.AllowedValuesInfo;
 import com.github.salilvnair.excelprocessor.v2.model.CellValidationInfo;
-import com.github.salilvnair.excelprocessor.v2.model.FieldInfo;
 import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetReaderFactory;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetWriterFactory;
@@ -13,7 +12,8 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellV
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import com.github.salilvnair.excelprocessor.v2.type.FieldType;
+import com.github.salilvnair.excelprocessor.v2.test.sheet.dynamic.task.DynamicSheetTask;
+import com.github.salilvnair.excelprocessor.v2.test.sheet.dynamic.task.DynamicSheetValidatorTask;
 
 import java.io.File;
 import java.util.*;
@@ -32,10 +32,14 @@ public class DynamicSheetTestSuite {
         StopWatch.start();
         AllowedValuesInfo allowedValuesInfo = new AllowedValuesInfo().toBuilder().showValuesInMessage(true).allowNull(true).value(new String[]{"RJ", "KL"}).build();
         CellValidationInfo cellValidationInfo = new CellValidationInfo().toBuilder().required(true).allowedValuesInfo(allowedValuesInfo).build();
-        Map<String, CellValidationInfo> cellValidationInfoMap = MapGenerator.immutable().generate("State", cellValidationInfo);
+        Map<String, CellValidationInfo> cellValidationInfoMap = MapGenerator.mutable().generate("State", cellValidationInfo);
+
+        CellValidationInfo noOfStudentsValidation = new CellValidationInfo().toBuilder().customTask("someCustomTask").build();
+        cellValidationInfoMap.put("# of students", noOfStudentsValidation);
         //Map<String, FieldInfo> headerFieldInfo = MapGenerator.immutable().generate("# of students", new FieldInfo().toBuilder().type(FieldType.LONG.typeStringValue()).build());
         builder.headerKeyedCellValidationInfo(cellValidationInfoMap);
         //builder.headerFieldInfo(headerFieldInfo);
+        builder.taskValidatorBean(new DynamicSheetValidatorTask());
         ExcelSheetContext sheetContext = builder.build();
         List<DynamicCollegeSheet> sheetData = reader.read(DynamicCollegeSheet.class, sheetContext);
         for (DynamicCollegeSheet collegeSheet : sheetData) {
@@ -61,6 +65,7 @@ public class DynamicSheetTestSuite {
                                                 .fileName("DynamicallyGeneratedExcelProcessorTest.xlsx")
                                                 .styleTemplate(template)
                                                 .dynamicHeaderCellStyleInfo(headerCellStyleInfoMap)
+                                                .taskBean(new DynamicSheetTask())
                                                 .taskMetadata(headerCellStyleInfoMap, "Test1", "Test2")
                                                 .build();
         Map<String, String> dynamicHeaderDisplayNames = prepareDynamicHeaderDisplayNames();

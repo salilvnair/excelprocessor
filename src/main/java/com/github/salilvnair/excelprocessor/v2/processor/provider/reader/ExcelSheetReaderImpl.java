@@ -380,10 +380,12 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
         List<? extends BaseSheet> rows = readerContext.getSheetData();
         return ExcelSheetValidator
                 .init(validatorContext)
-                .setUserValidatorMap(sheetContext.userValidatorMap())
-                .setValidValuesDataSet(sheetContext.validValuesDataSet())
-                .setUserDefinedMessageDataSet(sheetContext.userDefinedMessageDataSet())
-                .setHeaderKeyedCellValidationInfo(sheetContext.headerKeyedCellValidationInfo())
+                .userValidatorMap(sheetContext.userValidatorMap())
+                .validValuesDataSet(sheetContext.validValuesDataSet())
+                .userDefinedMessageDataSet(sheetContext.userDefinedMessageDataSet())
+                .headerKeyedCellValidationInfo(sheetContext.headerKeyedCellValidationInfo())
+                .taskValidatorBean(sheetContext.taskValidatorBean())
+                .taskMetadata(sheetContext.taskMetadata())
                 .rows(rows)
                 .validate();
     }

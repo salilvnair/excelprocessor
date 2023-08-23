@@ -5,6 +5,7 @@ import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.model.CellValidationInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.core.ExcelValidator;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.task.core.AbstractExcelTaskValidator;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 
 import java.lang.reflect.Field;
@@ -19,6 +20,8 @@ public class CellValidatorContext {
     private List<? extends BaseSheet> currentSheet;
     private Map<String, List<? extends BaseSheet>> excelSheets;
     private Field field;
+    private String header;
+    private String headerKey;
     private ExcelSheetContext sheetContext;
     private ExcelSheetReaderContext readerContext;
     private ExcelValidator validator;
@@ -26,6 +29,8 @@ public class CellValidatorContext {
     private Map<String,List<String>> validValuesDataSet;
     private Map<String,String> userDefinedMessageDataSet;
     private Map<String, CellValidationInfo> headerKeyedCellValidationInfo;
+    private AbstractExcelTaskValidator taskValidatorBean;
+    private List<Object> taskMetadata;
 
 
     public List<? extends BaseSheet> getCurrentSheet() {
@@ -149,5 +154,37 @@ public class CellValidatorContext {
 
     public void setSheetContext(ExcelSheetContext sheetContext) {
         this.sheetContext = sheetContext;
+    }
+
+    public AbstractExcelTaskValidator taskValidatorBean() {
+        return taskValidatorBean;
+    }
+
+    public void setTaskValidatorBean(AbstractExcelTaskValidator taskValidatorBean) {
+        this.taskValidatorBean = taskValidatorBean;
+    }
+
+    public List<Object> taskMetadata() {
+        return taskMetadata;
+    }
+
+    public void setTaskMetadata(List<Object> taskMetadata) {
+        this.taskMetadata = taskMetadata;
+    }
+
+    public String header() {
+        return header;
+    }
+
+    public void setHeader(String header) {
+        this.header = header;
+    }
+
+    public String headerKey() {
+        return headerKey;
+    }
+
+    public void setHeaderKey(String headerKey) {
+        this.headerKey = headerKey;
     }
 }

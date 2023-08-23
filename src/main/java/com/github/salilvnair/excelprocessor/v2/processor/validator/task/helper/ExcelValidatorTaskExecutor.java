@@ -10,9 +10,9 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.task.core.Abs
  */
 public class ExcelValidatorTaskExecutor {
     public static Object execute(String methodName, Class<? extends AbstractExcelTaskValidator> taskClass, CellValidatorContext validatorContext) {
-        if(!taskClass.getName().equals(Sheet.DefaultTaskValidator.class.getName())) {
+        if(!taskClass.getName().equals(Sheet.DefaultTaskValidator.class.getName()) || validatorContext.taskValidatorBean()!=null) {
             try {
-                AbstractExcelTaskValidator task = taskClass.newInstance();
+                AbstractExcelTaskValidator task = validatorContext.taskValidatorBean()!=null ? validatorContext.taskValidatorBean() : taskClass.newInstance();
                 task.setMethodName(methodName);
                 return ReflectionUtil.invokeMethod(task, task.getMethodName(), validatorContext);
             }

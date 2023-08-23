@@ -9,7 +9,9 @@ import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReade
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
+import com.github.salilvnair.excelprocessor.v2.processor.validator.task.core.AbstractExcelTaskValidator;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+import com.github.salilvnair.excelprocessor.v2.task.AbstractExcelTask;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -52,6 +54,10 @@ public class ExcelSheetContext {
     private boolean suppressExceptions;
     private boolean suppressTaskExceptions = true;
     private List<Object> taskMetadata;
+
+    private AbstractExcelTask taskBean;
+
+    private AbstractExcelTaskValidator taskValidatorBean;
 
     public String fileName() {
         return fileName;
@@ -213,6 +219,22 @@ public class ExcelSheetContext {
 
     public void setTaskMetadata(List<Object> taskMetadata) {
         this.taskMetadata = taskMetadata;
+    }
+
+    public AbstractExcelTask taskBean() {
+        return taskBean;
+    }
+
+    public void setTaskBean(AbstractExcelTask taskBean) {
+        this.taskBean = taskBean;
+    }
+
+    public AbstractExcelTaskValidator taskValidatorBean() {
+        return taskValidatorBean;
+    }
+
+    public void setTaskValidatorBean(AbstractExcelTaskValidator taskValidatorBean) {
+        this.taskValidatorBean = taskValidatorBean;
     }
 
     public static ExcelSheetContextBuilder builder() {
@@ -621,6 +643,16 @@ public class ExcelSheetContext {
 
         public ExcelSheetContextBuilder suppressExceptions() {
             excelSheetContext.setSuppressExceptions(true);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder taskBean(AbstractExcelTask abstractExcelTask) {
+            excelSheetContext.setTaskBean(abstractExcelTask);
+            return this;
+        }
+
+        public ExcelSheetContextBuilder taskValidatorBean(AbstractExcelTaskValidator abstractExcelTaskValidator) {
+            excelSheetContext.setTaskValidatorBean(abstractExcelTaskValidator);
             return this;
         }
 

@@ -20,6 +20,8 @@ public class CustomMethodValidator extends BaseDynamicCellValidator {
     protected boolean violated(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
         Sheet sheet = validatorContext.sheet();
         CellValidationInfo cellValidation = cellValidation();
+        validatorContext.setHeader(header());
+        validatorContext.setHeaderKey(headerKey());
         if(!StringUtils.isEmpty(cellValidation.getCustomTask())) {
             ExcelValidatorTaskExecutor.execute(cellValidation.getCustomTask(), sheet.excelTaskValidator(), validatorContext);
         }
