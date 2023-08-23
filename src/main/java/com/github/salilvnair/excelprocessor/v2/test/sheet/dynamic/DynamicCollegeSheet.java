@@ -16,7 +16,9 @@ import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
         value="College",
         type = ExcelFileType.Extension.XLSX,
         excelTask = DynamicSheetTask.class,
-        dynamicHeaders = true
+        dynamicHeaders = true,
+        useDefaultNumberType = true,
+        readValuesAsString = true
 )
 public class DynamicCollegeSheet extends DynamicHeaderSheet {
 }

@@ -49,4 +49,7 @@ public @interface Sheet {
 	final class DefaultTask extends AbstractExcelTask {};
     SectionHint[] sectionHints() default {};
     boolean streamingWorkbook() default false;
+    boolean readValuesAsString() default false;
+    boolean useDefaultNumberType() default false;
+    Class<? extends Number> defaultNumberType() default Long.class;
 }

@@ -26,9 +26,9 @@ public interface DynamicHeaderSheetReader {
         Set<Field> headers = AnnotationUtil.getAnnotatedFields(clazz, DynamicCell.class);
         boolean hasUserDefinedDynamicCell = !headers.isEmpty() && headers.size() > 1;
         List<Field> fields = headers
-                .stream()
-                .filter(field -> hasUserDefinedDynamicCell && field.getAnnotation(DynamicCell.class).priority() > -1 || field.getAnnotation(DynamicCell.class).priority() == -1)
-                .collect(Collectors.toList());
+                            .stream()
+                            .filter(field -> hasUserDefinedDynamicCell && field.getAnnotation(DynamicCell.class).priority() > -1 || field.getAnnotation(DynamicCell.class).priority() == -1)
+                            .collect(Collectors.toList());
         return fields.get(0);
     }
 
@@ -54,10 +54,20 @@ public interface DynamicHeaderSheetReader {
         Map<String, FieldInfo> headerFieldInfoMap = context.headerFieldInfoMap();
         String header = cellInfo.originalHeader();
         Object value = cellInfo.value();
-        if(headerFieldInfoMap!=null && headerFieldInfoMap.containsKey(header)) {
-            FieldInfo fieldInfo = headerFieldInfoMap.get(header);
-            FieldType fieldType = FieldType.type(fieldInfo.getType());
-            value = TypeConvertor.convert(value, cellInfo.cellType(), fieldType.type(), fieldInfo);
+        if(value != null) {
+            if(!(value instanceof String) && context.sheet().readValuesAsString()) {
+                value = TypeConvertor.convert(value, cellInfo.cellType(), String.class);
+            }
+            else {
+                if(context.sheet().useDefaultNumberType() && value instanceof Number) {
+                    value = TypeConvertor.convert(value, cellInfo.cellType(), context.sheet().defaultNumberType());
+                }
+                if(headerFieldInfoMap!=null && headerFieldInfoMap.containsKey(header)) {
+                    FieldInfo fieldInfo = headerFieldInfoMap.get(header);
+                    FieldType fieldType = FieldType.type(fieldInfo.getType());
+                    value = TypeConvertor.convert(value, cellInfo.cellType(), fieldType.type(), fieldInfo);
+                }
+            }
         }
         return value;
     }

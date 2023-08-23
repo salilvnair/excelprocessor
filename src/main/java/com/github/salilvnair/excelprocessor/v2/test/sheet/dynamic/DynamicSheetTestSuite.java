@@ -20,8 +20,8 @@ import java.util.*;
 
 public class DynamicSheetTestSuite {
     public static void main(String[] args) throws Exception {
-        write();
-        //read();
+//        write();
+        read();
     }
 
     public static List<? extends BaseSheet> read() throws Exception {
@@ -33,9 +33,9 @@ public class DynamicSheetTestSuite {
         AllowedValuesInfo allowedValuesInfo = new AllowedValuesInfo().toBuilder().showValuesInMessage(true).allowNull(true).value(new String[]{"RJ", "KL"}).build();
         CellValidationInfo cellValidationInfo = new CellValidationInfo().toBuilder().required(true).allowedValuesInfo(allowedValuesInfo).build();
         Map<String, CellValidationInfo> cellValidationInfoMap = MapGenerator.immutable().generate("State", cellValidationInfo);
-        Map<String, FieldInfo> headerFieldInfo = MapGenerator.immutable().generate("# of students", new FieldInfo().toBuilder().type(FieldType.LONG.typeStringValue()).build());
+        //Map<String, FieldInfo> headerFieldInfo = MapGenerator.immutable().generate("# of students", new FieldInfo().toBuilder().type(FieldType.LONG.typeStringValue()).build());
         builder.headerKeyedCellValidationInfo(cellValidationInfoMap);
-        builder.headerFieldInfo(headerFieldInfo);
+        //builder.headerFieldInfo(headerFieldInfo);
         ExcelSheetContext sheetContext = builder.build();
         List<DynamicCollegeSheet> sheetData = reader.read(DynamicCollegeSheet.class, sheetContext);
         for (DynamicCollegeSheet collegeSheet : sheetData) {
