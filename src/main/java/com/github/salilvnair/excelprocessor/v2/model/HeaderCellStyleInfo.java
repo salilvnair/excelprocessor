@@ -29,6 +29,8 @@ public class HeaderCellStyleInfo {
 
     private boolean wrapText = false;
 
+    private boolean hide = false;
+
     private IndexedColors foregroundColor = IndexedColors.AUTOMATIC;
 
     private IndexedColors backgroundColor = IndexedColors.AUTOMATIC;

@@ -33,6 +33,8 @@ public @interface HeaderCellStyle {
 
     boolean wrapText() default false;
 
+    boolean hide() default false;
+
     IndexedColors foregroundColor() default IndexedColors.AUTOMATIC;
 
     IndexedColors backgroundColor() default IndexedColors.AUTOMATIC;

@@ -65,6 +65,7 @@ public class HeaderCellStyleWriterUtil {
         }
 
         cellStyle.setWrapText(headerCellStyle.wrapText());
+        cellStyle.setHidden(headerCellStyle.hide());
         if(headerCellStyle.hasBorderStyle()) {
             cellStyle.setBorderTop(headerCellStyle.borderStyle());
             cellStyle.setBorderRight(headerCellStyle.borderStyle());
@@ -113,6 +114,7 @@ public class HeaderCellStyleWriterUtil {
         }
 
         cellStyle.setWrapText(headerCellStyleInfo.isWrapText());
+        cellStyle.setHidden(headerCellStyleInfo.isHide());
         if(headerCellStyleInfo.isHasBorderStyle()) {
             cellStyle.setBorderTop(headerCellStyleInfo.getBorderStyle());
             cellStyle.setBorderRight(headerCellStyleInfo.getBorderStyle());
