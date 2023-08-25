@@ -25,6 +25,7 @@ public class DynamicHorizontalSheetWriter extends BaseHorizontalSheetWriter {
 
         writeDynamicDataToHeader(headerKeyedCellValueMap, workbookSheet, sheet, writerContext);
         writeDynamicDataToBody(sheetData, workbookSheet, sheet, writerContext);
+        applySheetStyles(sheet, workbook, workbookSheet, writerContext);
         writerContext.setWorkbook(workbook);
     }
 }

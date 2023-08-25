@@ -65,20 +65,18 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         Set<String> headerKeys = CollectionUtils.isNotEmpty(context.getOrderedHeaders()) ?  context.getOrderedHeaders(): headerKeyedCellValueMap.keySet();
         int headerRowIndex = sheet.headerRowAt() - 1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
-        if(context.template() == null) {
-            row = workbookSheet.createRow(headerRowIndex);
-            for (int c = 0; c < headerKeys.size(); c++) {
-                String headerKey = new ArrayList<>(headerKeys).get(c);
-                Map<String, String> dynamicHeaderDisplayNames = context.getDynamicHeaderDisplayNames();
-                String headerDisplayName = headerKey;
-                if(CollectionUtils.isNotEmpty(Collections.singleton(dynamicHeaderDisplayNames))) {
-                    headerDisplayName = dynamicHeaderDisplayNames.getOrDefault(headerKey, headerKey);
-                }
-                int createColumnIndex = c + headerColumnIndex;
-                org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(createColumnIndex);
-                convertAndSetCellValue(rowCell, headerDisplayName);
-                applyDynamicHeaderCellStyles(sheet, headerKey, rowCell, context);
+        row = workbookSheet.createRow(headerRowIndex);
+        for (int c = 0; c < headerKeys.size(); c++) {
+            String headerKey = new ArrayList<>(headerKeys).get(c);
+            Map<String, String> dynamicHeaderDisplayNames = context.getDynamicHeaderDisplayNames();
+            String headerDisplayName = headerKey;
+            if(CollectionUtils.isNotEmpty(Collections.singleton(dynamicHeaderDisplayNames))) {
+                headerDisplayName = dynamicHeaderDisplayNames.getOrDefault(headerKey, headerKey);
             }
+            int createColumnIndex = c + headerColumnIndex;
+            org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(createColumnIndex);
+            convertAndSetCellValue(rowCell, headerDisplayName);
+            applyDynamicHeaderCellStyles(sheet, headerKey, rowCell, context);
         }
     }
 

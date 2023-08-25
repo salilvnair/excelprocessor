@@ -25,6 +25,7 @@ public class HorizontalSheetWriter extends BaseHorizontalSheetWriter {
         List<Field> cells = new ArrayList<>(cellFields);
         writeDataToHeader(sheetData, cellFields, workbookSheet, cells, sheet, writerContext);
         writeDataToBody(sheetData, cellFields, workbookSheet, cells, sheet, writerContext);
+        applySheetStyles(sheet, workbook, workbookSheet, writerContext);
         writerContext.setWorkbook(workbook);
     }
 }

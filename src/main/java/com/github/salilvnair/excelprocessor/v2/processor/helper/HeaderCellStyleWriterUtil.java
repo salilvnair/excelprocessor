@@ -66,6 +66,9 @@ public class HeaderCellStyleWriterUtil {
 
         cellStyle.setWrapText(headerCellStyle.wrapText());
         cellStyle.setHidden(headerCellStyle.hide());
+        if(headerCellStyle.hide()) {
+            rowCell.getSheet().setColumnHidden(rowCell.getColumnIndex(), true);
+        }
         if(headerCellStyle.hasBorderStyle()) {
             cellStyle.setBorderTop(headerCellStyle.borderStyle());
             cellStyle.setBorderRight(headerCellStyle.borderStyle());
@@ -115,6 +118,9 @@ public class HeaderCellStyleWriterUtil {
 
         cellStyle.setWrapText(headerCellStyleInfo.isWrapText());
         cellStyle.setHidden(headerCellStyleInfo.isHide());
+        if(headerCellStyleInfo.isHide()) {
+            rowCell.getSheet().setColumnHidden(rowCell.getColumnIndex(), true);
+        }
         if(headerCellStyleInfo.isHasBorderStyle()) {
             cellStyle.setBorderTop(headerCellStyleInfo.getBorderStyle());
             cellStyle.setBorderRight(headerCellStyleInfo.getBorderStyle());
@@ -171,6 +177,8 @@ public class HeaderCellStyleWriterUtil {
         headerCellStyleInfo.setColumnWidthInUnits(headerCellStyle.columnWidthInUnits());
         headerCellStyleInfo.setWrapText(headerCellStyle.wrapText());
         headerCellStyleInfo.setIgnoreStyleTemplate(headerCellStyle.ignoreStyleTemplate());
+        StyleTemplateCellInfo styleTemplateCellInfo = extractStyleTemplateCellInfo(headerCellStyle.styleTemplateCell());
+        headerCellStyleInfo.setStyleTemplateCellInfo(styleTemplateCellInfo);
         return headerCellStyleInfo;
     }
 

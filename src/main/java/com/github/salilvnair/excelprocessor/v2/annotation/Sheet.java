@@ -52,4 +52,6 @@ public @interface Sheet {
     boolean readValuesAsString() default false;
     boolean useDefaultNumberType() default false;
     Class<? extends Number> defaultNumberType() default Long.class;
+
+    String[] hideColumns() default {};
 }

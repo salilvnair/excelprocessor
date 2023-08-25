@@ -4,6 +4,7 @@ import com.github.salilvnair.excelprocessor.v2.annotation.DataCellStyle;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.DataCellStyleWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.HeaderCellStyleWriterUtil;
+import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.type.PictureSourceType;
 import com.github.salilvnair.excelprocessor.v2.type.PictureType;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
@@ -53,7 +54,7 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         }
     }
 
-    private void initCellProperties(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, Object value, ExcelSheetWriterContext context) {
+    protected void initCellProperties(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, Object value, ExcelSheetWriterContext context) {
         DataCellStyle dataCellStyle = DataCellStyleWriterUtil.extractDataCellStyle(cellField, context.getSheetDataObj());
         if(dataCellStyle == null) {
             return;
@@ -64,7 +65,7 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
     }
 
     @SuppressWarnings("unchecked")
-    private void processCellImageData(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
+    protected void processCellImageData(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
         if(cellInfo.picture()) {
             int r = rowCell.getRow().getRowNum();
             int c = rowCell.getColumnIndex();
@@ -124,7 +125,7 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         }
     }
 
-    private void processHyperLink(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
+    protected void processHyperLink(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
         if (value == null) {
             return;
         }
@@ -142,7 +143,7 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         }
     }
 
-    private void processMultiLinkAsSimpleText(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
+    protected void processMultiLinkAsSimpleText(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
         processCommonCellData(sheetInfo, cellInfo, rowCell, value, context);
         Workbook workbook = rowCell.getSheet().getWorkbook();
         // Create a CellStyle for the formula cell
@@ -160,7 +161,7 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         rowCell.setCellStyle(formulaCellStyle);
     }
 
-    private void processUniLinkCellValue(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
+    protected void processUniLinkCellValue(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
         Workbook workbook = rowCell.getSheet().getWorkbook();
         CreationHelper creationHelper = workbook.getCreationHelper();
         Hyperlink link = creationHelper.createHyperlink(HyperlinkType.URL);
@@ -175,7 +176,7 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         CellUtil.setFont(rowCell, font);
     }
 
-    private void processMultiLinkCellValue(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
+    protected void processMultiLinkCellValue(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
         Workbook workbook = rowCell.getSheet().getWorkbook();
         List<String> hyperlinks = ExcelSheetReaderUtil.extractHyperlinks(String.valueOf(value));
         String cellFormula = createHyperlinkFormula(hyperlinks);
@@ -196,7 +197,7 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         rowCell.setCellStyle(formulaCellStyle);
     }
 
-    private static String createHyperlinkFormula(List<String> hyperlinks) {
+    protected static String createHyperlinkFormula(List<String> hyperlinks) {
         StringBuilder formulaBuilder = new StringBuilder();
 
         for (int i = 0; i < hyperlinks.size(); i++) {
@@ -229,7 +230,7 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         DataCellStyleWriterUtil.applyDynamicCellStyles(sheet, header, rowCell, fieldValue, context);
     }
 
-    public void copyRowStyle(Workbook workbook, org.apache.poi.ss.usermodel.Sheet oldSheet, org.apache.poi.ss.usermodel.Sheet newSheet, int oldRowNum, int newRowNum, int oldCellNum, int newCellNum) {
+    protected void copyRowStyle(Workbook workbook, org.apache.poi.ss.usermodel.Sheet oldSheet, org.apache.poi.ss.usermodel.Sheet newSheet, int oldRowNum, int newRowNum, int oldCellNum, int newCellNum) {
         Row newRow = newSheet.getRow(newRowNum);
         Row oldRow = oldSheet.getRow(oldRowNum);
         if(newRow!=null && oldRow!=null) {
@@ -240,7 +241,7 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         }
     }
 
-    public void copyCellStyle(org.apache.poi.ss.usermodel.Cell oldCell, org.apache.poi.ss.usermodel.Cell newCell){
+    protected void copyCellStyle(org.apache.poi.ss.usermodel.Cell oldCell, org.apache.poi.ss.usermodel.Cell newCell){
         if(oldCell!=null && newCell!=null) {
             CellStyle newCellStyle = newCell.getSheet().getWorkbook().createCellStyle();
             newCellStyle.cloneStyleFrom(oldCell.getCellStyle());
@@ -301,9 +302,20 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         }
     }
 
-    private byte[] castFromWrapperByteArray(Object pictureSource) {
+    protected byte[] castFromWrapperByteArray(Object pictureSource) {
         Byte[] wrapperBytes = (Byte[]) pictureSource;
         return ArrayUtils.toPrimitive(wrapperBytes);
+    }
+
+    protected void applySheetStyles(Sheet sheet, Workbook workbook, org.apache.poi.ss.usermodel.Sheet workbookSheet, ExcelSheetWriterContext writerContext) {
+        hideColumnsIfApplicable(sheet, workbook, workbookSheet, writerContext);
+    }
+
+    protected void hideColumnsIfApplicable(Sheet sheet, Workbook workbook, org.apache.poi.ss.usermodel.Sheet workbookSheet, ExcelSheetWriterContext writerContext) {
+        for (String column : sheet.hideColumns()) {
+            int columnIndex = ExcelSheetReader.toIndentNumber(column) - 1;
+            workbookSheet.setColumnHidden(columnIndex, true);
+        }
     }
 
 }

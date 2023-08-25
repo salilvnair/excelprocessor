@@ -19,7 +19,7 @@ import java.util.Set;
 public class VerticalSheetWriter extends BaseExcelSheetWriter {
 
     @Override
-    void write(List<? extends BaseSheet> sheetData, ExcelSheetWriterContext context) {
+    void write(List<? extends BaseSheet> sheetData, ExcelSheetWriterContext writerContext) {
         BaseSheet baseSheet = sheetData.get(0);
         Sheet sheet = baseSheet.getClass().getAnnotation(Sheet.class);
         Set<Field> cellFields = AnnotationUtil.getAnnotatedFields(baseSheet.getClass(), Cell.class);
@@ -27,7 +27,7 @@ public class VerticalSheetWriter extends BaseExcelSheetWriter {
         org.apache.poi.ss.usermodel.Sheet workbookSheet = workbook.createSheet(sheet.value());
         List<Field> cells = new ArrayList<>(cellFields);
         Row row = null;
-        context.setSheetData(sheetData);
+        writerContext.setSheetData(sheetData);
         for (int r = 0; r < cellFields.size(); r++) {
             row = workbookSheet.createRow(r);
             Field cellField = cells.get(r);
@@ -35,19 +35,20 @@ public class VerticalSheetWriter extends BaseExcelSheetWriter {
                 Cell cell = cellField.getAnnotation(Cell.class);
                 Object fieldValue = cell.value();
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c);
-                writeDataToHeaderCell(sheet, cell, rowCell, fieldValue, context);
-                applyHeaderCellStyles(sheet, cell, rowCell, cellField, fieldValue, context);
+                writeDataToHeaderCell(sheet, cell, rowCell, fieldValue, writerContext);
+                applyHeaderCellStyles(sheet, cell, rowCell, cellField, fieldValue, writerContext);
             }
             for (int c = 0; c < sheetData.size(); c++) {
                 BaseSheet sheetDataObj = sheetData.get(c);
-                context.setSheetDataObj(sheetDataObj);
+                writerContext.setSheetDataObj(sheetDataObj);
                 Cell cell = cellField.getAnnotation(Cell.class);
                 Object fieldValue = ReflectionUtil.getFieldValue(sheetDataObj, cellField);
                 org.apache.poi.ss.usermodel.Cell rowCell = row.createCell(c+1);
-                writeDataToCell(sheet, cell, rowCell, cellField, fieldValue, context);
-                applyDataCellStyles(sheet, cell, rowCell, cellField, fieldValue, context);
+                writeDataToCell(sheet, cell, rowCell, cellField, fieldValue, writerContext);
+                applyDataCellStyles(sheet, cell, rowCell, cellField, fieldValue, writerContext);
             }
         }
-        context.setWorkbook(workbook);
+        applySheetStyles(sheet, workbook, workbookSheet, writerContext);
+        writerContext.setWorkbook(workbook);
     }
 }

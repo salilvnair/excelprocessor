@@ -20,8 +20,8 @@ import java.util.*;
 
 public class DynamicSheetTestSuite {
     public static void main(String[] args) throws Exception {
-//        write();
-        read();
+        write();
+//        read();
     }
 
     public static List<? extends BaseSheet> read() throws Exception {
@@ -64,6 +64,7 @@ public class DynamicSheetTestSuite {
                                                 .filePath(path)
                                                 .fileName("DynamicallyGeneratedExcelProcessorTest.xlsx")
                                                 .styleTemplate(template)
+                                                .template(template)
                                                 .dynamicHeaderCellStyleInfo(headerCellStyleInfoMap)
                                                 .taskBean(new DynamicSheetTask())
                                                 .taskMetadata(headerCellStyleInfoMap, "Test1", "Test2")
