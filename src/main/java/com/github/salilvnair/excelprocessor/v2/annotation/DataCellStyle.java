@@ -33,6 +33,7 @@ public @interface DataCellStyle {
 
     boolean wrapText() default false;
 
+
     IndexedColors foregroundColor() default IndexedColors.AUTOMATIC;
 
     IndexedColors backgroundColor() default IndexedColors.AUTOMATIC;
@@ -44,6 +45,10 @@ public @interface DataCellStyle {
     IndexedColors borderColor() default IndexedColors.AUTOMATIC;
 
     int columnWidthInUnits() default -1;
+
+    boolean customTextStyle() default false;
+
+    TextStyle textStyle() default @TextStyle;
 
     StyleTemplateCell styleTemplateCell() default @StyleTemplateCell;
 

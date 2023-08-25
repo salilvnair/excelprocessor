@@ -43,6 +43,10 @@ public @interface HeaderCellStyle {
 
     BorderStyle borderStyle() default BorderStyle.NONE;
 
+    boolean customTextStyle() default false;
+
+    TextStyle textStyle() default @TextStyle;
+
     StyleTemplateCell styleTemplateCell() default @StyleTemplateCell;
 
     IndexedColors borderColor() default IndexedColors.AUTOMATIC;

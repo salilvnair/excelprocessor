@@ -1,13 +1,16 @@
 package com.github.salilvnair.excelprocessor.v2.processor.helper;
 
 import com.github.salilvnair.excelprocessor.v2.annotation.*;
+import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.model.StyleTemplateCellInfo;
+import com.github.salilvnair.excelprocessor.v2.model.TextStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -90,6 +93,9 @@ public class HeaderCellStyleWriterUtil {
             cellStyle.setFillPattern(headerCellStyle.fillPattern());
             cellStyle.setFillForegroundColor(headerCellStyle.foregroundColor().getIndex());
         }
+        if(headerCellStyle.customTextStyle()) {
+            applyTextStyleIfApplicable(rowCell, cellStyle, extractTextStyleInfo(headerCellStyle.textStyle()));
+        }
         rowCell.setCellStyle(cellStyle);
     }
 
@@ -144,7 +150,25 @@ public class HeaderCellStyleWriterUtil {
             cellStyle.setFillPattern(headerCellStyleInfo.getFillPattern());
             cellStyle.setFillForegroundColor(headerCellStyleInfo.getForegroundColor().getIndex());
         }
+        if(headerCellStyleInfo.isCustomTextStyle() && headerCellStyleInfo.getTextStyleInfo()!=null) {
+            applyTextStyleIfApplicable(rowCell, cellStyle, headerCellStyleInfo.getTextStyleInfo());
+        }
         rowCell.setCellStyle(cellStyle);
+    }
+
+    private static void applyTextStyleIfApplicable(org.apache.poi.ss.usermodel.Cell rowCell, CellStyle cellStyle, TextStyleInfo textStyleInfo) {
+        Font font = rowCell.getSheet().getWorkbook().createFont();
+        font.setBold(textStyleInfo.isBold());
+        font.setItalic(textStyleInfo.isItalic());
+        font.setColor(textStyleInfo.getColor().getIndex());
+        font.setStrikeout(textStyleInfo.isStrikeout());
+        if(StringUtils.isNotEmpty(textStyleInfo.getFontName())) {
+            font.setFontName(textStyleInfo.getFontName());
+        }
+        if(textStyleInfo.getFontHeight() != -1) {
+            font.setFontHeight(textStyleInfo.getFontHeight());
+        }
+        cellStyle.setFont(font);
     }
 
     public static HeaderCellStyle extractHeaderCellStyle(Field annotatedField, ExcelSheetWriterContext writerContext) {
@@ -177,7 +201,9 @@ public class HeaderCellStyleWriterUtil {
         headerCellStyleInfo.setColumnWidthInUnits(headerCellStyle.columnWidthInUnits());
         headerCellStyleInfo.setWrapText(headerCellStyle.wrapText());
         headerCellStyleInfo.setIgnoreStyleTemplate(headerCellStyle.ignoreStyleTemplate());
+        headerCellStyleInfo.setTextStyleInfo(extractTextStyleInfo(headerCellStyle.textStyle()));
         StyleTemplateCellInfo styleTemplateCellInfo = extractStyleTemplateCellInfo(headerCellStyle.styleTemplateCell());
+        headerCellStyleInfo.setCustomTextStyle(headerCellStyle.customTextStyle());
         headerCellStyleInfo.setStyleTemplateCellInfo(styleTemplateCellInfo);
         return headerCellStyleInfo;
     }
@@ -191,5 +217,18 @@ public class HeaderCellStyleWriterUtil {
         styleTemplateCellInfo.setRow(styleTemplateCell.row());
         return styleTemplateCellInfo;
     }
-    
+
+    public static TextStyleInfo extractTextStyleInfo(TextStyle textStyle) {
+        if(textStyle == null) {
+            return null;
+        }
+        TextStyleInfo textStyleInfo = new TextStyleInfo();
+        textStyleInfo.setBold(textStyle.bold());
+        textStyleInfo.setColor(textStyle.color());
+        textStyleInfo.setItalic(textStyle.italic());
+        textStyleInfo.setStrikeout(textStyle.strikeout());
+        textStyleInfo.setFontName(textStyle.fontName());
+        textStyleInfo.setFontHeight(textStyle.fontHeight());
+        return textStyleInfo;
+    }
 }

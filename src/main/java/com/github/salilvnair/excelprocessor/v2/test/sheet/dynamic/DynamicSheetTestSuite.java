@@ -5,6 +5,7 @@ import com.github.salilvnair.excelprocessor.util.StopWatch;
 import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.model.AllowedValuesInfo;
 import com.github.salilvnair.excelprocessor.v2.model.CellValidationInfo;
+import com.github.salilvnair.excelprocessor.v2.model.DataCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetReaderFactory;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetWriterFactory;
@@ -14,6 +15,7 @@ import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.test.sheet.dynamic.task.DynamicSheetTask;
 import com.github.salilvnair.excelprocessor.v2.test.sheet.dynamic.task.DynamicSheetValidatorTask;
+import org.apache.poi.ss.usermodel.IndexedColors;
 
 import java.io.File;
 import java.util.*;
@@ -54,20 +56,26 @@ public class DynamicSheetTestSuite {
     public static void write() throws Exception {
         String path = "/Users/salilvnair/Workspace/Personal/github/salilvnair/excelprocessor/src/main/resources/excel";
         File template = new File(path+ "/"+"ExcelProcessorTestTemplate.xlsx");
-        Map<String, HeaderCellStyleInfo> headerCellStyleInfoMap = new HashMap<>();
-        HeaderCellStyleInfo headerCellStyleInfo = new HeaderCellStyleInfo();
-        headerCellStyleInfo.getStyleTemplateCellInfo().setRow(1);
-        headerCellStyleInfo.getStyleTemplateCellInfo().setColumn("B");
-        headerCellStyleInfoMap.put("university", headerCellStyleInfo);
+//        Map<String, HeaderCellStyleInfo> headerCellStyleInfoMap = new HashMap<>();
+//        HeaderCellStyleInfo headerCellStyleInfo = new HeaderCellStyleInfo();
+//        headerCellStyleInfo.getStyleTemplateCellInfo().setRow(1);
+//        headerCellStyleInfo.getStyleTemplateCellInfo().setColumn("B");
+//        headerCellStyleInfoMap.put("university", headerCellStyleInfo);
+
+        Map<String, DataCellStyleInfo> dataCellStyleInfoMap = new HashMap<>();
+        DataCellStyleInfo dataCellStyleInfo = new DataCellStyleInfo();
+        dataCellStyleInfo.setCustomTextStyle(true);
+        dataCellStyleInfo.getTextStyleInfo().setColor(IndexedColors.GREY_50_PERCENT);
+        dataCellStyleInfoMap.put("university", dataCellStyleInfo);
         ExcelSheetContext excelSheetContext = ExcelSheetContext
                                                 .builder()
                                                 .filePath(path)
                                                 .fileName("DynamicallyGeneratedExcelProcessorTest.xlsx")
                                                 .styleTemplate(template)
                                                 .template(template)
-                                                .dynamicHeaderCellStyleInfo(headerCellStyleInfoMap)
+                                                .dynamicHeaderDataCellStyleInfo(dataCellStyleInfoMap)
                                                 .taskBean(new DynamicSheetTask())
-                                                .taskMetadata(headerCellStyleInfoMap, "Test1", "Test2")
+                                                .taskMetadata(dataCellStyleInfoMap, "Test1", "Test2")
                                                 .build();
         Map<String, String> dynamicHeaderDisplayNames = prepareDynamicHeaderDisplayNames();
         excelSheetContext.setDynamicHeaderDisplayNames(dynamicHeaderDisplayNames);

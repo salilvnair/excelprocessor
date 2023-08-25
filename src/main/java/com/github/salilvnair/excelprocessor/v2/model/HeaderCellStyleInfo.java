@@ -43,6 +43,10 @@ public class HeaderCellStyleInfo {
 
     private int columnWidthInUnits = -1;
 
+    private boolean customTextStyle = false;
+
+    private TextStyleInfo textStyleInfo = new TextStyleInfo();
+
     private StyleTemplateCellInfo styleTemplateCellInfo = new StyleTemplateCellInfo();
 
     private boolean ignoreStyleTemplate = false;

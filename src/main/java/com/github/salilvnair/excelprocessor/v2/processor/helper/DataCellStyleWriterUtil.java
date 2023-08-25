@@ -1,18 +1,18 @@
 package com.github.salilvnair.excelprocessor.v2.processor.helper;
 
 import com.github.salilvnair.excelprocessor.util.ObjectUtil;
-import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
-import com.github.salilvnair.excelprocessor.v2.annotation.DataCellStyle;
-import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
-import com.github.salilvnair.excelprocessor.v2.annotation.StyleTemplateCell;
+import com.github.salilvnair.excelprocessor.v2.annotation.*;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.model.DataCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.model.StyleTemplateCellInfo;
+import com.github.salilvnair.excelprocessor.v2.model.TextStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.writer.task.helper.ExcelCellStyleTaskExecutor;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+
 import java.lang.reflect.Field;
 import java.util.Map;
 
@@ -66,27 +66,6 @@ public class DataCellStyleWriterUtil {
         else {
             applyStaticDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
         }
-    }
-
-    private static DataCellStyleInfo extractDataCellStyleInfo(DataCellStyle dataCellStyle) {
-        DataCellStyleInfo dataCellStyleInfo = new DataCellStyleInfo();
-        dataCellStyleInfo.setConditional(dataCellStyle.conditional());
-        dataCellStyleInfo.setCondition(dataCellStyle.condition());
-        dataCellStyleInfo.setBorderStyle(dataCellStyle.borderStyle());
-        dataCellStyleInfo.setBorderColor(dataCellStyle.borderColor());
-        dataCellStyleInfo.setApplyDefaultStyles(dataCellStyle.applyDefaultStyles());
-        dataCellStyleInfo.setCustomTask(dataCellStyle.customTask());
-        dataCellStyleInfo.setBackgroundColor(dataCellStyle.backgroundColor());
-        dataCellStyleInfo.setFillPattern(dataCellStyle.fillPattern());
-        dataCellStyleInfo.setForegroundColor(dataCellStyle.foregroundColor());
-        dataCellStyleInfo.setHasBackgroundColor(dataCellStyle.hasBackgroundColor());
-        dataCellStyleInfo.setHasBorderColor(dataCellStyle.hasBorderColor());
-        dataCellStyleInfo.setHasBorderStyle(dataCellStyle.hasBorderStyle());
-        dataCellStyleInfo.setHasForegroundColor(dataCellStyle.hasForegroundColor());
-        dataCellStyleInfo.setColumnWidthInUnits(dataCellStyle.columnWidthInUnits());
-        dataCellStyleInfo.setWrapText(dataCellStyle.wrapText());
-        dataCellStyleInfo.setIgnoreStyleTemplate(dataCellStyle.ignoreStyleTemplate());
-        return dataCellStyleInfo;
     }
 
     private static void executeCustomTaskWithCellStyle(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, ExcelSheetWriterContext writerContext) {
@@ -202,6 +181,9 @@ public class DataCellStyleWriterUtil {
             cellStyle.setFillPattern(dataCellStyle.fillPattern());
             cellStyle.setFillForegroundColor(dataCellStyle.foregroundColor().getIndex());
         }
+        if(dataCellStyle.customTextStyle()) {
+            applyTextStyleIfApplicable(rowCell, cellStyle, extractTextStyleInfo(dataCellStyle.textStyle()));
+        }
         rowCell.setCellStyle(cellStyle);
     }
 
@@ -252,7 +234,51 @@ public class DataCellStyleWriterUtil {
             cellStyle.setFillPattern(dataCellStyleInfo.getFillPattern());
             cellStyle.setFillForegroundColor(dataCellStyleInfo.getForegroundColor().getIndex());
         }
+
+        if(dataCellStyleInfo.isCustomTextStyle() && dataCellStyleInfo.getTextStyleInfo()!=null) {
+            applyTextStyleIfApplicable(rowCell, cellStyle, dataCellStyleInfo.getTextStyleInfo());
+        }
         rowCell.setCellStyle(cellStyle);
+    }
+
+    private static void applyTextStyleIfApplicable(org.apache.poi.ss.usermodel.Cell rowCell, CellStyle cellStyle, TextStyleInfo textStyleInfo) {
+        Font font = rowCell.getSheet().getWorkbook().createFont();
+        font.setBold(textStyleInfo.isBold());
+        font.setItalic(textStyleInfo.isItalic());
+        font.setColor(textStyleInfo.getColor().getIndex());
+        font.setStrikeout(textStyleInfo.isStrikeout());
+        if(StringUtils.isNotEmpty(textStyleInfo.getFontName())) {
+            font.setFontName(textStyleInfo.getFontName());
+        }
+        if(textStyleInfo.getFontHeight() != -1) {
+            font.setFontHeight(textStyleInfo.getFontHeight());
+        }
+        cellStyle.setFont(font);
+    }
+
+    private static DataCellStyleInfo extractDataCellStyleInfo(DataCellStyle dataCellStyle) {
+        DataCellStyleInfo dataCellStyleInfo = new DataCellStyleInfo();
+        dataCellStyleInfo.setConditional(dataCellStyle.conditional());
+        dataCellStyleInfo.setCondition(dataCellStyle.condition());
+        dataCellStyleInfo.setBorderStyle(dataCellStyle.borderStyle());
+        dataCellStyleInfo.setBorderColor(dataCellStyle.borderColor());
+        dataCellStyleInfo.setApplyDefaultStyles(dataCellStyle.applyDefaultStyles());
+        dataCellStyleInfo.setCustomTask(dataCellStyle.customTask());
+        dataCellStyleInfo.setBackgroundColor(dataCellStyle.backgroundColor());
+        dataCellStyleInfo.setFillPattern(dataCellStyle.fillPattern());
+        dataCellStyleInfo.setForegroundColor(dataCellStyle.foregroundColor());
+        dataCellStyleInfo.setHasBackgroundColor(dataCellStyle.hasBackgroundColor());
+        dataCellStyleInfo.setHasBorderColor(dataCellStyle.hasBorderColor());
+        dataCellStyleInfo.setHasBorderStyle(dataCellStyle.hasBorderStyle());
+        dataCellStyleInfo.setHasForegroundColor(dataCellStyle.hasForegroundColor());
+        dataCellStyleInfo.setColumnWidthInUnits(dataCellStyle.columnWidthInUnits());
+        dataCellStyleInfo.setWrapText(dataCellStyle.wrapText());
+        dataCellStyleInfo.setIgnoreStyleTemplate(dataCellStyle.ignoreStyleTemplate());
+        StyleTemplateCellInfo styleTemplateCellInfo = extractStyleTemplateCellInfo(dataCellStyle.styleTemplateCell());
+        dataCellStyleInfo.setStyleTemplateCellInfo(styleTemplateCellInfo);
+        dataCellStyleInfo.setTextStyleInfo(extractTextStyleInfo(dataCellStyle.textStyle()));
+        dataCellStyleInfo.setCustomTextStyle(dataCellStyle.customTextStyle());
+        return dataCellStyleInfo;
     }
 
     public static DataCellStyle extractDataCellStyle(Field annotatedField, Object annotatedClassObject) {
@@ -261,6 +287,30 @@ public class DataCellStyleWriterUtil {
             dataCellStyle = annotatedClassObject.getClass().getAnnotation(DataCellStyle.class);
         }
         return dataCellStyle;
+    }
+
+    private static StyleTemplateCellInfo extractStyleTemplateCellInfo(StyleTemplateCell styleTemplateCell) {
+        if(styleTemplateCell == null) {
+            return null;
+        }
+        StyleTemplateCellInfo styleTemplateCellInfo = new StyleTemplateCellInfo();
+        styleTemplateCellInfo.setColumn(styleTemplateCell.column());
+        styleTemplateCellInfo.setRow(styleTemplateCell.row());
+        return styleTemplateCellInfo;
+    }
+
+    public static TextStyleInfo extractTextStyleInfo(TextStyle textStyle) {
+        if(textStyle == null) {
+            return null;
+        }
+        TextStyleInfo textStyleInfo = new TextStyleInfo();
+        textStyleInfo.setBold(textStyle.bold());
+        textStyleInfo.setColor(textStyle.color());
+        textStyleInfo.setItalic(textStyle.italic());
+        textStyleInfo.setStrikeout(textStyle.strikeout());
+        textStyleInfo.setFontName(textStyle.fontName());
+        textStyleInfo.setFontHeight(textStyle.fontHeight());
+        return textStyleInfo;
     }
     
 }
