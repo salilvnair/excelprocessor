@@ -41,6 +41,9 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         int valueRowIndex = sheet.valueRowAt()!=-1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         context.setSheetData(sheetData);
+        //if the template !=null then need to read header String and prepare
+        // a map of HeaderString, Cell annotated field
+        // and create columnLoop using above key set
         for (int r = 0; r < sheetData.size(); r++) {
             BaseSheet sheetDataObj = sheetData.get(r);
             context.setSheetDataObj(sheetDataObj);

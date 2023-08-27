@@ -55,6 +55,9 @@ public class DataCellStyleWriterUtil {
         else {
             dataCellStyleInfo = dynamicHeaderDataCellStyleInfo.get(header);
         }
+        if(dataCellStyleInfo == null) {
+            return;
+        }
         writerContext.setRowCell(rowCell);
         writerContext.setCellValue(fieldValue);
         if(dataCellStyleInfo.isConditional()) {
@@ -257,6 +260,9 @@ public class DataCellStyleWriterUtil {
     }
 
     private static DataCellStyleInfo extractDataCellStyleInfo(DataCellStyle dataCellStyle) {
+        if(dataCellStyle == null) {
+            return null;
+        }
         DataCellStyleInfo dataCellStyleInfo = new DataCellStyleInfo();
         dataCellStyleInfo.setConditional(dataCellStyle.conditional());
         dataCellStyleInfo.setCondition(dataCellStyle.condition());
