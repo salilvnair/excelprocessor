@@ -9,6 +9,7 @@ import com.github.salilvnair.excelprocessor.v2.model.DataCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetReaderFactory;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetWriterFactory;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
@@ -16,6 +17,7 @@ import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.test.sheet.dynamic.task.DynamicSheetTask;
 import com.github.salilvnair.excelprocessor.v2.test.sheet.dynamic.task.DynamicSheetValidatorTask;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.File;
 import java.util.*;
@@ -54,8 +56,8 @@ public class DynamicSheetTestSuite {
     }
 
     public static void write() throws Exception {
-        String path = "/Users/salilvnair/Workspace/Personal/github/salilvnair/excelprocessor/src/main/resources/excel";
-        File template = new File(path+ "/"+"ExcelProcessorTestTemplate.xlsx");
+        String path = "/Users/salilvnair/Workspace/personal";
+//        File template = new File(path+ "/"+"ExcelProcessorTestTemplate.xlsx");
 //        Map<String, HeaderCellStyleInfo> headerCellStyleInfoMap = new HashMap<>();
 //        HeaderCellStyleInfo headerCellStyleInfo = new HeaderCellStyleInfo();
 //        headerCellStyleInfo.getStyleTemplateCellInfo().setRow(1);
@@ -71,8 +73,8 @@ public class DynamicSheetTestSuite {
                                                 .builder()
                                                 .filePath(path)
                                                 .fileName("DynamicallyGeneratedExcelProcessorTest.xlsx")
-                                                .styleTemplate(template)
-                                                .template(template)
+//                                                .styleTemplate(template)
+//                                                .template(template)
                                                 .dynamicHeaderDataCellStyleInfo(dataCellStyleInfoMap)
                                                 .taskBean(new DynamicSheetTask())
                                                 .taskMetadata(dataCellStyleInfoMap, "Test1", "Test2")
@@ -80,12 +82,18 @@ public class DynamicSheetTestSuite {
         Map<String, String> dynamicHeaderDisplayNames = prepareDynamicHeaderDisplayNames();
         excelSheetContext.setDynamicHeaderDisplayNames(dynamicHeaderDisplayNames);
         List<DynamicCollegeSheet> dynamicCollegeSheets = prepareDynamicCollegeSheet();
-        sheetWriter(dynamicCollegeSheets, excelSheetContext);
+        Map<String, List<? extends BaseSheet>> excelData = new HashMap<>();
+        excelData.put("College", dynamicCollegeSheets);
+
+        List<DynamicSchoolSheet> dynamicSchoolSheets = prepareDynamicSchoolSheet();
+        excelData.put("School", dynamicSchoolSheets);
+        sheetWriter(excelData, excelSheetContext);
     }
 
-    private static void sheetWriter(List<? extends BaseSheet> sheetData, ExcelSheetContext context) throws Exception {
+    private static void sheetWriter(Map<String, List<? extends BaseSheet>> excelData, ExcelSheetContext context) throws Exception {
         ExcelSheetWriter writer = ExcelSheetWriterFactory.generate();
-        writer.write(sheetData, context);
+        Workbook workbook = writer.workbook(excelData, context);
+        ExcelSheetWriterUtil.write(workbook, context.fileName(), context.filePath());
     }
 
     private static Map<String, String> prepareDynamicHeaderDisplayNames() {
@@ -117,6 +125,28 @@ public class DynamicSheetTestSuite {
         dynamicCollegeSheet.setDynamicHeaderKeyedCellValueMap(dynamicHeaderKeyedCellValueMap);
         dynamicCollegeSheets.add(dynamicCollegeSheet);
         return dynamicCollegeSheets;
+    }
+
+    private static List<DynamicSchoolSheet> prepareDynamicSchoolSheet() {
+        List<DynamicSchoolSheet> dynamicSchoolSheets = new ArrayList<>();
+        DynamicSchoolSheet dynamicSchoolSheet = new DynamicSchoolSheet();
+        LinkedHashMap<String, Object> dynamicHeaderKeyedCellValueMap = new LinkedHashMap<>();
+        dynamicHeaderKeyedCellValueMap.put("name", "Salil");
+        dynamicHeaderKeyedCellValueMap.put("board", "CBSE");
+        dynamicHeaderKeyedCellValueMap.put("state", "KA");
+        dynamicHeaderKeyedCellValueMap.put("noOfStudents", 5000);
+        dynamicSchoolSheet.setDynamicHeaderKeyedCellValueMap(dynamicHeaderKeyedCellValueMap);
+        dynamicSchoolSheets.add(dynamicSchoolSheet);
+
+        dynamicSchoolSheet = new DynamicSchoolSheet();
+        dynamicHeaderKeyedCellValueMap = new LinkedHashMap<>();
+        dynamicHeaderKeyedCellValueMap.put("name", null);
+        dynamicHeaderKeyedCellValueMap.put("board", "ICSE");
+        dynamicHeaderKeyedCellValueMap.put("state", null);
+        dynamicHeaderKeyedCellValueMap.put("noOfStudents", 10000);
+        dynamicSchoolSheet.setDynamicHeaderKeyedCellValueMap(dynamicHeaderKeyedCellValueMap);
+        dynamicSchoolSheets.add(dynamicSchoolSheet);
+        return dynamicSchoolSheets;
     }
 
 }

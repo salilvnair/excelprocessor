@@ -22,7 +22,9 @@ public class DynamicHorizontalSheetWriter extends BaseHorizontalSheetWriter {
 
         Workbook workbook = writerContext.containsExistingWorkbook() ? writerContext.existingWorkbook() : writerContext.template() == null ? ExcelSheetWriterUtil.generateWorkbook(sheet) : writerContext.template();
         org.apache.poi.ss.usermodel.Sheet workbookSheet =  writerContext.template() == null ? workbook.createSheet(sheet.value()): workbook.getSheet(sheet.value());
-
+        if(workbookSheet == null) {
+            workbookSheet = workbook.createSheet(sheet.value());
+        }
         writeDynamicDataToHeader(headerKeyedCellValueMap, workbookSheet, sheet, writerContext);
         writeDynamicDataToBody(sheetData, workbookSheet, sheet, writerContext);
         applySheetStyles(sheet, workbook, workbookSheet, writerContext);

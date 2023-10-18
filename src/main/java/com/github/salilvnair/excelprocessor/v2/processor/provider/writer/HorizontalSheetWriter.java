@@ -22,6 +22,9 @@ public class HorizontalSheetWriter extends BaseHorizontalSheetWriter {
         Set<Field> cellFields = AnnotationUtil.getAnnotatedFields(baseSheet.getClass(), Cell.class);
         Workbook workbook = writerContext.containsExistingWorkbook() ? writerContext.existingWorkbook() : writerContext.template() == null ? ExcelSheetWriterUtil.generateWorkbook(sheet) : writerContext.template();
         org.apache.poi.ss.usermodel.Sheet workbookSheet =  writerContext.template() == null ? workbook.createSheet(sheet.value()): workbook.getSheet(sheet.value());
+        if(workbookSheet == null) {
+            workbookSheet = workbook.createSheet(sheet.value());
+        }
         List<Field> cells = new ArrayList<>(cellFields);
         writeDataToHeader(sheetData, cellFields, workbookSheet, cells, sheet, writerContext);
         writeDataToBody(sheetData, cellFields, workbookSheet, cells, sheet, writerContext);
