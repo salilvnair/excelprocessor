@@ -145,7 +145,13 @@ public class DataCellStyleWriterUtil {
         CellStyle cellStyle = null;
 
         if(writerContext.styleTemplate()!=null && !dataCellStyle.ignoreStyleTemplate()) {
-            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+            if(writerContext.getDefaultDataCellStyle() != null ) {
+                cellStyle = writerContext.getDefaultDataCellStyle();
+            }
+            else {
+                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+                writerContext.setDefaultDataCellStyle(cellStyle);
+            }
             StyleTemplateCell styleTemplateCell = dataCellStyle.styleTemplateCell();
             int rowIndex = styleTemplateCell.row()  - 1;
             int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCell.column())  - 1;
@@ -157,7 +163,13 @@ public class DataCellStyleWriterUtil {
             cellStyle.setWrapText(templateCellStyle.getWrapText());
         }
         else {
-            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+            if(writerContext.getDefaultDataCellStyle() != null ) {
+                cellStyle = writerContext.getDefaultDataCellStyle();
+            }
+            else {
+                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+                writerContext.setDefaultDataCellStyle(cellStyle);
+            }
         }
 
         cellStyle.setWrapText(dataCellStyle.wrapText());
@@ -198,7 +210,13 @@ public class DataCellStyleWriterUtil {
         CellStyle cellStyle = null;
 
         if(writerContext.styleTemplate()!=null && !dataCellStyleInfo.isIgnoreStyleTemplate()) {
-            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+            if(writerContext.getDefaultDataCellStyle() != null ) {
+                cellStyle = writerContext.getDefaultDataCellStyle();
+            }
+            else {
+                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+                writerContext.setDefaultDataCellStyle(cellStyle);
+            }
             StyleTemplateCellInfo styleTemplateCellInfo = dataCellStyleInfo.getStyleTemplateCellInfo();
             int rowIndex = styleTemplateCellInfo.getRow()  - 1;
             int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCellInfo.getColumn())  - 1;
@@ -210,7 +228,13 @@ public class DataCellStyleWriterUtil {
             cellStyle.setWrapText(templateCellStyle.getWrapText());
         }
         else {
-            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+            if(writerContext.getDefaultDataCellStyle() != null ) {
+                cellStyle = writerContext.getDefaultDataCellStyle();
+            }
+            else {
+                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+                writerContext.setDefaultDataCellStyle(cellStyle);
+            }
         }
 
         cellStyle.setWrapText(dataCellStyleInfo.isWrapText());

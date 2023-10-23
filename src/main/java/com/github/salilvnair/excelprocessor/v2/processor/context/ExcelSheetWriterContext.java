@@ -6,6 +6,7 @@ import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.task.AbstractExcelTask;
 import lombok.*;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.lang.reflect.Field;
@@ -60,6 +61,10 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
     private boolean suppressTaskExceptions;
 
     private AbstractExcelTask taskBean;
+
+    private CellStyle defaultHeaderCellStyle;
+
+    private CellStyle defaultDataCellStyle;
 
     public Workbook workbook() {
         return super.getWorkbook();

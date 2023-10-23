@@ -58,11 +58,11 @@ public class DynamicSheetTestSuite {
     public static void write() throws Exception {
         String path = "/Users/salilvnair/Workspace/personal";
 //        File template = new File(path+ "/"+"ExcelProcessorTestTemplate.xlsx");
-//        Map<String, HeaderCellStyleInfo> headerCellStyleInfoMap = new HashMap<>();
-//        HeaderCellStyleInfo headerCellStyleInfo = new HeaderCellStyleInfo();
-//        headerCellStyleInfo.getStyleTemplateCellInfo().setRow(1);
-//        headerCellStyleInfo.getStyleTemplateCellInfo().setColumn("B");
-//        headerCellStyleInfoMap.put("university", headerCellStyleInfo);
+        Map<String, HeaderCellStyleInfo> headerCellStyleInfoMap = new HashMap<>();
+        HeaderCellStyleInfo headerCellStyleInfo = new HeaderCellStyleInfo();
+        headerCellStyleInfo.setCustomTextStyle(true);
+        headerCellStyleInfo.getTextStyleInfo().setColor(IndexedColors.RED);
+        headerCellStyleInfoMap.put("university", headerCellStyleInfo);
 
         Map<String, DataCellStyleInfo> dataCellStyleInfoMap = new HashMap<>();
         DataCellStyleInfo dataCellStyleInfo = new DataCellStyleInfo();
@@ -75,12 +75,13 @@ public class DynamicSheetTestSuite {
                                                 .fileName("DynamicallyGeneratedExcelProcessorTest.xlsx")
 //                                                .styleTemplate(template)
 //                                                .template(template)
+                                                .dynamicHeaderCellStyleInfo(headerCellStyleInfoMap)
                                                 .dynamicHeaderDataCellStyleInfo(dataCellStyleInfoMap)
                                                 .taskBean(new DynamicSheetTask())
                                                 .taskMetadata(dataCellStyleInfoMap, "Test1", "Test2")
                                                 .build();
-        Map<String, String> dynamicHeaderDisplayNames = prepareDynamicHeaderDisplayNames();
-        excelSheetContext.setDynamicHeaderDisplayNames(dynamicHeaderDisplayNames);
+//        Map<String, String> dynamicHeaderDisplayNames = prepareDynamicHeaderDisplayNames();
+//        excelSheetContext.setDynamicHeaderDisplayNames(dynamicHeaderDisplayNames);
         List<DynamicCollegeSheet> dynamicCollegeSheets = prepareDynamicCollegeSheet();
         Map<String, List<? extends BaseSheet>> excelData = new HashMap<>();
         excelData.put("College", dynamicCollegeSheets);
@@ -113,6 +114,18 @@ public class DynamicSheetTestSuite {
         dynamicHeaderKeyedCellValueMap.put("university", "VMU");
         dynamicHeaderKeyedCellValueMap.put("state", "KA");
         dynamicHeaderKeyedCellValueMap.put("noOfStudents", 5000);
+        dynamicHeaderKeyedCellValueMap.put("name1", "Salil");
+        dynamicHeaderKeyedCellValueMap.put("university1", "VMU");
+        dynamicHeaderKeyedCellValueMap.put("state1", "KA");
+        dynamicHeaderKeyedCellValueMap.put("noOfStudents1", 5000);
+        dynamicHeaderKeyedCellValueMap.put("name2", "Salil");
+        dynamicHeaderKeyedCellValueMap.put("university2", "VMU");
+        dynamicHeaderKeyedCellValueMap.put("state2", "KA");
+        dynamicHeaderKeyedCellValueMap.put("noOfStudents2", 5000);
+        dynamicHeaderKeyedCellValueMap.put("name3", "Salil");
+        dynamicHeaderKeyedCellValueMap.put("university3", "VMU");
+        dynamicHeaderKeyedCellValueMap.put("state3", "KA");
+        dynamicHeaderKeyedCellValueMap.put("noOfStudents3", 5000);
         dynamicCollegeSheet.setDynamicHeaderKeyedCellValueMap(dynamicHeaderKeyedCellValueMap);
         dynamicCollegeSheets.add(dynamicCollegeSheet);
 
@@ -122,8 +135,44 @@ public class DynamicSheetTestSuite {
         dynamicHeaderKeyedCellValueMap.put("university", "MIT");
         dynamicHeaderKeyedCellValueMap.put("state", null);
         dynamicHeaderKeyedCellValueMap.put("noOfStudents", 10000);
+        dynamicHeaderKeyedCellValueMap.put("name1", "Salil");
+        dynamicHeaderKeyedCellValueMap.put("university1", "VMU");
+        dynamicHeaderKeyedCellValueMap.put("state1", "KA");
+        dynamicHeaderKeyedCellValueMap.put("noOfStudents1", 5000);
+        dynamicHeaderKeyedCellValueMap.put("name2", "Salil");
+        dynamicHeaderKeyedCellValueMap.put("university2", "VMU");
+        dynamicHeaderKeyedCellValueMap.put("state2", "KA");
+        dynamicHeaderKeyedCellValueMap.put("noOfStudents2", 5000);
+        dynamicHeaderKeyedCellValueMap.put("name3", "Salil");
+        dynamicHeaderKeyedCellValueMap.put("university3", "VMU");
+        dynamicHeaderKeyedCellValueMap.put("state3", "KA");
+        dynamicHeaderKeyedCellValueMap.put("noOfStudents3", 5000);
         dynamicCollegeSheet.setDynamicHeaderKeyedCellValueMap(dynamicHeaderKeyedCellValueMap);
         dynamicCollegeSheets.add(dynamicCollegeSheet);
+
+
+        for (int i = 0; i < 20000; i++) {
+            dynamicCollegeSheet = new DynamicCollegeSheet();
+            dynamicHeaderKeyedCellValueMap = new LinkedHashMap<>();
+            dynamicHeaderKeyedCellValueMap.put("name", "test"+i);
+            dynamicHeaderKeyedCellValueMap.put("university", "MIT"+i);
+            dynamicHeaderKeyedCellValueMap.put("state", null);
+            dynamicHeaderKeyedCellValueMap.put("noOfStudents", i+10000);
+            dynamicHeaderKeyedCellValueMap.put("name1", "test"+i);
+            dynamicHeaderKeyedCellValueMap.put("university1", "MIT"+i);
+            dynamicHeaderKeyedCellValueMap.put("state1", null);
+            dynamicHeaderKeyedCellValueMap.put("noOfStudents1", i+10000);
+            dynamicHeaderKeyedCellValueMap.put("name2", "test"+i);
+            dynamicHeaderKeyedCellValueMap.put("university2", "MIT"+i);
+            dynamicHeaderKeyedCellValueMap.put("state2", null);
+            dynamicHeaderKeyedCellValueMap.put("noOfStudents2", i+10000);
+            dynamicHeaderKeyedCellValueMap.put("name33", "test"+i);
+            dynamicHeaderKeyedCellValueMap.put("university3", "MIT"+i);
+            dynamicHeaderKeyedCellValueMap.put("state3", null);
+            dynamicHeaderKeyedCellValueMap.put("noOfStudents3", i+10000);
+            dynamicCollegeSheet.setDynamicHeaderKeyedCellValueMap(dynamicHeaderKeyedCellValueMap);
+            dynamicCollegeSheets.add(dynamicCollegeSheet);
+        }
         return dynamicCollegeSheets;
     }
 

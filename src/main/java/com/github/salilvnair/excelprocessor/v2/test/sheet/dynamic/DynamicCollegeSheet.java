@@ -19,7 +19,6 @@ import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
         dynamicHeaders = true,
         useDefaultNumberType = true,
         readValuesAsString = true,
-        headerRowAt = 2,
         hideColumns = {"A"}
 )
 public class DynamicCollegeSheet extends DynamicHeaderSheet {
