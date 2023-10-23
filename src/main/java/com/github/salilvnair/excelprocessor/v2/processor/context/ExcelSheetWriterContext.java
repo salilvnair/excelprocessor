@@ -2,6 +2,7 @@ package com.github.salilvnair.excelprocessor.v2.processor.context;
 
 import com.github.salilvnair.excelprocessor.v2.model.DataCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.DataCellStyleWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.task.AbstractExcelTask;
 import lombok.*;
@@ -10,6 +11,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +67,10 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
     private CellStyle defaultHeaderCellStyle;
 
     private CellStyle defaultDataCellStyle;
+
+    private Map<String, CellStyle> headerCellStyleMap;
+
+    private Map<String, CellStyle> dataCellStyleMap;
 
     public Workbook workbook() {
         return super.getWorkbook();
@@ -125,6 +131,28 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
             return clazz.cast(sheetDataObj);
         }
         return null;
+    }
+
+    public CellStyle defaultDataCellStyle() {
+        return this.defaultDataCellStyle;
+    }
+
+    public CellStyle dataCellStyle(String key) {
+        if(this.dataCellStyleMap != null && dataCellStyleMap.containsKey(key)) {
+            return dataCellStyleMap.get(key);
+        }
+        return null;
+    }
+
+    public boolean hasDataCellStyle(String key) {
+        return this.dataCellStyleMap!=null && dataCellStyleMap.containsKey(key);
+    }
+
+    public void addDataCellStyle(String key, CellStyle cellStyle) {
+        if(dataCellStyleMap == null) {
+            dataCellStyleMap = new HashMap<>();
+        }
+        dataCellStyleMap.put(key, cellStyle);
     }
 
 }

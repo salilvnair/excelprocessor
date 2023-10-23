@@ -11,7 +11,9 @@ import com.github.salilvnair.excelprocessor.v2.processor.provider.writer.task.he
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -145,8 +147,8 @@ public class DataCellStyleWriterUtil {
         CellStyle cellStyle = null;
 
         if(writerContext.styleTemplate()!=null && !dataCellStyle.ignoreStyleTemplate()) {
-            if(writerContext.getDefaultDataCellStyle() != null ) {
-                cellStyle = writerContext.getDefaultDataCellStyle();
+            if(writerContext.defaultDataCellStyle() != null ) {
+                cellStyle = writerContext.defaultDataCellStyle();
             }
             else {
                 cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
@@ -163,8 +165,8 @@ public class DataCellStyleWriterUtil {
             cellStyle.setWrapText(templateCellStyle.getWrapText());
         }
         else {
-            if(writerContext.getDefaultDataCellStyle() != null ) {
-                cellStyle = writerContext.getDefaultDataCellStyle();
+            if(writerContext.defaultDataCellStyle() != null ) {
+                cellStyle = writerContext.defaultDataCellStyle();
             }
             else {
                 cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
@@ -197,7 +199,7 @@ public class DataCellStyleWriterUtil {
             cellStyle.setFillForegroundColor(dataCellStyle.foregroundColor().getIndex());
         }
         if(dataCellStyle.customTextStyle()) {
-            applyTextStyleIfApplicable(rowCell, cellStyle, extractTextStyleInfo(dataCellStyle.textStyle()));
+            applyTextStyleIfApplicable(rowCell, cellStyle, extractTextStyleInfo(dataCellStyle.textStyle()), writerContext);
         }
         rowCell.setCellStyle(cellStyle);
     }
@@ -210,8 +212,8 @@ public class DataCellStyleWriterUtil {
         CellStyle cellStyle = null;
 
         if(writerContext.styleTemplate()!=null && !dataCellStyleInfo.isIgnoreStyleTemplate()) {
-            if(writerContext.getDefaultDataCellStyle() != null ) {
-                cellStyle = writerContext.getDefaultDataCellStyle();
+            if(writerContext.defaultDataCellStyle() != null ) {
+                cellStyle = writerContext.defaultDataCellStyle();
             }
             else {
                 cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
@@ -228,8 +230,8 @@ public class DataCellStyleWriterUtil {
             cellStyle.setWrapText(templateCellStyle.getWrapText());
         }
         else {
-            if(writerContext.getDefaultDataCellStyle() != null ) {
-                cellStyle = writerContext.getDefaultDataCellStyle();
+            if(writerContext.defaultDataCellStyle() != null ) {
+                cellStyle = writerContext.defaultDataCellStyle();
             }
             else {
                 cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
@@ -263,12 +265,12 @@ public class DataCellStyleWriterUtil {
         }
 
         if(dataCellStyleInfo.isCustomTextStyle() && dataCellStyleInfo.getTextStyleInfo()!=null) {
-            applyTextStyleIfApplicable(rowCell, cellStyle, dataCellStyleInfo.getTextStyleInfo());
+            applyTextStyleIfApplicable(rowCell, cellStyle, dataCellStyleInfo.getTextStyleInfo(), writerContext);
         }
         rowCell.setCellStyle(cellStyle);
     }
 
-    private static void applyTextStyleIfApplicable(org.apache.poi.ss.usermodel.Cell rowCell, CellStyle cellStyle, TextStyleInfo textStyleInfo) {
+    private static void applyTextStyleIfApplicable(org.apache.poi.ss.usermodel.Cell rowCell, CellStyle cellStyle, TextStyleInfo textStyleInfo, ExcelSheetWriterContext writerContext) {
         Font font = rowCell.getSheet().getWorkbook().createFont();
         font.setBold(textStyleInfo.isBold());
         font.setItalic(textStyleInfo.isItalic());
@@ -342,5 +344,13 @@ public class DataCellStyleWriterUtil {
         textStyleInfo.setFontHeight(textStyle.fontHeight());
         return textStyleInfo;
     }
+
+    public static void clearCellStyles(CellStyle defaultDataCellStyle) {
+        clearBackgroundColor(defaultDataCellStyle);
+    }
     
+    private static void clearBackgroundColor(CellStyle defaultDataCellStyle) {
+        defaultDataCellStyle.setFillPattern(FillPatternType.NO_FILL);
+        defaultDataCellStyle.setFillForegroundColor(IndexedColors.AUTOMATIC.getIndex());
+    }
 }

@@ -52,13 +52,7 @@ public class HeaderCellStyleWriterUtil {
         CellStyle cellStyle = null;
 
         if(writerContext.styleTemplate()!=null && !headerCellStyle.ignoreStyleTemplate()) {
-            if(writerContext.getDefaultHeaderCellStyle() != null ) {
-                cellStyle = writerContext.getDefaultHeaderCellStyle();
-            }
-            else {
-                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-                writerContext.setDefaultHeaderCellStyle(cellStyle);
-            }
+            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
             StyleTemplateCell styleTemplateCell = headerCellStyle.styleTemplateCell();
             int rowIndex = styleTemplateCell.row()  - 1;
             int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCell.column())  - 1;
@@ -70,13 +64,7 @@ public class HeaderCellStyleWriterUtil {
             cellStyle.setWrapText(templateCellStyle.getWrapText());
         }
         else {
-            if(writerContext.getDefaultHeaderCellStyle() != null ) {
-                cellStyle = writerContext.getDefaultHeaderCellStyle();
-            }
-            else {
-                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-                writerContext.setDefaultHeaderCellStyle(cellStyle);
-            }
+            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
         }
 
         cellStyle.setWrapText(headerCellStyle.wrapText());
@@ -119,13 +107,7 @@ public class HeaderCellStyleWriterUtil {
         CellStyle cellStyle = null;
 
         if(writerContext.styleTemplate()!=null && !headerCellStyleInfo.isIgnoreStyleTemplate()) {
-            if(writerContext.getDefaultHeaderCellStyle() != null ) {
-                cellStyle = writerContext.getDefaultHeaderCellStyle();
-            }
-            else {
-                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-                writerContext.setDefaultHeaderCellStyle(cellStyle);
-            }
+            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
             StyleTemplateCellInfo styleTemplateCellInfo = headerCellStyleInfo.getStyleTemplateCellInfo();
             int rowIndex = styleTemplateCellInfo.getRow()  - 1;
             int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCellInfo.getColumn())  - 1;
@@ -137,13 +119,7 @@ public class HeaderCellStyleWriterUtil {
             cellStyle.setWrapText(templateCellStyle.getWrapText());
         }
         else {
-            if(writerContext.getDefaultHeaderCellStyle() != null ) {
-                cellStyle = writerContext.getDefaultHeaderCellStyle();
-            }
-            else {
-                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-                writerContext.setDefaultHeaderCellStyle(cellStyle);
-            }
+            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
         }
 
         cellStyle.setWrapText(headerCellStyleInfo.isWrapText());
