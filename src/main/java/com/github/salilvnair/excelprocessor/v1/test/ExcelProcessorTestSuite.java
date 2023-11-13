@@ -230,16 +230,16 @@ public class ExcelProcessorTestSuite {
 		try {
 			ExcelProcessorBuilder excelProcessorBuilder = new ExcelProcessorBuilder();
 			excelProcessorBuilder.clear();
-			StopWatch.start();
+            StopWatch watch = StopWatch.start();
 
-			Map<String, List<? extends BaseExcelSheet>> sheetMap = excelProcessorBuilder
+            Map<String, List<? extends BaseExcelSheet>> sheetMap = excelProcessorBuilder
 					.setExcelfile(excelfile)
 					.setExcelMappingBeanClasses(SchoolSheet.class)
 					.validateInDetail()
 					.fromExcel()
 					.toSheetMap();
 			excelProcessorBuilder.clear();
-			System.out.println("excelprocessor v1 took " + StopWatch.elapsed(TimeUnit.MILLISECONDS) + " millisecond(s)");
+			System.out.println("excelprocessor v1 took " + StopWatch.elapsed(watch, TimeUnit.MILLISECONDS) + " millisecond(s)");
 			
 		}
 		catch (Exception e1) {

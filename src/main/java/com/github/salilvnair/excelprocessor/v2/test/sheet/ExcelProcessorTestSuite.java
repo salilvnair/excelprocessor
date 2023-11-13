@@ -77,7 +77,7 @@ public class ExcelProcessorTestSuite {
         InputStream inputS = ExcelSheetReaderUtil.resourceStream(com.github.salilvnair.excelprocessor.v1.test.ExcelProcessorTestSuite.TEST_EXCEL_FOLDER, "ExcelProcessorTest1.xlsx");
         Workbook workbook = ExcelSheetReaderUtil.generateWorkbook(inputS, "ExcelProcessorTest1.xlsx");
         builder.workbook(workbook);
-        StopWatch.start();
+        StopWatch watch = StopWatch.start();
         ExcelSheetContext sheetContext = builder.build();
         List<SectionSheet> sheetData = reader.read(SectionSheet.class, sheetContext);
         System.out.println(sheetData.size());
@@ -87,7 +87,7 @@ public class ExcelProcessorTestSuite {
         System.out.println(Arrays.toString(sheetData.get(1).foregroundRgb()));
         List<CellValidationMessage> validationMessages = reader.validate(sheetData, sheetContext);
         System.out.println("validationMessages:"+validationMessages.size());
-        System.out.println("excelprocessor v2 took " + StopWatch.elapsed(TimeUnit.MILLISECONDS) + " millisecond(s)");
+        System.out.println("excelprocessor v2 took " + StopWatch.elapsed(watch, TimeUnit.MILLISECONDS) + " millisecond(s)");
         return sheetData;
     }
 }
