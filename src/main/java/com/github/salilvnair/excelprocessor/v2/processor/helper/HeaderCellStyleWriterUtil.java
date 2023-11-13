@@ -56,12 +56,14 @@ public class HeaderCellStyleWriterUtil {
             StyleTemplateCell styleTemplateCell = headerCellStyle.styleTemplateCell();
             int rowIndex = styleTemplateCell.row()  - 1;
             int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCell.column())  - 1;
-            CellStyle templateCellStyle = writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getCellStyle();
-            cellStyle.cloneStyleFrom(templateCellStyle);
-            // Copy cell width
-            rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), writerContext.styleTemplate().getSheet(sheet.value()).getColumnWidth(writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getColumnIndex()));
-            // Copy text wrapping
-            cellStyle.setWrapText(templateCellStyle.getWrapText());
+            if(writerContext.styleTemplate().getSheet(sheet.value()) != null) {
+                CellStyle templateCellStyle = writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getCellStyle();
+                cellStyle.cloneStyleFrom(templateCellStyle);
+                // Copy cell width
+                rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), writerContext.styleTemplate().getSheet(sheet.value()).getColumnWidth(writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getColumnIndex()));
+                // Copy text wrapping
+                cellStyle.setWrapText(templateCellStyle.getWrapText());
+            }
         }
         else {
             cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
@@ -111,12 +113,14 @@ public class HeaderCellStyleWriterUtil {
             StyleTemplateCellInfo styleTemplateCellInfo = headerCellStyleInfo.getStyleTemplateCellInfo();
             int rowIndex = styleTemplateCellInfo.getRow()  - 1;
             int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCellInfo.getColumn())  - 1;
-            CellStyle templateCellStyle = writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getCellStyle();
-            cellStyle.cloneStyleFrom(templateCellStyle);
-            // Copy cell width
-            rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), writerContext.styleTemplate().getSheet(sheet.value()).getColumnWidth(writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getColumnIndex()));
-            // Copy text wrapping
-            cellStyle.setWrapText(templateCellStyle.getWrapText());
+            if(writerContext.styleTemplate().getSheet(sheet.value()) != null) {
+                CellStyle templateCellStyle = writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getCellStyle();
+                cellStyle.cloneStyleFrom(templateCellStyle);
+                // Copy cell width
+                rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), writerContext.styleTemplate().getSheet(sheet.value()).getColumnWidth(writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getColumnIndex()));
+                // Copy text wrapping
+                cellStyle.setWrapText(templateCellStyle.getWrapText());
+            }
         }
         else {
             cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();

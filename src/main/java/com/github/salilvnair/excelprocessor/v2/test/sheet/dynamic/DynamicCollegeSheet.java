@@ -11,7 +11,7 @@ import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
 @DataCellStyle(
         customTask = "highlightYellowIfValueIsEmpty"
 )
-@HeaderCellStyle(styleTemplateCell = @StyleTemplateCell(row = 2))
+@HeaderCellStyle(ignoreStyleTemplate = true)
 @Sheet(
         value="College",
         type = ExcelFileType.Extension.XLSX,

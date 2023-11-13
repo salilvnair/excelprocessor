@@ -57,7 +57,7 @@ public class DynamicSheetTestSuite {
 
     public static void write() throws Exception {
         String path = "/Users/salilvnair/Workspace/personal";
-//        File template = new File(path+ "/"+"ExcelProcessorTestTemplate.xlsx");
+        File template = new File(path+ "/"+"Template.xlsx");
         Map<String, HeaderCellStyleInfo> headerCellStyleInfoMap = new HashMap<>();
         HeaderCellStyleInfo headerCellStyleInfo = new HeaderCellStyleInfo();
         headerCellStyleInfo.setCustomTextStyle(true);
@@ -73,7 +73,7 @@ public class DynamicSheetTestSuite {
                                                 .builder()
                                                 .filePath(path)
                                                 .fileName("DynamicallyGeneratedExcelProcessorTest.xlsx")
-//                                                .styleTemplate(template)
+                                                .styleTemplate(template)
 //                                                .template(template)
                                                 .dynamicHeaderCellStyleInfo(headerCellStyleInfoMap)
                                                 .dynamicHeaderDataCellStyleInfo(dataCellStyleInfoMap)
