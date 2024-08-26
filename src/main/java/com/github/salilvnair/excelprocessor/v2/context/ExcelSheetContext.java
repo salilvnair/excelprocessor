@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * @author Salil V Nair
@@ -54,6 +55,7 @@ public class ExcelSheetContext {
     private boolean suppressExceptions;
     private boolean suppressTaskExceptions = true;
     private List<Object> taskMetadata;
+    private Function<String, Object> beanFunction;
 
     private AbstractExcelTask taskBean;
 
@@ -342,6 +344,14 @@ public class ExcelSheetContext {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public Function<String, Object> beanFunction() {
+        return beanFunction;
+    }
+
+    public void setBeanFunction(Function<String, Object> beanFunction) {
+        this.beanFunction = beanFunction;
     }
 
     public static class ExcelSheetContextBuilder {
@@ -658,6 +668,12 @@ public class ExcelSheetContext {
 
         public ExcelSheetContextBuilder taskMetadata(Object... taskMetadata) {
             excelSheetContext.setTaskMetadata(Arrays.asList(taskMetadata));
+            return this;
+        }
+
+
+        public ExcelSheetContextBuilder beanFunction(Function<String, Object> beanFunction) {
+            excelSheetContext.setBeanFunction(beanFunction);
             return this;
         }
 

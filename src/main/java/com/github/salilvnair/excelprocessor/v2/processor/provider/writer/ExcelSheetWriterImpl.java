@@ -89,6 +89,7 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
                 .styleTemplate(sheetContext.styleTemplateWorkbook())
                 .taskMetadata(sheetContext.taskMetadata())
                 .taskBean(sheetContext.taskBean())
+                .beanFunction(sheetContext.beanFunction())
                 .suppressExceptions(sheetContext.suppressExceptions())
                 .suppressTaskExceptions(sheetContext.suppressTaskExceptions())
                 .orderedHeaders(sheetContext.orderedHeaders())

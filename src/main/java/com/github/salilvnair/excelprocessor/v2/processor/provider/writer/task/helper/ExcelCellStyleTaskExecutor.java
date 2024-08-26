@@ -29,4 +29,34 @@ public class ExcelCellStyleTaskExecutor {
         }
         return null;
     }
+
+    public static Object execute(String methodName, Sheet sheet, ExcelSheetWriterContext writerContext) {
+        Class<? extends AbstractExcelTask> taskClass = sheet.excelTask();
+        if(!taskClass.getName().equals(Sheet.DefaultTaskValidator.class.getName()) || writerContext.getTaskBean()!=null || !"".equals(sheet.excelTaskBeanName())) {
+            try {
+                AbstractExcelTask task;
+                String beanName = sheet.excelTaskBeanName();
+                if(beanName !=null && !beanName.isEmpty()) {
+                    task = (AbstractExcelTask) writerContext.beanFunction().apply(beanName);
+                    if (task == null) {
+                        task = taskClass.newInstance();
+                    }
+                }
+                else {
+                    task = writerContext.getTaskBean()!=null ? writerContext.getTaskBean() : taskClass.newInstance();
+                }
+                task.setMethodName(methodName);
+                if(CollectionUtils.isNotEmpty(writerContext.taskMetadata())) {
+                    return ReflectionUtil.invokeMethod(task, task.getMethodName(), writerContext, writerContext.taskMetadata().toArray(new Object[0]));
+                }
+                return ReflectionUtil.invokeMethod(task, task.getMethodName(), writerContext);
+            }
+            catch (Exception ex) {
+                if(!writerContext.suppressTaskExceptions()) {
+                    throw new ExcelSheetWriterException(ex);
+                }
+            }
+        }
+        return null;
+    }
 }

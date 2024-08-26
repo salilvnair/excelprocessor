@@ -78,7 +78,7 @@ public class AllowedValueValidator extends BaseCellValidator {
 
     private boolean satisfiesValidValueCondition(String condition, CellValidatorContext validatorContext) {
         Sheet sheet = validatorContext.sheet();
-        Object object = ExcelValidatorTaskExecutor.execute(condition, sheet.excelTaskValidator(), validatorContext);
+        Object object = ExcelValidatorTaskExecutor.execute(condition, sheet, validatorContext);
         return ObjectUtil.isBoolean(object) && (Boolean) object;
     }
 

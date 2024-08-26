@@ -9,6 +9,7 @@ import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * @author Salil V Nair
@@ -82,6 +83,11 @@ public final class ExcelSheetValidator {
         return this;
     }
 
+    public ExcelSheetValidator beanFunction(Function<String, Object> beanFunction) {
+        initValidatorContext();
+        validatorContext.setBeanFunction(beanFunction);
+        return this;
+    }
 
     public ExcelSheetValidator taskMetadata(List<Object> taskMetadata) {
         initValidatorContext();

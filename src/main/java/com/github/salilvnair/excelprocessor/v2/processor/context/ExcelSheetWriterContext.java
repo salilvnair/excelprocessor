@@ -2,7 +2,6 @@ package com.github.salilvnair.excelprocessor.v2.processor.context;
 
 import com.github.salilvnair.excelprocessor.v2.model.DataCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
-import com.github.salilvnair.excelprocessor.v2.processor.helper.DataCellStyleWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.task.AbstractExcelTask;
 import lombok.*;
@@ -15,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * @author Salil V Nair
@@ -63,6 +63,8 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
     private boolean suppressTaskExceptions;
 
     private AbstractExcelTask taskBean;
+
+    private Function<String, Object> beanFunction;
 
     private CellStyle defaultHeaderCellStyle;
 
@@ -153,6 +155,10 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
             dataCellStyleMap = new HashMap<>();
         }
         dataCellStyleMap.put(key, cellStyle);
+    }
+
+    public Function<String, Object> beanFunction() {
+        return this.beanFunction;
     }
 
 }

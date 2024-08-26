@@ -23,11 +23,11 @@ public class CustomMethodValidator extends BaseDynamicCellValidator {
         validatorContext.setHeader(header());
         validatorContext.setHeaderKey(headerKey());
         if(!StringUtils.isEmpty(cellValidation.getCustomTask())) {
-            ExcelValidatorTaskExecutor.execute(cellValidation.getCustomTask(), sheet.excelTaskValidator(), validatorContext);
+            ExcelValidatorTaskExecutor.execute(cellValidation.getCustomTask(), sheet, validatorContext);
         }
         else {
             for (String customTask : cellValidation.getCustomTasks()) {
-                ExcelValidatorTaskExecutor.execute(customTask, sheet.excelTaskValidator(), validatorContext);
+                ExcelValidatorTaskExecutor.execute(customTask, sheet, validatorContext);
             }
         }
 

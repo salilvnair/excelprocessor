@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public class CellValidatorContext {
     private Sheet sheet;
@@ -31,6 +32,7 @@ public class CellValidatorContext {
     private Map<String, CellValidationInfo> headerKeyedCellValidationInfo;
     private AbstractExcelTaskValidator taskValidatorBean;
     private List<Object> taskMetadata;
+    private Function<String, Object> beanFunction;
 
 
     public List<? extends BaseSheet> getCurrentSheet() {
@@ -186,5 +188,13 @@ public class CellValidatorContext {
 
     public void setHeaderKey(String headerKey) {
         this.headerKey = headerKey;
+    }
+
+    public Function<String, Object> beanFunction() {
+        return beanFunction;
+    }
+
+    public void setBeanFunction(Function<String, Object> beanFunction) {
+        this.beanFunction = beanFunction;
     }
 }

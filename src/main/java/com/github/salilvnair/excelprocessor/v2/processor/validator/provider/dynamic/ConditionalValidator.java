@@ -24,7 +24,7 @@ public class ConditionalValidator extends BaseDynamicCellValidator {
         CellValidationInfo cellValidation = cellValidation();
         validatorContext.setHeader(header());
         validatorContext.setHeaderKey(headerKey());
-        Object object = ExcelValidatorTaskExecutor.execute(cellValidation.getCondition(), sheet.excelTaskValidator(), validatorContext);
+        Object object = ExcelValidatorTaskExecutor.execute(cellValidation.getCondition(), sheet, validatorContext);
         if(!ObjectUtil.isNull(object) && !ObjectUtil.isBoolean(object)) {
             this.conditionalMessage = object+"";
         }

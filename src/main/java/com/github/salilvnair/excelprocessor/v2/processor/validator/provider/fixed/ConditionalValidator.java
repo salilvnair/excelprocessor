@@ -22,7 +22,7 @@ public class ConditionalValidator extends BaseCellValidator {
     protected boolean violated(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
         Sheet sheet = validatorContext.sheet();
         CellValidation cellValidation = field.getAnnotation(CellValidation.class);
-        Object object = ExcelValidatorTaskExecutor.execute(cellValidation.condition(), sheet.excelTaskValidator(), validatorContext);
+        Object object = ExcelValidatorTaskExecutor.execute(cellValidation.condition(), sheet, validatorContext);
         if(!ObjectUtil.isNull(object) && !ObjectUtil.isBoolean(object)) {
             this.conditionalMessage = object+"";
         }
