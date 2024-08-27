@@ -10,7 +10,7 @@
 
 * Supports AllowedValues annotation for set of valid values.
 
-* Can be used with any framework of Java or a Rest based Java API.
+* Can be used with any framework of Java like Spring etc.
 
 * A user validator map, user defined message set, valid value data set can be configured using builder pattern.
 
@@ -24,7 +24,7 @@
 <dependency>
     <groupId>com.github.salilvnair</groupId>
     <artifactId>excelprocessor</artifactId>
-    <version>2.0.6</version>
+    <version>3.1.3</version>
 </dependency>
 ```
 
@@ -88,8 +88,7 @@ public class ExcelProcessorTestSuite {
 
           //SheetContext can be build using the ExcelSheetContext.ExcelSheetContextBuilder
 
-          ExcelSheetContext.ExcelSheetContextBuilder builder = ExcelSheetContext.builder();
-          ExcelSheetContext sheetContext = builder
+          ExcelSheetContext sheetContext = ExcelSheetContext.builder()
                                            .excelFile(new File("ExcelProcessorTest.xlsx"))
                                            .build();  
           
