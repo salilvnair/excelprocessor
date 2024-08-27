@@ -32,7 +32,7 @@ public class CellValidatorContext {
     private Map<String, CellValidationInfo> headerKeyedCellValidationInfo;
     private AbstractExcelTaskValidator taskValidatorBean;
     private List<Object> taskMetadata;
-    private Function<String, Object> beanFunction;
+    private Function<String, Object> beanResolver;
 
 
     public List<? extends BaseSheet> getCurrentSheet() {
@@ -190,11 +190,11 @@ public class CellValidatorContext {
         this.headerKey = headerKey;
     }
 
-    public Function<String, Object> beanFunction() {
-        return beanFunction;
+    public Function<String, Object> beanResolver() {
+        return beanResolver;
     }
 
-    public void setBeanFunction(Function<String, Object> beanFunction) {
-        this.beanFunction = beanFunction;
+    public void setBeanResolver(Function<String, Object> beanResolver) {
+        this.beanResolver = beanResolver;
     }
 }

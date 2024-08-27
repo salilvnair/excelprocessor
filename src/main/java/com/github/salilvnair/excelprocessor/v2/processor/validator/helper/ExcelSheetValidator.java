@@ -83,9 +83,9 @@ public final class ExcelSheetValidator {
         return this;
     }
 
-    public ExcelSheetValidator beanFunction(Function<String, Object> beanFunction) {
+    public ExcelSheetValidator beanResolver(Function<String, Object> beanResolver) {
         initValidatorContext();
-        validatorContext.setBeanFunction(beanFunction);
+        validatorContext.setBeanResolver(beanResolver);
         return this;
     }
 

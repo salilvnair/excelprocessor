@@ -64,7 +64,7 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
 
     private AbstractExcelTask taskBean;
 
-    private Function<String, Object> beanFunction;
+    private Function<String, Object> beanResolver;
 
     private CellStyle defaultHeaderCellStyle;
 
@@ -157,8 +157,8 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
         dataCellStyleMap.put(key, cellStyle);
     }
 
-    public Function<String, Object> beanFunction() {
-        return this.beanFunction;
+    public Function<String, Object> beanResolver() {
+        return this.beanResolver;
     }
 
 }

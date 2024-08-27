@@ -16,7 +16,7 @@ public class ExcelValidatorTaskExecutor {
                 AbstractExcelTaskValidator task;
                 String beanName = sheet.excelTaskValidatorBeanName();
                 if(beanName!=null && !beanName.isEmpty()) {
-                    task = (AbstractExcelTaskValidator) validatorContext.beanFunction().apply(beanName);
+                    task = (AbstractExcelTaskValidator) validatorContext.beanResolver().apply(beanName);
                     if (task == null) {
                         task = taskClass.newInstance();
                     }

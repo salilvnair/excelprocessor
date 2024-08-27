@@ -385,7 +385,7 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
                 .userDefinedMessageDataSet(sheetContext.userDefinedMessageDataSet())
                 .headerKeyedCellValidationInfo(sheetContext.headerKeyedCellValidationInfo())
                 .taskValidatorBean(sheetContext.taskValidatorBean())
-                .beanFunction(sheetContext.beanFunction())
+                .beanResolver(sheetContext.beanFunction())
                 .taskMetadata(sheetContext.taskMetadata())
                 .rows(rows)
                 .validate();

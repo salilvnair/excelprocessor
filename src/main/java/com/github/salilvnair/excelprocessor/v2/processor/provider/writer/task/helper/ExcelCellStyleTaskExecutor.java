@@ -37,7 +37,7 @@ public class ExcelCellStyleTaskExecutor {
                 AbstractExcelTask task;
                 String beanName = sheet.excelTaskBeanName();
                 if(beanName !=null && !beanName.isEmpty()) {
-                    task = (AbstractExcelTask) writerContext.beanFunction().apply(beanName);
+                    task = (AbstractExcelTask) writerContext.beanResolver().apply(beanName);
                     if (task == null) {
                         task = taskClass.newInstance();
                     }

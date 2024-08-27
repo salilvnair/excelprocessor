@@ -97,22 +97,22 @@ public class DataCellStyleWriterUtil {
 
     private static void executeCustomTask(DataCellStyle dataCellStyle, Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, ExcelSheetWriterContext writerContext) {
         if(!StringUtils.isEmpty(dataCellStyle.customTask())) {
-            ExcelCellStyleTaskExecutor.execute(dataCellStyle.customTask(), sheet.excelTask(), writerContext);
+            ExcelCellStyleTaskExecutor.execute(dataCellStyle.customTask(), sheet, writerContext);
         }
         else {
             for (String customTask : dataCellStyle.customTasks()) {
-                ExcelCellStyleTaskExecutor.execute(customTask, sheet.excelTask(), writerContext);
+                ExcelCellStyleTaskExecutor.execute(customTask, sheet, writerContext);
             }
         }
     }
 
     private static void executeCustomTask(DataCellStyleInfo dataCellStyle, Sheet sheet, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext writerContext) {
         if(!StringUtils.isEmpty(dataCellStyle.getCustomTask())) {
-            ExcelCellStyleTaskExecutor.execute(dataCellStyle.getCustomTask(), sheet.excelTask(), writerContext);
+            ExcelCellStyleTaskExecutor.execute(dataCellStyle.getCustomTask(), sheet, writerContext);
         }
         else {
             for (String customTask : dataCellStyle.getCustomTasks()) {
-                ExcelCellStyleTaskExecutor.execute(customTask, sheet.excelTask(), writerContext);
+                ExcelCellStyleTaskExecutor.execute(customTask, sheet, writerContext);
             }
         }
     }
@@ -122,7 +122,7 @@ public class DataCellStyleWriterUtil {
         if(dataCellStyle == null) {
             return;
         }
-        Object object = ExcelCellStyleTaskExecutor.execute(dataCellStyle.condition(), sheet.excelTask(), writerContext);
+        Object object = ExcelCellStyleTaskExecutor.execute(dataCellStyle.condition(), sheet, writerContext);
         if(ObjectUtil.nonNullOrBooleanTrue(object)) {
             applyStaticCellStyles(sheet, cell, rowCell, cellField, writerContext);
         }
@@ -133,7 +133,7 @@ public class DataCellStyleWriterUtil {
             return;
         }
         writerContext.setHeader(header);
-        Object object = ExcelCellStyleTaskExecutor.execute(dataCellStyleInfo.getCondition(), sheet.excelTask(), writerContext);
+        Object object = ExcelCellStyleTaskExecutor.execute(dataCellStyleInfo.getCondition(), sheet, writerContext);
         if(ObjectUtil.nonNullOrBooleanTrue(object)) {
             applyStaticDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
         }

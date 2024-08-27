@@ -55,7 +55,7 @@ public class ExcelSheetContext {
     private boolean suppressExceptions;
     private boolean suppressTaskExceptions = true;
     private List<Object> taskMetadata;
-    private Function<String, Object> beanFunction;
+    private Function<String, Object> beanResolver;
 
     private AbstractExcelTask taskBean;
 
@@ -347,11 +347,11 @@ public class ExcelSheetContext {
     }
 
     public Function<String, Object> beanFunction() {
-        return beanFunction;
+        return beanResolver;
     }
 
-    public void setBeanFunction(Function<String, Object> beanFunction) {
-        this.beanFunction = beanFunction;
+    public void setBeanResolver(Function<String, Object> beanResolver) {
+        this.beanResolver = beanResolver;
     }
 
     public static class ExcelSheetContextBuilder {
@@ -672,8 +672,8 @@ public class ExcelSheetContext {
         }
 
 
-        public ExcelSheetContextBuilder beanFunction(Function<String, Object> beanFunction) {
-            excelSheetContext.setBeanFunction(beanFunction);
+        public ExcelSheetContextBuilder beanResolver(Function<String, Object> resolverFunction) {
+            excelSheetContext.setBeanResolver(resolverFunction);
             return this;
         }
 
