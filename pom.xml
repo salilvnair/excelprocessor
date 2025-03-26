@@ -42,7 +42,7 @@
     </distributionManagement>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>1.8</java.version>
         <org.json.json>20250107</org.json.json>
         <org.apache.poi.poi>5.4.0</org.apache.poi.poi>
         <org.apache.poi.poi-ooxml>5.4.0</org.apache.poi.poi-ooxml>
