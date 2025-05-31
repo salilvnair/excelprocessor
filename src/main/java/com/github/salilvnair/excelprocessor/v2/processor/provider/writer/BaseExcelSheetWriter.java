@@ -1,10 +1,12 @@
 package com.github.salilvnair.excelprocessor.v2.processor.provider.writer;
 
 import com.github.salilvnair.excelprocessor.v2.annotation.DataCellStyle;
+import com.github.salilvnair.excelprocessor.v2.model.CellInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.DataCellStyleWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.HeaderCellStyleWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
+import com.github.salilvnair.excelprocessor.v2.sheet.DynamicHeaderSheet;
 import com.github.salilvnair.excelprocessor.v2.type.PictureSourceType;
 import com.github.salilvnair.excelprocessor.v2.type.PictureType;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
@@ -29,7 +31,10 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Salil V Nair
@@ -315,6 +320,22 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         for (String column : sheet.hideColumns()) {
             int columnIndex = ExcelSheetReader.toIndentNumber(column) - 1;
             workbookSheet.setColumnHidden(columnIndex, true);
+        }
+    }
+
+    protected static LinkedHashMap<String, CellInfo> extractHeaderKeyedCellInfoMap(DynamicHeaderSheet dynamicHeaderSheet) {
+        LinkedHashMap<String, Object> dynamicHeaderKeyedCellValueMap = dynamicHeaderSheet.dynamicHeaderKeyedCellValueMap();
+        if(dynamicHeaderKeyedCellValueMap == null || dynamicHeaderKeyedCellValueMap.isEmpty()) {
+            return dynamicHeaderSheet.dynamicHeaderKeyedCellInfoMap();
+        }
+        else {
+            return dynamicHeaderKeyedCellValueMap
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey,
+                            e -> CellInfo.builder().header(e.getKey()).originalHeader(e.getKey()).value(e.getValue()).build(),
+                            (o, n) -> n, LinkedHashMap::new
+                    ));
         }
     }
 

@@ -14,6 +14,7 @@ import java.util.Map;
 public class DynamicHeaderSheet extends BaseSheet {
     @DynamicCell
     private LinkedHashMap<String, Object> dynamicHeaderKeyedCellValueMap;
+    private LinkedHashMap<String, CellInfo> dynamicHeaderKeyedCellInfoMap;
 
     public LinkedHashMap<String, Object> dynamicHeaderKeyedCellValueMap() {
         return dynamicHeaderKeyedCellValueMap;
@@ -21,6 +22,14 @@ public class DynamicHeaderSheet extends BaseSheet {
 
     public void setDynamicHeaderKeyedCellValueMap(LinkedHashMap<String, Object> dynamicHeaderKeyedCellValueMap) {
         this.dynamicHeaderKeyedCellValueMap = dynamicHeaderKeyedCellValueMap;
+    }
+
+    public LinkedHashMap<String, CellInfo> dynamicHeaderKeyedCellInfoMap() {
+        return dynamicHeaderKeyedCellInfoMap;
+    }
+
+    public void setDynamicHeaderKeyedCellInfoMap(LinkedHashMap<String, CellInfo> dynamicHeaderKeyedCellInfoMap) {
+        this.dynamicHeaderKeyedCellInfoMap = dynamicHeaderKeyedCellInfoMap;
     }
 
 

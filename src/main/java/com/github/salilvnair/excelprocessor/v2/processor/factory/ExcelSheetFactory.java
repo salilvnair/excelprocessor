@@ -63,15 +63,30 @@ public class ExcelSheetFactory {
 
     public static BaseExcelSheetWriter generateWriter(Sheet sheet) {
         if(sheet.vertical()) {
+            if(sheet.userDefinedTemplate() && sheet.dynamicHeaders()) {
+                return new UserDefinedTemplateDynamicVerticalSheetWriter();
+            }
+            else if(sheet.dynamicHeaders()) {
+                return new DynamicVerticalSheetWriter();
+            }
+            else if(sheet.userDefinedTemplate()) {
+                return new UserDefinedTemplateVerticalSheetWriter();
+            }
             return new VerticalSheetWriter();
         }
-        else if(sheet.dynamicHeaders()) {
-            return new DynamicHorizontalSheetWriter();
-        }
-        else if (ExcelFileType.Extension.XLSX.equals(sheet.type()) && sheet.streamingWorkbook()) {
-            return new StreamingHorizontalSheetWriter();
-        }
         else {
+            if(sheet.userDefinedTemplate() && sheet.dynamicHeaders()) {
+                return new UserDefinedTemplateDynamicHorizontalSheetWriter();
+            }
+            else if(sheet.dynamicHeaders()) {
+                return new DynamicHorizontalSheetWriter();
+            }
+            else if(sheet.userDefinedTemplate()) {
+                return new UserDefinedTemplateHorizontalSheetWriter();
+            }
+            else if (ExcelFileType.Extension.XLSX.equals(sheet.type()) && sheet.streamingWorkbook()) {
+                return new StreamingHorizontalSheetWriter();
+            }
             return new HorizontalSheetWriter();
         }
     }

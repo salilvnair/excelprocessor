@@ -57,7 +57,7 @@ public class ExcelSheetReaderUtil {
         if(spacedString.length>0) {
             StringBuilder camelCaseBuilder = new StringBuilder();
             for(int i=0;i<spacedString.length;i++) {
-                if(spacedString[i].length()>0){
+                if(!spacedString[i].isEmpty()){
                     if(i==0) {
                         camelCaseBuilder.append(spacedString[i].toLowerCase());
                     }
@@ -67,6 +67,9 @@ public class ExcelSheetReaderUtil {
                 }
             }
             finalString = camelCaseBuilder.toString();
+            if(StringUtils.isEmpty(finalString)) {
+                return finalString;
+            }
             String hasVariable = "#";
             finalString = finalString.replace(hasVariable, "No");
             finalString = finalString.substring(0, 1).toLowerCase()+finalString.substring(1);

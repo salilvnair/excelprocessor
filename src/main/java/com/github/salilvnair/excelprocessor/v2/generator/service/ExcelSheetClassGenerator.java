@@ -4,6 +4,7 @@ import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
 import com.github.salilvnair.excelprocessor.v2.generator.sheet.DynamicClassGeneratorSheet;
+import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetReaderFactory;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
@@ -119,6 +120,9 @@ public class ExcelSheetClassGenerator {
             field = constructValidJavaVariableNameFromHeader(field);
             if(sheetInfo.useOriginalHeader()) {
                 field = constructValidJavaVariableNameFromHeader(originalHeader);
+            }
+            if(StringUtils.isEmpty(field)) {
+                continue;
             }
             String upperCaseFieldString = field.substring(0,1).toUpperCase()+field.substring(1);
             sb.append("    public ").append(typeString).append(" get").append(upperCaseFieldString).append("() {");

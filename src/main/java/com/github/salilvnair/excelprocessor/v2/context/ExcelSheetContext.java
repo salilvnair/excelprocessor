@@ -13,6 +13,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.validator.task.core.Abs
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.task.AbstractExcelTask;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
+import lombok.Setter;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.ByteArrayInputStream;
@@ -25,6 +26,7 @@ import java.util.function.Function;
 /**
  * @author Salil V Nair
  */
+@Setter
 public class ExcelSheetContext {
     private File excelFile;
     private String fileName;
@@ -65,80 +67,40 @@ public class ExcelSheetContext {
         return fileName;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
     public Workbook workbook() {
         return workbook;
-    }
-
-    public void setWorkbook(Workbook workbook) {
-        this.workbook = workbook;
     }
 
     public Workbook styleTemplateWorkbook() {
         return styleTemplateWorkbook;
     }
 
-    public void setStyleTemplateWorkbook(Workbook styleTemplateWorkbook) {
-        this.styleTemplateWorkbook = styleTemplateWorkbook;
-    }
-
     public File excelFile() {
         return excelFile;
-    }
-
-    public void setExcelFile(File excelFile) {
-        this.excelFile = excelFile;
     }
 
     public File template() {
         return template;
     }
 
-    public void setTemplate(File template) {
-        this.template = template;
-    }
-
     public Map<String, List<? extends BaseSheet>> excelSheets() {
         return excelSheets;
-    }
-
-    public void setExcelSheets(Map<String, List<? extends BaseSheet>> excelSheets) {
-        this.excelSheets = excelSheets;
     }
 
     public List<? extends BaseSheet> sheet() {
         return sheet;
     }
 
-    public void setSheet(List<? extends BaseSheet> sheet) {
-        this.sheet = sheet;
-    }
-
     public Map<String, List<CellValidationMessage>> excelValidationMessages() {
         return excelValidationMessages;
-    }
-
-    public void setExcelValidationMessages(Map<String, List<CellValidationMessage>> excelValidationMessages) {
-        this.excelValidationMessages = excelValidationMessages;
     }
 
     public List<CellValidationMessage> sheetValidationMessages() {
         return sheetValidationMessages;
     }
 
-    public void setSheetValidationMessages(List<CellValidationMessage> sheetValidationMessages) {
-        this.sheetValidationMessages = sheetValidationMessages;
-    }
-
     public ExcelSheetReaderContext readerContext() {
         return readerContext;
-    }
-
-    public void setReaderContext(ExcelSheetReaderContext readerContext) {
-        this.readerContext = readerContext;
     }
 
     public ExcelSheetWriterContext writerContext() {
@@ -148,19 +110,11 @@ public class ExcelSheetContext {
         return writerContext;
     }
 
-    public void setWriterContext(ExcelSheetWriterContext writerContext) {
-        this.writerContext = writerContext;
-    }
-
     public Map<String, ExcelSheetReaderContext> readerContexts() {
         if(readerContexts == null) {
             readerContexts = new HashMap<>();
         }
         return readerContexts;
-    }
-
-    public void setReaderContexts(Map<String, ExcelSheetReaderContext> readerContexts) {
-        this.readerContexts = readerContexts;
     }
 
     public Map<String, Object> userValidatorMap() {
@@ -170,19 +124,11 @@ public class ExcelSheetContext {
         return userValidatorMap;
     }
 
-    public void setUserValidatorMap(Map<String, Object> userValidatorMap) {
-        this.userValidatorMap = userValidatorMap;
-    }
-
     public Map<String, List<String>> validValuesDataSet() {
         if(validValuesDataSet==null) {
             validValuesDataSet = new HashMap<>();
         }
         return validValuesDataSet;
-    }
-
-    public void setValidValuesDataSet(Map<String, List<String>> validValuesDataSet) {
-        this.validValuesDataSet = validValuesDataSet;
     }
 
     public Map<String, String> userDefinedMessageDataSet() {
@@ -192,10 +138,6 @@ public class ExcelSheetContext {
         return userDefinedMessageDataSet;
     }
 
-    public void setUserDefinedMessageDataSet(Map<String, String> userDefinedMessageDataSet) {
-        this.userDefinedMessageDataSet = userDefinedMessageDataSet;
-    }
-
     public Map<String, CellValidationInfo> headerKeyedCellValidationInfo() {
         if(headerKeyedCellValidationInfo==null) {
             headerKeyedCellValidationInfo = new HashMap<>();
@@ -203,40 +145,20 @@ public class ExcelSheetContext {
         return headerKeyedCellValidationInfo;
     }
 
-    public void setHeaderKeyedCellValidationInfo(Map<String, CellValidationInfo> headerKeyedCellValidationInfo) {
-        this.headerKeyedCellValidationInfo = headerKeyedCellValidationInfo;
-    }
-
     public Map<String, FieldInfo> headerFieldInfo() {
         return headerFieldInfo;
-    }
-
-    public void setHeaderFieldInfo(Map<String, FieldInfo> headerFieldInfo) {
-        this.headerFieldInfo = headerFieldInfo;
     }
 
     public List<Object> taskMetadata() {
         return taskMetadata;
     }
 
-    public void setTaskMetadata(List<Object> taskMetadata) {
-        this.taskMetadata = taskMetadata;
-    }
-
     public AbstractExcelTask taskBean() {
         return taskBean;
     }
 
-    public void setTaskBean(AbstractExcelTask taskBean) {
-        this.taskBean = taskBean;
-    }
-
     public AbstractExcelTaskValidator taskValidatorBean() {
         return taskValidatorBean;
-    }
-
-    public void setTaskValidatorBean(AbstractExcelTaskValidator taskValidatorBean) {
-        this.taskValidatorBean = taskValidatorBean;
     }
 
     public static ExcelSheetContextBuilder builder() {
@@ -247,19 +169,11 @@ public class ExcelSheetContext {
         return sheetName;
     }
 
-    public void setSheetName(String sheetName) {
-        this.sheetName = sheetName;
-    }
-
     public List<String> ignoreHeaders() {
         if(ignoreHeaders == null) {
             ignoreHeaders = new ArrayList<>();
         }
         return ignoreHeaders;
-    }
-
-    public void setIgnoreHeaders(List<String> ignoreHeaders) {
-        this.ignoreHeaders = ignoreHeaders;
     }
 
     public Set<String> orderedHeaders() {
@@ -269,19 +183,11 @@ public class ExcelSheetContext {
         return orderedHeaders;
     }
 
-    public void setOrderedHeaders(Set<String> orderedHeaders) {
-        this.orderedHeaders = orderedHeaders;
-    }
-
     public Map<String, DataCellStyleInfo> dynamicHeaderDataCellStyleInfo() {
         if(dynamicHeaderDataCellStyleInfo == null) {
             dynamicHeaderDataCellStyleInfo = new HashMap<>();
         }
         return dynamicHeaderDataCellStyleInfo;
-    }
-
-    public void setDynamicHeaderDataCellStyleInfo(Map<String, DataCellStyleInfo> dynamicHeaderDataCellStyleInfo) {
-        this.dynamicHeaderDataCellStyleInfo = dynamicHeaderDataCellStyleInfo;
     }
 
     public Map<String, HeaderCellStyleInfo> dynamicHeaderCellStyleInfo() {
@@ -291,10 +197,6 @@ public class ExcelSheetContext {
         return dynamicHeaderCellStyleInfo;
     }
 
-    public void setDynamicHeaderCellStyleInfo(Map<String, HeaderCellStyleInfo> dynamicHeaderCellStyleInfo) {
-        this.dynamicHeaderCellStyleInfo = dynamicHeaderCellStyleInfo;
-    }
-
     public Map<String, String> dynamicHeaderDisplayNames() {
         if(dynamicHeaderDisplayNames == null) {
             dynamicHeaderDisplayNames = new HashMap<>();
@@ -302,56 +204,28 @@ public class ExcelSheetContext {
         return dynamicHeaderDisplayNames;
     }
 
-    public void setDynamicHeaderDisplayNames(Map<String, String> dynamicHeaderDisplayNames) {
-        this.dynamicHeaderDisplayNames = dynamicHeaderDisplayNames;
-    }
-
     public List<Integer> ignoreHeaderRows() {
         return ignoreHeaderRows;
-    }
-
-    public void setIgnoreHeaderRows(List<Integer> ignoreHeaderRows) {
-        this.ignoreHeaderRows = ignoreHeaderRows;
     }
 
     public List<String> ignoreHeaderColumns() {
         return ignoreHeaderColumns;
     }
 
-    public void setIgnoreHeaderColumns(List<String> ignoreHeaderColumns) {
-        this.ignoreHeaderColumns = ignoreHeaderColumns;
-    }
-
     public boolean suppressExceptions() {
         return suppressExceptions;
-    }
-
-    public void setSuppressExceptions(boolean suppressExceptions) {
-        this.suppressExceptions = suppressExceptions;
     }
 
     public boolean suppressTaskExceptions() {
         return suppressTaskExceptions;
     }
 
-    public void setSuppressTaskExceptions(boolean suppressTaskExceptions) {
-        this.suppressTaskExceptions = suppressTaskExceptions;
-    }
-
     public String filePath() {
         return filePath;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
     public Function<String, Object> beanFunction() {
         return beanResolver;
-    }
-
-    public void setBeanResolver(Function<String, Object> beanResolver) {
-        this.beanResolver = beanResolver;
     }
 
     public static class ExcelSheetContextBuilder {

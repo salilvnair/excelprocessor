@@ -144,7 +144,7 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         List<Integer> ignoreHeaderColumns = context.ignoreHeaderColumns().stream().map(col -> ExcelSheetReader.toIndentNumber(col) -1 ).collect(Collectors.toList());
         Set<Field> sheetCells = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
         List<String> classCellHeaders = sheetCells.stream().map(cellField -> cellField.getAnnotation(Cell.class).value()).collect(Collectors.toList());
-        int lastCellNum = StringUtils.isNotEmpty(sheet.headerColumnEndsAt()) ? ExcelSheetReader.toIndentNumber(sheet.headerColumnEndsAt()) - 1 : headerRow.getLastCellNum();
+        int lastCellNum = StringUtils.isNotEmpty(sheet.headerColumnEndsAt()) ? ExcelSheetReader.toIndentNumber(sheet.headerColumnEndsAt()) : headerRow.getLastCellNum();
         for (int c = headerColumnIndex; c < lastCellNum; c++) {
             String headerString = headerRow.getCell(c).getStringCellValue();
             headerString = ExcelSheetReaderUtil.cleanHeaderString(headerString);

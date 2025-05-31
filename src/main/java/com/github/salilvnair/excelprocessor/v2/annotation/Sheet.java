@@ -13,12 +13,13 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Sheet {
 	String value() default "";
-	String type() default ExcelFileType.Extension.XLS;
+	String type() default ExcelFileType.Extension.XLSX;
     String excelTaskValidatorBeanName() default "";
     String excelTaskBeanName() default "";
 	Class<? extends AbstractExcelTaskValidator> excelTaskValidator() default DefaultTaskValidator.class;
     Class<? extends AbstractExcelTask> excelTask() default DefaultTask.class;
 	boolean vertical() default false;
+	boolean userDefinedTemplate() default false;
 	boolean ignoreUnknown() default true;
 	String customTask() default "";
 	String[] customTasks() default {};

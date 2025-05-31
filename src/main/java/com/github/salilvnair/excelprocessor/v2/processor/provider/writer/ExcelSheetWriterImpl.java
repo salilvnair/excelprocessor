@@ -9,7 +9,6 @@ import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Workbook;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
@@ -31,8 +30,34 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
     }
 
     @Override
+    public <T extends BaseSheet> void write(ExcelSheetContext sheetContext, List<List<? extends BaseSheet>> multiOrientedSheetData) throws Exception {
+        boolean containsExistingWorkbook = false;
+        generateWorkbook(sheetContext, multiOrientedSheetData, containsExistingWorkbook);
+        Workbook workbook = sheetContext.writerContext().workbook();
+        if(workbook != null) {
+            ExcelSheetWriterUtil.write(workbook, sheetContext.fileName(), sheetContext.filePath());
+            disposeStreamingWorkbook(workbook, sheetContext);
+        }
+    }
+
+    private void generateWorkbook(ExcelSheetContext sheetContext, List<List<? extends BaseSheet>> multiOrientedSheetData, boolean containsExistingWorkbook) {
+        for (List<? extends BaseSheet> sheetData: multiOrientedSheetData) {
+            Workbook existingWorkbook = extractWorkbookBySheetData(sheetData, sheetContext, containsExistingWorkbook);
+            sheetContext.setWorkbook(existingWorkbook);
+            containsExistingWorkbook = true;
+        }
+    }
+
+    @Override
     public <T extends BaseSheet> Workbook workbook(List<T> sheetData, ExcelSheetContext sheetContext) {
         return extractWorkbookBySheetData(sheetData, sheetContext, false);
+    }
+
+    @Override
+    public <T extends BaseSheet> Workbook workbook(ExcelSheetContext sheetContext, List<List<? extends BaseSheet>> multiOrientedSheets) throws Exception {
+        boolean containsExistingWorkbook = false;
+        generateWorkbook(sheetContext, multiOrientedSheets, containsExistingWorkbook);
+        return sheetContext.writerContext().workbook();
     }
 
     @Override
@@ -45,6 +70,20 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
         for (String sheetName: sheetNames) {
             Workbook existingWorkbook = extractWorkbookBySheetData(sheets.get(sheetName), sheetContext, containsExistingWorkbook);
             sheetContext.setWorkbook(existingWorkbook);
+            containsExistingWorkbook = true;
+        }
+        return sheetContext.writerContext().workbook();
+    }
+
+    @Override
+    public Workbook workbook(ExcelSheetContext sheetContext, Map<String, List<List<? extends BaseSheet>>> multiOrientedSheets) throws Exception {
+        if(multiOrientedSheets == null || multiOrientedSheets.isEmpty()) {
+            return null;
+        }
+        Set<String> sheetNames = multiOrientedSheets.keySet();
+        boolean containsExistingWorkbook = false;
+        for (String sheetName: sheetNames) {
+            generateWorkbook(sheetContext, multiOrientedSheets.get(sheetName), containsExistingWorkbook);
             containsExistingWorkbook = true;
         }
         return sheetContext.writerContext().workbook();

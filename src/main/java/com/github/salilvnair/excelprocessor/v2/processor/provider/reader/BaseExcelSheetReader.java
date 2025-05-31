@@ -21,7 +21,7 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
     abstract void read(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context);
     abstract ExcelInfo excelInfo(Class<? extends BaseSheet> clazz, ExcelSheetReaderContext context);
 
-    protected Object extractValueBasedOnCellType(Workbook workbook, Cell cell, CellInfo cellInfo) {
+    public static Object extractValueBasedOnCellType(Workbook workbook, Cell cell, CellInfo cellInfo) {
         Object cellValue = null;
         CellType cellType = cell.getCellType();
         switch (cellType) {

@@ -14,11 +14,17 @@ import java.util.Map;
 public interface ExcelSheetWriter {
     default <T extends BaseSheet> void write(List<T> sheetData, ExcelSheetContext sheetContext) throws Exception {}
 
+    default <T extends BaseSheet> void write(ExcelSheetContext sheetContext, List<List<? extends BaseSheet>> multiOrientedSheets) throws Exception {}
+
     default void write(Map<String, List<? extends BaseSheet>> sheets, ExcelSheetContext sheetContext) {}
 
     default <T extends BaseSheet> Workbook workbook(List<T> sheetData, ExcelSheetContext sheetContext) { return null;}
 
+    default <T extends BaseSheet> Workbook workbook(ExcelSheetContext sheetContext, List<List<? extends BaseSheet>> multiOrientedSheets) throws Exception { return null;}
+
     default Workbook workbook(Map<String, List<? extends BaseSheet>> sheets, ExcelSheetContext sheetContext) {return null;}
+
+    default Workbook workbook(ExcelSheetContext sheetContext, Map<String, List<List<? extends BaseSheet>>> multiOrientedSheets) throws Exception { return null;}
 
     default void disposeStreamingWorkbook(Workbook workbook, ExcelSheetContext context) {
         if(context.writerContext().streamingWorkbook()) {
