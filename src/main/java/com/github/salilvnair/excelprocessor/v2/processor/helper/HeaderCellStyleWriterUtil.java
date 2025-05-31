@@ -3,11 +3,15 @@ package com.github.salilvnair.excelprocessor.v2.processor.helper;
 import com.github.salilvnair.excelprocessor.v2.annotation.*;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
+import com.github.salilvnair.excelprocessor.v2.model.NumberStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.model.StyleTemplateCellInfo;
 import com.github.salilvnair.excelprocessor.v2.model.TextStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+import com.github.salilvnair.excelprocessor.v2.type.DateFormatPattern;
+import com.github.salilvnair.excelprocessor.v2.type.NumberCategoryFormat;
+import com.github.salilvnair.excelprocessor.v2.type.NumberPrecisionFormat;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -123,7 +127,10 @@ public class HeaderCellStyleWriterUtil {
             }
         }
         else {
-            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+            cellStyle = rowCell.getCellStyle();
+            if (cellStyle == null || cellStyle.getDataFormat() == 0) {
+                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+            }
         }
 
         cellStyle.setWrapText(headerCellStyleInfo.isWrapText());
@@ -234,5 +241,37 @@ public class HeaderCellStyleWriterUtil {
         textStyleInfo.setFontName(textStyle.fontName());
         textStyleInfo.setFontHeight(textStyle.fontHeight());
         return textStyleInfo;
+    }
+
+    public static NumberStyleInfo extractNumberStyleInfo(NumberStyle numberStyle) {
+        if(numberStyle == null) {
+            return null;
+        }
+        NumberStyleInfo numberStyleInfo = new NumberStyleInfo();
+        numberStyleInfo.setGeneral(numberStyle.general());
+        numberStyleInfo.setNumber(numberStyle.number());
+        numberStyleInfo.setCurrency(numberStyle.currency());
+        numberStyleInfo.setAccounting(numberStyle.accounting());
+        numberStyleInfo.setDate(numberStyle.date());
+        numberStyleInfo.setTime(numberStyle.time());
+        numberStyleInfo.setPercentage(numberStyle.percentage());
+        numberStyleInfo.setFraction(numberStyle.fraction());
+        numberStyleInfo.setScientific(numberStyle.scientific());
+        numberStyleInfo.setText(numberStyle.text());
+        numberStyleInfo.setCustom(numberStyle.custom());
+        numberStyleInfo.setCategoryFormat(numberStyle.categoryFormat());
+        numberStyleInfo.setCustomFormat(numberStyle.customFormat());
+        numberStyleInfo.setDateFormat(numberStyle.dateFormat());
+        numberStyleInfo.setNumberFormat(numberStyle.numberFormat());
+        if(numberStyleInfo.getCategoryFormat() == null) {
+            numberStyleInfo.setCategoryFormat(NumberCategoryFormat.GENERAL);
+        }
+        if(numberStyleInfo.getDateFormat() == null) {
+            numberStyleInfo.setDateFormat(DateFormatPattern.SLASH_MM_DD_YYYY);
+        }
+        if(numberStyleInfo.getNumberFormat() == null) {
+            numberStyleInfo.setNumberFormat(NumberPrecisionFormat.TWO_DECIMAL);
+        }
+        return numberStyleInfo;
     }
 }

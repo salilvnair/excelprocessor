@@ -14,8 +14,8 @@ import java.util.List;
 
 public class WithTemplateMultiOrientedTest1 {
     public static void main(String[] args) throws Exception {
-        String filePath = "/Users/salilvnair/workspace/experiments";
-        String templateFilePath = "/Users/salilvnair/workspace/experiments/NoTemplateMultiOrientedTemplate.xlsx";
+        String filePath = "/Users/salilvnair/workspace/git/salilvnair/excelprocessor/src/main/resources/excel/generated";
+        String templateFilePath = "/Users/salilvnair/workspace/git/salilvnair/excelprocessor/src/main/resources/excel/template/TemplateMultiOrientedTest1.xlsx";
         ExcelSheetWriter writer = ExcelSheetWriterFactory.generate();
         ExcelSheetContext excelSheetContext = ExcelSheetContext
                                                 .builder()

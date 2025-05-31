@@ -45,6 +45,8 @@ public @interface HeaderCellStyle {
 
     boolean customTextStyle() default false;
 
+    NumberStyle numberStyle() default @NumberStyle;
+
     TextStyle textStyle() default @TextStyle;
 
     StyleTemplateCell styleTemplateCell() default @StyleTemplateCell;

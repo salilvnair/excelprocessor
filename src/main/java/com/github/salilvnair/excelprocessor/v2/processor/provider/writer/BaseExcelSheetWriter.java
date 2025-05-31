@@ -2,6 +2,8 @@ package com.github.salilvnair.excelprocessor.v2.processor.provider.writer;
 
 import com.github.salilvnair.excelprocessor.v2.annotation.DataCellStyle;
 import com.github.salilvnair.excelprocessor.v2.model.CellInfo;
+import com.github.salilvnair.excelprocessor.v2.model.DataCellStyleInfo;
+import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.DataCellStyleWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.HeaderCellStyleWriterUtil;
@@ -30,10 +32,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -336,6 +335,27 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
                             e -> CellInfo.builder().header(e.getKey()).originalHeader(e.getKey()).value(e.getValue()).build(),
                             (o, n) -> n, LinkedHashMap::new
                     ));
+        }
+    }
+
+    protected void addHeaderAndDataCellStyleFromCellInfoIntoWriterContextIfAvailable(Map<String, CellInfo> headerKeyedCellInfoMap, ExcelSheetWriterContext context) {
+        Map<String, DataCellStyleInfo> dynamicHeaderDataCellStyleInfo = new HashMap<>();
+        Map<String, HeaderCellStyleInfo> dynamicHeaderCellStyleInfo = new HashMap<>();
+        headerKeyedCellInfoMap.forEach((key, cellInfo) -> {
+            DataCellStyleInfo dataCellStyleInfo = cellInfo.getDataCellStyleInfo();
+            if (dataCellStyleInfo != null) {
+                dynamicHeaderDataCellStyleInfo.put(key, dataCellStyleInfo);
+            }
+            HeaderCellStyleInfo headerCellStyleInfo = cellInfo.getHeaderCellStyleInfo();
+            if (headerCellStyleInfo != null) {
+                dynamicHeaderCellStyleInfo.put(key, headerCellStyleInfo);
+            }
+        });
+        if(!dynamicHeaderCellStyleInfo.isEmpty()) {
+            context.setDynamicHeaderCellStyleInfo(dynamicHeaderCellStyleInfo);
+        }
+        if(!dynamicHeaderDataCellStyleInfo.isEmpty()) {
+            context.setDynamicHeaderDataCellStyleInfo(dynamicHeaderDataCellStyleInfo);
         }
     }
 

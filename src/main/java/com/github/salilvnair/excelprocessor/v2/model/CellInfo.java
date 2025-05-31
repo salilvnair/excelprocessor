@@ -15,6 +15,8 @@ public class CellInfo {
     public static final String CELL_TYPE_DOUBLE = "Double";
     public static final String CELL_TYPE_DATE = "Date";
     public static final String CELL_TYPE_BOOLEAN = "Boolean";
+    private HeaderCellStyleInfo headerCellStyleInfo;
+    private DataCellStyleInfo dataCellStyleInfo;
     private String originalHeader;
     private String header;
     private Object value;

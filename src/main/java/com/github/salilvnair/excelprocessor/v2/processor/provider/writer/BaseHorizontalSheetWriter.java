@@ -5,6 +5,7 @@ import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.model.CellInfo;
+import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.reader.BaseExcelSheetReader;
@@ -18,7 +19,6 @@ import org.apache.poi.ss.usermodel.Row;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
@@ -186,7 +186,8 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
             String originalHeader = headerList.get(c - headerColumnIndex);
             org.apache.poi.ss.usermodel.Cell rowCell = row.getCell(c) == null ? row.createCell(c) : row.getCell(c);
             convertAndSetCellValue(rowCell, originalHeader);
-            applyDynamicHeaderDataCellStyles(sheet, originalHeader, rowCell, originalHeader, context);
+            addHeaderAndDataCellStyleFromCellInfoIntoWriterContextIfAvailable(headerKeyedCellInfoMap, context);
+            applyDynamicHeaderCellStyles(sheet, originalHeader, rowCell, context);
             FormulaEvaluator evaluator = workbookSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
             evaluator.evaluateFormulaCell(rowCell);
         }
@@ -256,6 +257,20 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         }
     }
 
+    private void generateHeaderCellStyleFromCellInfoAndApplyDynamicHeaderCellStyles(Map<String, CellInfo> headerKeyedCellInfoMap, Sheet sheet, String header, org.apache.poi.ss.usermodel.Cell cell, ExcelSheetWriterContext context) {
+        Map<String, HeaderCellStyleInfo> dynamicHeaderCellStyleInfo = new HashMap<>();
+        headerKeyedCellInfoMap.forEach((key, cellInfo) -> {
+            HeaderCellStyleInfo headerCellStyleInfo = cellInfo.getHeaderCellStyleInfo();
+            if (headerCellStyleInfo != null) {
+                dynamicHeaderCellStyleInfo.put(key, headerCellStyleInfo);
+            }
+        });
+        if(!dynamicHeaderCellStyleInfo.isEmpty()) {
+            context.setDynamicHeaderCellStyleInfo(dynamicHeaderCellStyleInfo);
+        }
+        applyDynamicHeaderCellStyles(sheet, header, cell, context);
+    }
+
     protected void writeUserDefinedTemplateDynamicDataToBody(List<? extends BaseSheet> sheetData, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
         int headerRowIndex = sheet.headerRowAt() - 1;
         int valueRowIndex = sheet.valueRowAt()!=-1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
@@ -267,7 +282,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
 
         DynamicHeaderSheet dynamicHeaderSheet = (DynamicHeaderSheet) sheetData.get(0);
         Map<String, CellInfo> headerKeyedCellInfoMap = extractHeaderKeyedCellInfoMap(dynamicHeaderSheet);
-
+        addHeaderAndDataCellStyleFromCellInfoIntoWriterContextIfAvailable(headerKeyedCellInfoMap, context);
         String headerColumnEndsAt = sheet.headerColumnEndsAt();
         int headerColumnEndsAtIndex = ExcelSheetReader.toIndentNumber(headerColumnEndsAt)  - 1;
         String valueColumnAt = sheet.valueColumnAt();

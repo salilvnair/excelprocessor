@@ -2,18 +2,21 @@ package com.github.salilvnair.excelprocessor.v2.processor.helper;
 
 import com.github.salilvnair.excelprocessor.util.ObjectUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.*;
+import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
+import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.helper.StringUtils;
 import com.github.salilvnair.excelprocessor.v2.model.DataCellStyleInfo;
+import com.github.salilvnair.excelprocessor.v2.model.NumberStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.model.StyleTemplateCellInfo;
 import com.github.salilvnair.excelprocessor.v2.model.TextStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.writer.task.helper.ExcelCellStyleTaskExecutor;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
+import com.github.salilvnair.excelprocessor.v2.type.DateFormatPattern;
+import com.github.salilvnair.excelprocessor.v2.type.NumberCategoryFormat;
+import com.github.salilvnair.excelprocessor.v2.type.NumberPrecisionFormat;
+import org.apache.poi.ss.usermodel.*;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -37,7 +40,7 @@ public class DataCellStyleWriterUtil {
             executeCustomTaskWithCellStyle(sheet, cell, rowCell, cellField, writerContext);
         }
         else {
-            applyStaticCellStyles(sheet, cell, rowCell, cellField, writerContext);
+            applyCellStyles(sheet, cell, rowCell, cellField, writerContext);
         }
     }
 
@@ -65,11 +68,11 @@ public class DataCellStyleWriterUtil {
         if(dataCellStyleInfo.isConditional()) {
             applyConditionalDynamicCellStyle(sheet, header, dataCellStyleInfo, rowCell, writerContext);
         }
-        else if(!StringUtils.isEmpty(dataCellStyleInfo.getCustomTask()) || dataCellStyleInfo.getCustomTasks().length > 0) {
+        else if(!StringUtils.isEmpty(dataCellStyleInfo.getCustomTask()) || (dataCellStyleInfo.getCustomTasks() != null && dataCellStyleInfo.getCustomTasks().length > 0)) {
             executeCustomTaskWithDynamicCellStyle(sheet, header, dataCellStyleInfo, rowCell, writerContext);
         }
         else {
-            applyStaticDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
+            applyDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
         }
     }
 
@@ -79,7 +82,7 @@ public class DataCellStyleWriterUtil {
             return;
         }
         if(dataCellStyle.applyDefaultStyles()) {
-            applyStaticCellStyles(sheet, cell, rowCell, cellField, writerContext);
+            applyCellStyles(sheet, cell, rowCell, cellField, writerContext);
         }
         executeCustomTask(dataCellStyle, sheet, cell, rowCell, cellField, writerContext);
     }
@@ -90,7 +93,7 @@ public class DataCellStyleWriterUtil {
         }
         writerContext.setHeader(header);
         if(dataCellStyleInfo.isApplyDefaultStyles()) {
-            applyStaticDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
+            applyDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
         }
         executeCustomTask(dataCellStyleInfo, sheet, rowCell, writerContext);
     }
@@ -124,7 +127,7 @@ public class DataCellStyleWriterUtil {
         }
         Object object = ExcelCellStyleTaskExecutor.execute(dataCellStyle.condition(), sheet, writerContext);
         if(ObjectUtil.nonNullOrBooleanTrue(object)) {
-            applyStaticCellStyles(sheet, cell, rowCell, cellField, writerContext);
+            applyCellStyles(sheet, cell, rowCell, cellField, writerContext);
         }
     }
 
@@ -135,11 +138,11 @@ public class DataCellStyleWriterUtil {
         writerContext.setHeader(header);
         Object object = ExcelCellStyleTaskExecutor.execute(dataCellStyleInfo.getCondition(), sheet, writerContext);
         if(ObjectUtil.nonNullOrBooleanTrue(object)) {
-            applyStaticDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
+            applyDynamicCellStyles(sheet, header, dataCellStyleInfo, rowCell, writerContext);
         }
     }
 
-    public static void applyStaticCellStyles(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, ExcelSheetWriterContext writerContext) {
+    public static void applyCellStyles(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, ExcelSheetWriterContext writerContext) {
         DataCellStyle dataCellStyle =  extractDataCellStyle(cellField, writerContext.getSheetDataObj());
         if(dataCellStyle == null) {
             return;
@@ -171,7 +174,10 @@ public class DataCellStyleWriterUtil {
                 cellStyle = writerContext.defaultDataCellStyle();
             }
             else {
-                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+                cellStyle = rowCell.getCellStyle();
+                if (cellStyle == null || cellStyle.getDataFormat() == 0) {
+                    cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+                }
                 writerContext.setDefaultDataCellStyle(cellStyle);
             }
         }
@@ -203,11 +209,11 @@ public class DataCellStyleWriterUtil {
         if(dataCellStyle.customTextStyle()) {
             applyTextStyleIfApplicable(rowCell, cellStyle, extractTextStyleInfo(dataCellStyle.textStyle()), writerContext);
         }
+        applyNumberStyleIfApplicable(rowCell, cellStyle, extractNumberStyleInfo(dataCellStyle.numberStyle()), writerContext);
         rowCell.setCellStyle(cellStyle);
     }
 
-
-    public static void applyStaticDynamicCellStyles(Sheet sheet, String header, DataCellStyleInfo dataCellStyleInfo, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext writerContext) {
+    public static void applyDynamicCellStyles(Sheet sheet, String header, DataCellStyleInfo dataCellStyleInfo, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext writerContext) {
         if(dataCellStyleInfo == null) {
             return;
         }
@@ -238,8 +244,10 @@ public class DataCellStyleWriterUtil {
                 cellStyle = writerContext.defaultDataCellStyle();
             }
             else {
-                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-                writerContext.setDefaultDataCellStyle(cellStyle);
+                cellStyle = rowCell.getCellStyle();
+                if (cellStyle == null || cellStyle.getDataFormat() == 0) {
+                    cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
+                }
             }
         }
 
@@ -271,6 +279,7 @@ public class DataCellStyleWriterUtil {
         if(dataCellStyleInfo.isCustomTextStyle() && dataCellStyleInfo.getTextStyleInfo()!=null) {
             applyTextStyleIfApplicable(rowCell, cellStyle, dataCellStyleInfo.getTextStyleInfo(), writerContext);
         }
+        applyNumberStyleIfApplicable(rowCell, cellStyle, dataCellStyleInfo.getNumberStyleInfo(), writerContext);
         rowCell.setCellStyle(cellStyle);
     }
 
@@ -287,6 +296,22 @@ public class DataCellStyleWriterUtil {
             font.setFontHeight(textStyleInfo.getFontHeight());
         }
         cellStyle.setFont(font);
+    }
+
+    private static void applyNumberStyleIfApplicable(org.apache.poi.ss.usermodel.Cell rowCell, CellStyle cellStyle, NumberStyleInfo numberStyleInfo, ExcelSheetWriterContext writerContext) {
+        DataFormat dataFormat = rowCell.getSheet().getWorkbook().createDataFormat();
+        if (numberStyleInfo.custom() && !numberStyleInfo.customFormat().isEmpty()) {
+            cellStyle.setDataFormat(dataFormat.getFormat(numberStyleInfo.customFormat()));
+        }
+        else if (numberStyleInfo.date()) {
+            cellStyle.setDataFormat(dataFormat.getFormat(numberStyleInfo.dateFormat().format()));
+        }
+        else if (numberStyleInfo.number()) {
+            cellStyle.setDataFormat(dataFormat.getFormat(numberStyleInfo.numberFormat().format()));
+        }
+        else  {
+            cellStyle.setDataFormat(dataFormat.getFormat(numberStyleInfo.categoryFormat().format()));
+        }
     }
 
     private static DataCellStyleInfo extractDataCellStyleInfo(DataCellStyle dataCellStyle) {
@@ -347,6 +372,38 @@ public class DataCellStyleWriterUtil {
         textStyleInfo.setFontName(textStyle.fontName());
         textStyleInfo.setFontHeight(textStyle.fontHeight());
         return textStyleInfo;
+    }
+
+    public static NumberStyleInfo extractNumberStyleInfo(NumberStyle numberStyle) {
+        if(numberStyle == null) {
+            return null;
+        }
+        NumberStyleInfo numberStyleInfo = new NumberStyleInfo();
+        numberStyleInfo.setGeneral(numberStyle.general());
+        numberStyleInfo.setNumber(numberStyle.number());
+        numberStyleInfo.setCurrency(numberStyle.currency());
+        numberStyleInfo.setAccounting(numberStyle.accounting());
+        numberStyleInfo.setDate(numberStyle.date());
+        numberStyleInfo.setTime(numberStyle.time());
+        numberStyleInfo.setPercentage(numberStyle.percentage());
+        numberStyleInfo.setFraction(numberStyle.fraction());
+        numberStyleInfo.setScientific(numberStyle.scientific());
+        numberStyleInfo.setText(numberStyle.text());
+        numberStyleInfo.setCustom(numberStyle.custom());
+        numberStyleInfo.setCategoryFormat(numberStyle.categoryFormat());
+        numberStyleInfo.setCustomFormat(numberStyle.customFormat());
+        numberStyleInfo.setDateFormat(numberStyle.dateFormat());
+        numberStyleInfo.setNumberFormat(numberStyle.numberFormat());
+        if(numberStyleInfo.getCategoryFormat() == null) {
+            numberStyleInfo.setCategoryFormat(NumberCategoryFormat.GENERAL);
+        }
+        if(numberStyleInfo.getDateFormat() == null) {
+            numberStyleInfo.setDateFormat(DateFormatPattern.SLASH_MM_DD_YYYY);
+        }
+        if(numberStyleInfo.getNumberFormat() == null) {
+            numberStyleInfo.setNumberFormat(NumberPrecisionFormat.TWO_DECIMAL);
+        }
+        return numberStyleInfo;
     }
 
     public static void clearCellStyles(CellStyle defaultDataCellStyle) {

@@ -30,6 +30,12 @@ public class UserDefinedTemplateVerticalSheetWriter extends BaseExcelSheetWriter
         if(workbookSheet == null) {
             workbookSheet = workbook.createSheet(sheet.value());
         }
+        writeUserDefinedTemplateDataToBody(sheetData, writerContext, sheet, cellFields, workbookSheet, workbook);
+        applySheetStyles(sheet, workbook, workbookSheet, writerContext);
+        writerContext.setWorkbook(workbook);
+    }
+
+    private void writeUserDefinedTemplateDataToBody(List<? extends BaseSheet> sheetData, ExcelSheetWriterContext writerContext, Sheet sheet, Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, Workbook workbook) {
         int headerRowIndex = sheet.headerRowAt() - 1;
         int headerRowEndsIndex = sheet.headerRowEndsAt();
         headerRowEndsIndex = headerRowEndsIndex != -1 ? headerRowEndsIndex : (headerRowIndex + cellFields.size() - 1);
@@ -73,7 +79,5 @@ public class UserDefinedTemplateVerticalSheetWriter extends BaseExcelSheetWriter
             }
             columnIndex++;
         }
-        applySheetStyles(sheet, workbook, workbookSheet, writerContext);
-        writerContext.setWorkbook(workbook);
     }
 }

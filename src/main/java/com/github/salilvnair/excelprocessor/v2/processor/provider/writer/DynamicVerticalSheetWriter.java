@@ -41,7 +41,7 @@ public class DynamicVerticalSheetWriter extends BaseExcelSheetWriter {
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         int headerRowEndsIndex = sheet.headerRowEndsAt();
         headerRowEndsIndex = headerRowEndsIndex != -1 ? headerRowEndsIndex : (headerRowIndex + headerKeyedCellInfoMap.size() - 1);
-
+        addHeaderAndDataCellStyleFromCellInfoIntoWriterContextIfAvailable(headerKeyedCellInfoMap, context);
         Set<String> headers = headerKeyedCellInfoMap.keySet();
         List<String> headerList = new ArrayList<>(headers);
         for (int r = headerRowIndex; r <= headerRowEndsIndex; r++) {
@@ -98,7 +98,7 @@ public class DynamicVerticalSheetWriter extends BaseExcelSheetWriter {
                 }
                 org.apache.poi.ss.usermodel.Cell rowCell = row.getCell(columnIndex) == null ? row.createCell(columnIndex) : row.getCell(columnIndex);
                 convertAndSetCellValue(rowCell, userProvidedCellInfo.value());
-                applyDynamicHeaderCellStyles(sheet, headerKey, rowCell, context);
+                applyDynamicHeaderDataCellStyles(sheet, headerKey, rowCell, userProvidedCellInfo.value(), context);
             }
             columnIndex++;
         }

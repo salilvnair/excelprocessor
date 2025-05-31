@@ -10,12 +10,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 public class NoTemplateHorizontalSheetTest {
 
     public static void main(String[] args) throws Exception {
-        String filePath = "/Users/salilvnair/workspace/experiments";
+        String filePath = "/Users/salilvnair/workspace/git/salilvnair/excelprocessor/src/main/resources/excel/generated";
         ExcelSheetWriter writer = ExcelSheetWriterFactory.generate();
         ExcelSheetContext excelSheetContext = ExcelSheetContext
                 .builder()
                 .filePath(filePath)
-                .fileName("HorizontalSheetTest.xlsx")
+                .fileName("NoTemplateHorizontalSheetTest.xlsx")
                 .build();
         Workbook workbook = writer.workbook(CompanyInfoNoTemplateHorizontalSheetMock.generateHorizontalSheets(), excelSheetContext);
         ExcelSheetWriterUtil.write(workbook, excelSheetContext.fileName(), excelSheetContext.filePath());

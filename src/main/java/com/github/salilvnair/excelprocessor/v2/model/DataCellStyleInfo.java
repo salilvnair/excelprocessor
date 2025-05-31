@@ -47,6 +47,8 @@ public class DataCellStyleInfo {
 
     private TextStyleInfo textStyleInfo = new TextStyleInfo();
 
+    private NumberStyleInfo numberStyleInfo = new NumberStyleInfo();
+
     private StyleTemplateCellInfo styleTemplateCellInfo = new StyleTemplateCellInfo();
 
     private boolean ignoreStyleTemplate = false;

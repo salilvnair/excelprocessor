@@ -71,6 +71,7 @@ public class UserDefinedTemplateDynamicVerticalSheetWriter extends BaseExcelShee
             if(headerKeyedCellInfoMap == null || headerKeyedCellInfoMap.isEmpty()) {
                 continue;
             }
+            addHeaderAndDataCellStyleFromCellInfoIntoWriterContextIfAvailable(headerKeyedCellInfoMap, context);
             for (int r = headerRowIndex; r <= headerRowEndsIndex; r++) {
                 Row row = workbookSheet.getRow(r) == null ? workbookSheet.createRow(r) : workbookSheet.getRow(r);
                 CellInfo dynamicallyGeneratedCellInfo = headerRowIndexCellInfoMap.get(r);
@@ -85,7 +86,7 @@ public class UserDefinedTemplateDynamicVerticalSheetWriter extends BaseExcelShee
                 }
                 org.apache.poi.ss.usermodel.Cell rowCell = row.getCell(columnIndex) == null ? row.createCell(columnIndex) : row.getCell(columnIndex);
                 convertAndSetCellValue(rowCell, userProvidedCellInfo.value());
-                applyDynamicHeaderCellStyles(sheet, headerKey, rowCell, context);
+                applyDynamicHeaderDataCellStyles(sheet, headerKey, rowCell, userProvidedCellInfo.value(), context);
             }
             columnIndex++;
         }
