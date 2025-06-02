@@ -165,7 +165,7 @@ public class ExcelSheetReaderUtil {
     public static String processSimilarHeaderString(Sheet sheet, String headerString, Cell cell) {
         if(sheet.duplicateHeaders() || sheet.sectional()) {
             if(sheet.vertical()) {
-                if(cell.row()!=-1) {
+                if(cell.row()> -1) {
                     return headerString+ SheetProcessingCommonConstant.UNDERSCORE+cell.row();
                 }
             }

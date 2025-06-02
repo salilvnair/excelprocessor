@@ -39,14 +39,14 @@ public class UserDefinedTemplateVerticalSheetWriter extends BaseExcelSheetWriter
     private void writeUserDefinedTemplateDataToBody(List<? extends BaseSheet> sheetData, ExcelSheetWriterContext writerContext, Sheet sheet, Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, Workbook workbook) {
         int headerRowIndex = sheet.headerRowAt() - 1;
         int headerRowEndsIndex = sheet.headerRowEndsAt() - 1;
-        headerRowEndsIndex = headerRowEndsIndex != -1 ? headerRowEndsIndex : (headerRowIndex + cellFields.size() - 1);
+        headerRowEndsIndex = headerRowEndsIndex > -1 ? headerRowEndsIndex : (headerRowIndex + cellFields.size() - 1);
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         String valueColumnAt = sheet.valueColumnAt();
         int valueColumnIndex = ExcelSheetReader.toIndentNumber(valueColumnAt)  - 1;
-        valueColumnIndex = valueColumnIndex!= -1 ? valueColumnIndex : headerColumnIndex + 1;
+        valueColumnIndex = valueColumnIndex> -1 ? valueColumnIndex : headerColumnIndex + 1;
         String valueColumnBeginsAt = sheet.valueColumnBeginsAt();
         int valueColumnBeginsAtIndex = ExcelSheetReader.toIndentNumber(valueColumnBeginsAt)  - 1;
-        valueColumnBeginsAtIndex = valueColumnBeginsAtIndex!= -1 ? valueColumnBeginsAtIndex : valueColumnIndex;
+        valueColumnBeginsAtIndex = valueColumnBeginsAtIndex> -1 ? valueColumnBeginsAtIndex : valueColumnIndex;
 
         List<Field> cells = new ArrayList<>(cellFields);
         Row row;

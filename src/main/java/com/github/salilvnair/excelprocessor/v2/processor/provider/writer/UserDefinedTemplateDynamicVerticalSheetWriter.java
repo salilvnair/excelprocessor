@@ -42,13 +42,13 @@ public class UserDefinedTemplateDynamicVerticalSheetWriter extends BaseExcelShee
         int headerRowIndex = sheet.headerRowAt() - 1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         int headerRowEndsIndex = sheet.headerRowEndsAt() - 1;
-        headerRowEndsIndex = headerRowEndsIndex != -1 ? headerRowEndsIndex : (headerRowIndex + headerKeyedCellInfoMap.size() - 1);
+        headerRowEndsIndex = headerRowEndsIndex > -1 ? headerRowEndsIndex : (headerRowIndex + headerKeyedCellInfoMap.size() - 1);
         String valueColumnAt = sheet.valueColumnAt();
         int valueColumnIndex = ExcelSheetReader.toIndentNumber(valueColumnAt)  - 1;
-        valueColumnIndex = valueColumnIndex!= -1 ? valueColumnIndex : headerColumnIndex + 1;
+        valueColumnIndex = valueColumnIndex> -1 ? valueColumnIndex : headerColumnIndex + 1;
         String valueColumnBeginsAt = sheet.valueColumnBeginsAt();
         int valueColumnBeginsAtIndex = ExcelSheetReader.toIndentNumber(valueColumnBeginsAt)  - 1;
-        valueColumnBeginsAtIndex = valueColumnBeginsAtIndex!= -1 ? valueColumnBeginsAtIndex : valueColumnIndex;
+        valueColumnBeginsAtIndex = valueColumnBeginsAtIndex> -1 ? valueColumnBeginsAtIndex : valueColumnIndex;
 
         Map<Integer, CellInfo> headerRowIndexCellInfoMap = new HashMap<>();
         for (int r = headerRowIndex; r <= headerRowEndsIndex; r++) {

@@ -48,7 +48,7 @@ public class OrderedSectionTypeVerticalSheetReader extends BaseVerticalSheetRead
         String sheetName = context.sheetName() == null ? sheet.value(): context.sheetName();
         org.apache.poi.ss.usermodel.Sheet workbookSheet = workbook.getSheet(sheetName);
         int totalRows = workbookSheet.getLastRowNum();
-        totalRows = sheet.valueRowEndsAt()!=-1 ? sheet.valueRowEndsAt() - 1 : totalRows;
+        totalRows = sheet.valueRowEndsAt()> -1 ? sheet.valueRowEndsAt() - 1 : totalRows;
         int headerColumnIndex = ExcelSheetReader.toIndentNumber(sheet.headerColumnAt())  - 1;
         String valueColumnAt = !StringUtils.isEmpty(context.valueColumnBeginsAt()) ? context.valueColumnBeginsAt() : sheet.valueColumnAt();
         int valueColumnIndex = ExcelSheetReader.toIndentNumber(valueColumnAt)  - 1;
@@ -127,7 +127,7 @@ public class OrderedSectionTypeVerticalSheetReader extends BaseVerticalSheetRead
         //skip all unknown header range
         processUnknownSectionsIfAny(sheet, ignoreHeaderRows, sectionRangeMap);
 
-        int valueColumnBeginsAt = valueColumnIndex!= -1 ? valueColumnIndex : headerColumnIndex + 1;
+        int valueColumnBeginsAt = valueColumnIndex> -1 ? valueColumnIndex : headerColumnIndex + 1;
         int cIndex = valueColumnBeginsAt;
         while(cIndex < maxColumnC) {
             Map<String, CellInfo> headerKeyCellInfoMap = orderedOrUnorderedMap(sheet);

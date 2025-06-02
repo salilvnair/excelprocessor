@@ -63,7 +63,7 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         if(dataCellStyle == null) {
             return;
         }
-        if(dataCellStyle.columnWidthInUnits() != -1) {
+        if(dataCellStyle.columnWidthInUnits() > -1) {
             rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), dataCellStyle.columnWidthInUnits());
         }
     }
@@ -297,7 +297,7 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
             anchor.setDy2(dy2);
             anchor.setAnchorType(ClientAnchor.AnchorType.byId(cell.pictureAnchorType().value()));
             Picture pic = drawing.createPicture(anchor, pictureIdx);
-            if(cell.pictureResizeScale()!=-1) {
+            if(cell.pictureResizeScale()> -1) {
                 pic.resize(cell.pictureResizeScale());
             }
         }

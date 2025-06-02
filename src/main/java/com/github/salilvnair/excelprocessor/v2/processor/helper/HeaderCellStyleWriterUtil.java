@@ -176,7 +176,7 @@ public class HeaderCellStyleWriterUtil {
         if(StringUtils.isNotEmpty(textStyleInfo.getFontName())) {
             font.setFontName(textStyleInfo.getFontName());
         }
-        if(textStyleInfo.getFontHeight() != -1) {
+        if(textStyleInfo.getFontHeight() > -1) {
             font.setFontHeight(textStyleInfo.getFontHeight());
         }
         cellStyle.setFont(font);

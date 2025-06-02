@@ -29,7 +29,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         String headerColumnEndsAt = sheet.headerColumnEndsAt();
         int headerColumnEndsAtIndex = ExcelSheetReader.toIndentNumber(headerColumnEndsAt)  - 1;
         List<String> headerList = cells.stream().map(cellField -> cellField.getAnnotation(Cell.class).value()).toList();
-        headerColumnEndsAtIndex = headerColumnEndsAtIndex != -1 ? headerColumnEndsAtIndex : (headerColumnIndex + cellFields.size() - 1);
+        headerColumnEndsAtIndex = headerColumnEndsAtIndex > -1 ? headerColumnEndsAtIndex : (headerColumnIndex + cellFields.size() - 1);
         Map<String, Field> headerKeyFieldMap = new HashMap<>();
         for (Field cellField : cells) {
             Cell cell = cellField.getAnnotation(Cell.class);
@@ -51,7 +51,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
 
     protected void writeDataToBody(List<? extends BaseSheet> sheetData, Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, List<Field> cells, Sheet sheet, ExcelSheetWriterContext context) {
         int headerRowIndex = sheet.headerRowAt() - 1;
-        int valueRowIndex = sheet.valueRowAt()!=-1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
+        int valueRowIndex = sheet.valueRowAt()> -1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         context.setSheetData(sheetData);
         //if the template !=null then need to read header String and prepare
@@ -60,16 +60,16 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
 
         String headerColumnEndsAt = sheet.headerColumnEndsAt();
         int headerColumnEndsAtIndex = ExcelSheetReader.toIndentNumber(headerColumnEndsAt)  - 1;
-        headerColumnEndsAtIndex = headerColumnEndsAtIndex != -1 ? headerColumnEndsAtIndex : (headerColumnIndex + cellFields.size() - 1);
+        headerColumnEndsAtIndex = headerColumnEndsAtIndex > -1 ? headerColumnEndsAtIndex : (headerColumnIndex + cellFields.size() - 1);
         String valueColumnAt = sheet.valueColumnAt();
         int valueColumnIndex = ExcelSheetReader.toIndentNumber(valueColumnAt)  - 1;
-        valueColumnIndex = valueColumnIndex!= -1 ? valueColumnIndex : headerColumnIndex;
+        valueColumnIndex = valueColumnIndex> -1 ? valueColumnIndex : headerColumnIndex;
         String valueColumnBeginsAt = sheet.valueColumnBeginsAt();
         int valueColumnBeginsAtIndex = ExcelSheetReader.toIndentNumber(valueColumnBeginsAt)  - 1;
-        valueColumnBeginsAtIndex = valueColumnBeginsAtIndex!= -1 ? valueColumnBeginsAtIndex : valueColumnIndex;
+        valueColumnBeginsAtIndex = valueColumnBeginsAtIndex> -1 ? valueColumnBeginsAtIndex : valueColumnIndex;
         String valueColumnEndsAt = sheet.valueColumnEndsAt();
         int valueColumnEndsAtIndex = ExcelSheetReader.toIndentNumber(valueColumnEndsAt)  - 1;
-        valueColumnEndsAtIndex = valueColumnEndsAtIndex!= -1 ? valueColumnEndsAtIndex : headerColumnEndsAtIndex !=-1 ? headerColumnEndsAtIndex : (headerColumnIndex + cellFields.size() - 1);
+        valueColumnEndsAtIndex = valueColumnEndsAtIndex> -1 ? valueColumnEndsAtIndex : headerColumnEndsAtIndex > -1 ? headerColumnEndsAtIndex : (headerColumnIndex + cellFields.size() - 1);
 
         Map<Integer, Field> headerColumnIndexCellFieldMap = new HashMap<>();
 
@@ -120,7 +120,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
 
     protected void writeUserDefinedTemplateDataToBody(List<? extends BaseSheet> sheetData, Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, List<Field> cells, Sheet sheet, ExcelSheetWriterContext context) {
         int headerRowIndex = sheet.headerRowAt() - 1;
-        int valueRowIndex = sheet.valueRowAt()!=-1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
+        int valueRowIndex = sheet.valueRowAt()> -1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         context.setSheetData(sheetData);
         //if the template !=null then need to read header String and prepare
@@ -131,14 +131,14 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         int headerColumnEndsAtIndex = ExcelSheetReader.toIndentNumber(headerColumnEndsAt)  - 1;
         String valueColumnAt = sheet.valueColumnAt();
         int valueColumnIndex = ExcelSheetReader.toIndentNumber(valueColumnAt)  - 1;
-        valueColumnIndex = valueColumnIndex!= -1 ? valueColumnIndex : headerColumnIndex;
+        valueColumnIndex = valueColumnIndex> -1 ? valueColumnIndex : headerColumnIndex;
         String valueColumnBeginsAt = sheet.valueColumnBeginsAt();
         int valueColumnBeginsAtIndex = ExcelSheetReader.toIndentNumber(valueColumnBeginsAt)  - 1;
-        valueColumnBeginsAtIndex = valueColumnBeginsAtIndex!= -1 ? valueColumnBeginsAtIndex : valueColumnIndex;
+        valueColumnBeginsAtIndex = valueColumnBeginsAtIndex> -1 ? valueColumnBeginsAtIndex : valueColumnIndex;
         String valueColumnEndsAt = sheet.valueColumnEndsAt();
         int valueColumnEndsAtIndex = ExcelSheetReader.toIndentNumber(valueColumnEndsAt)  - 1;
-        headerColumnEndsAtIndex = headerColumnEndsAtIndex!= -1 ? headerColumnEndsAtIndex : (headerColumnIndex + cellFields.size() - 1);
-        valueColumnEndsAtIndex = valueColumnEndsAtIndex != -1 ? valueColumnEndsAtIndex : headerColumnEndsAtIndex;
+        headerColumnEndsAtIndex = headerColumnEndsAtIndex> -1 ? headerColumnEndsAtIndex : (headerColumnIndex + cellFields.size() - 1);
+        valueColumnEndsAtIndex = valueColumnEndsAtIndex > -1 ? valueColumnEndsAtIndex : headerColumnEndsAtIndex;
 
         Map<Integer, Field> headerColumnIndexCellFieldMap = new HashMap<>();
 
@@ -180,7 +180,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         Map<String, CellInfo> headerKeyedCellInfoMap = extractHeaderKeyedCellInfoMap(dynamicHeaderSheet);
         Set<String> headers = headerKeyedCellInfoMap.keySet();
         List<String> headerList = new ArrayList<>(headers);
-        headerColumnEndsAtIndex = headerColumnEndsAtIndex != -1 ? headerColumnEndsAtIndex : (headerColumnIndex + headerKeyedCellInfoMap.size() - 1);
+        headerColumnEndsAtIndex = headerColumnEndsAtIndex > -1 ? headerColumnEndsAtIndex : (headerColumnIndex + headerKeyedCellInfoMap.size() - 1);
         for (int c = headerColumnIndex; c <= headerColumnEndsAtIndex; c++) {
             Row row = workbookSheet.getRow(headerRowIndex) == null ? workbookSheet.createRow(headerRowIndex) : workbookSheet.getRow(headerRowIndex);
             String originalHeader = headerList.get(c - headerColumnIndex);
@@ -195,7 +195,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
 
     protected void writeDynamicDataToBody(List<? extends BaseSheet> sheetData, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
         int headerRowIndex = sheet.headerRowAt() - 1;
-        int valueRowIndex = sheet.valueRowAt()!=-1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
+        int valueRowIndex = sheet.valueRowAt()> -1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
 
         if(CollectionUtils.isEmpty(sheetData)) {
@@ -209,15 +209,15 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         int headerColumnEndsAtIndex = ExcelSheetReader.toIndentNumber(headerColumnEndsAt)  - 1;
         String valueColumnAt = sheet.valueColumnAt();
         int valueColumnIndex = ExcelSheetReader.toIndentNumber(valueColumnAt)  - 1;
-        valueColumnIndex = valueColumnIndex!= -1 ? valueColumnIndex : headerColumnIndex;
+        valueColumnIndex = valueColumnIndex> -1 ? valueColumnIndex : headerColumnIndex;
         String valueColumnBeginsAt = sheet.valueColumnBeginsAt();
         int valueColumnBeginsAtIndex = ExcelSheetReader.toIndentNumber(valueColumnBeginsAt)  - 1;
-        valueColumnBeginsAtIndex = valueColumnBeginsAtIndex!= -1 ? valueColumnBeginsAtIndex : valueColumnIndex;
+        valueColumnBeginsAtIndex = valueColumnBeginsAtIndex> -1 ? valueColumnBeginsAtIndex : valueColumnIndex;
         String valueColumnEndsAt = sheet.valueColumnEndsAt();
         int valueColumnEndsAtIndex = ExcelSheetReader.toIndentNumber(valueColumnEndsAt)  - 1;
-        valueColumnEndsAtIndex = valueColumnEndsAtIndex!= -1 ? valueColumnEndsAtIndex : headerColumnEndsAtIndex !=-1 ? headerColumnEndsAtIndex : (headerColumnIndex + headerKeyedCellInfoMap.size() - 1);
+        valueColumnEndsAtIndex = valueColumnEndsAtIndex> -1 ? valueColumnEndsAtIndex : headerColumnEndsAtIndex > -1 ? headerColumnEndsAtIndex : (headerColumnIndex + headerKeyedCellInfoMap.size() - 1);
         Map<Integer, CellInfo> headerColumnIndexCellInfoMap = new HashMap<>();
-        headerColumnEndsAtIndex = headerColumnEndsAtIndex != -1 ? headerColumnEndsAtIndex : (headerColumnIndex + headerKeyedCellInfoMap.size() - 1);
+        headerColumnEndsAtIndex = headerColumnEndsAtIndex > -1 ? headerColumnEndsAtIndex : (headerColumnIndex + headerKeyedCellInfoMap.size() - 1);
         for (int c = headerColumnIndex; c <= headerColumnEndsAtIndex; c++) {
             Row row = workbookSheet.getRow(headerRowIndex) == null ? workbookSheet.createRow(headerRowIndex) : workbookSheet.getRow(headerRowIndex);
             org.apache.poi.ss.usermodel.Cell cell = row.getCell(c) == null ? row.createCell(c) : row.getCell(c);
@@ -273,7 +273,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
 
     protected void writeUserDefinedTemplateDynamicDataToBody(List<? extends BaseSheet> sheetData, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
         int headerRowIndex = sheet.headerRowAt() - 1;
-        int valueRowIndex = sheet.valueRowAt()!=-1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
+        int valueRowIndex = sheet.valueRowAt()> -1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
 
         if(CollectionUtils.isEmpty(sheetData)) {
@@ -287,14 +287,14 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         int headerColumnEndsAtIndex = ExcelSheetReader.toIndentNumber(headerColumnEndsAt)  - 1;
         String valueColumnAt = sheet.valueColumnAt();
         int valueColumnIndex = ExcelSheetReader.toIndentNumber(valueColumnAt)  - 1;
-        valueColumnIndex = valueColumnIndex!= -1 ? valueColumnIndex : headerColumnIndex;
+        valueColumnIndex = valueColumnIndex> -1 ? valueColumnIndex : headerColumnIndex;
         String valueColumnBeginsAt = sheet.valueColumnBeginsAt();
         int valueColumnBeginsAtIndex = ExcelSheetReader.toIndentNumber(valueColumnBeginsAt)  - 1;
-        valueColumnBeginsAtIndex = valueColumnBeginsAtIndex!= -1 ? valueColumnBeginsAtIndex : valueColumnIndex;
+        valueColumnBeginsAtIndex = valueColumnBeginsAtIndex> -1 ? valueColumnBeginsAtIndex : valueColumnIndex;
         String valueColumnEndsAt = sheet.valueColumnEndsAt();
         int valueColumnEndsAtIndex = ExcelSheetReader.toIndentNumber(valueColumnEndsAt)  - 1;
-        valueColumnEndsAtIndex = valueColumnEndsAtIndex!= -1 ? valueColumnEndsAtIndex : headerColumnEndsAtIndex !=-1 ? headerColumnEndsAtIndex : (headerColumnIndex + headerKeyedCellInfoMap.size() - 1);;
-        headerColumnEndsAtIndex = headerColumnEndsAtIndex != -1 ? headerColumnEndsAtIndex : (headerColumnIndex + headerKeyedCellInfoMap.size() - 1);
+        valueColumnEndsAtIndex = valueColumnEndsAtIndex> -1 ? valueColumnEndsAtIndex : headerColumnEndsAtIndex > -1 ? headerColumnEndsAtIndex : (headerColumnIndex + headerKeyedCellInfoMap.size() - 1);;
+        headerColumnEndsAtIndex = headerColumnEndsAtIndex > -1 ? headerColumnEndsAtIndex : (headerColumnIndex + headerKeyedCellInfoMap.size() - 1);
         Map<Integer, CellInfo> headerColumnIndexCellInfoMap = new HashMap<>();
 
         for (int c = headerColumnIndex; c <= headerColumnEndsAtIndex; c++) {

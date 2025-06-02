@@ -89,7 +89,7 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         Sheet excelSheet = clazz.getAnnotation(Sheet.class);
         int headerRowIndex = excelSheet.headerRowAt() - 1;
         int valueRowBeginsAt = excelSheet.valueRowBeginsAt();
-        int valueRowIndex = valueRowBeginsAt!=-1 ? valueRowBeginsAt: excelSheet.valueRowAt()!=-1 ? excelSheet.valueRowAt() : headerRowIndex+1;
+        int valueRowIndex = valueRowBeginsAt> -1 ? valueRowBeginsAt: excelSheet.valueRowAt()> -1 ? excelSheet.valueRowAt() : headerRowIndex+1;
         String sheetName = context.sheetName() == null ? excelSheet.value(): context.sheetName();
         org.apache.poi.ss.usermodel.Sheet sheet = workbook.getSheet(sheetName);
         if(sheet == null) {
@@ -167,9 +167,9 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
             headerStringList.add(processSimilarHeaderString);
         }
         int valueRowBeginsAt = context.valueRowBeginsAt() > -1 ? context.valueRowBeginsAt() - 1 : sheet.valueRowBeginsAt() > - 1 ? sheet.valueRowBeginsAt() -1 : -1;
-        int valueRowIndex = valueRowBeginsAt > -1 ? valueRowBeginsAt: sheet.valueRowAt()!=-1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
+        int valueRowIndex = valueRowBeginsAt > -1 ? valueRowBeginsAt: sheet.valueRowAt()> -1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int valueEndsAt = context.valueRowEndsAt() > -1 ? context.valueRowEndsAt() - 1 : sheet.valueRowEndsAt() > - 1 ? sheet.valueRowEndsAt() - 1 : -1;
-        totalRows = valueEndsAt!=-1 ? valueEndsAt : totalRows;
+        totalRows = valueEndsAt> -1 ? valueEndsAt : totalRows;
         for (int r = valueRowIndex ; r <= totalRows; r++) {
             Map<String, CellInfo> headerKeyCellInfoMap = orderedOrUnorderedMap(sheet);
             Row row = workbookSheet.getRow(r);
