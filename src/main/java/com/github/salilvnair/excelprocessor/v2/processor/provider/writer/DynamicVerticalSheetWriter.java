@@ -40,7 +40,7 @@ public class DynamicVerticalSheetWriter extends BaseExcelSheetWriter {
     protected void writeDynamicDataToHeader(Map<String, CellInfo> headerKeyedCellInfoMap, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
         int headerRowIndex = sheet.headerRowAt() - 1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
-        int headerRowEndsIndex = sheet.headerRowEndsAt();
+        int headerRowEndsIndex = sheet.headerRowEndsAt() - 1;
         headerRowEndsIndex = headerRowEndsIndex != -1 ? headerRowEndsIndex : (headerRowIndex + headerKeyedCellInfoMap.size() - 1);
         addHeaderAndDataCellStyleFromCellInfoIntoWriterContextIfAvailable(headerKeyedCellInfoMap, context);
         Set<String> headers = headerKeyedCellInfoMap.keySet();

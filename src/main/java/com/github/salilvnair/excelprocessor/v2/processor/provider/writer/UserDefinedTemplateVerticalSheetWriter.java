@@ -38,7 +38,7 @@ public class UserDefinedTemplateVerticalSheetWriter extends BaseExcelSheetWriter
 
     private void writeUserDefinedTemplateDataToBody(List<? extends BaseSheet> sheetData, ExcelSheetWriterContext writerContext, Sheet sheet, Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, Workbook workbook) {
         int headerRowIndex = sheet.headerRowAt() - 1;
-        int headerRowEndsIndex = sheet.headerRowEndsAt();
+        int headerRowEndsIndex = sheet.headerRowEndsAt() - 1;
         headerRowEndsIndex = headerRowEndsIndex != -1 ? headerRowEndsIndex : (headerRowIndex + cellFields.size() - 1);
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         String valueColumnAt = sheet.valueColumnAt();

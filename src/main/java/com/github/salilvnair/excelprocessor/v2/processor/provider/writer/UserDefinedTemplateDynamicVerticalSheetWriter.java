@@ -41,7 +41,7 @@ public class UserDefinedTemplateDynamicVerticalSheetWriter extends BaseExcelShee
     protected void writeDynamicDataToBody(Map<String, CellInfo> headerKeyedCellInfoMap, List<? extends BaseSheet> sheetData, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
         int headerRowIndex = sheet.headerRowAt() - 1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
-        int headerRowEndsIndex = sheet.headerRowEndsAt();
+        int headerRowEndsIndex = sheet.headerRowEndsAt() - 1;
         headerRowEndsIndex = headerRowEndsIndex != -1 ? headerRowEndsIndex : (headerRowIndex + headerKeyedCellInfoMap.size() - 1);
         String valueColumnAt = sheet.valueColumnAt();
         int valueColumnIndex = ExcelSheetReader.toIndentNumber(valueColumnAt)  - 1;
