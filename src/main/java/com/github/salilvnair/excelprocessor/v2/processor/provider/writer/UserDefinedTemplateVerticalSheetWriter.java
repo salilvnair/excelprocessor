@@ -12,6 +12,7 @@ import com.github.salilvnair.excelprocessor.v2.processor.provider.reader.BaseExc
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import java.lang.reflect.Field;
@@ -76,6 +77,9 @@ public class UserDefinedTemplateVerticalSheetWriter extends BaseExcelSheetWriter
                 Object fieldValue = ReflectionUtil.getFieldValue(sheetDataObj, cellField);
                 org.apache.poi.ss.usermodel.Cell rowCell = row.getCell(columnIndex) == null ? row.createCell(columnIndex) : row.getCell(columnIndex);
                 writeDataToCell(sheet, cell, rowCell, cellField, fieldValue, writerContext);
+                applyDataCellStyles(sheet, cell, rowCell, cellField, fieldValue, writerContext);
+                FormulaEvaluator evaluator = workbookSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+                evaluator.evaluateFormulaCell(rowCell);
             }
             columnIndex++;
         }

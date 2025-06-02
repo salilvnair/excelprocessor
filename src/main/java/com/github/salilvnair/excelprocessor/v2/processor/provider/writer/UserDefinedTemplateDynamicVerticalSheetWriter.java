@@ -10,6 +10,7 @@ import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.sheet.DynamicHeaderSheet;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import java.util.HashMap;
@@ -87,6 +88,8 @@ public class UserDefinedTemplateDynamicVerticalSheetWriter extends BaseExcelShee
                 org.apache.poi.ss.usermodel.Cell rowCell = row.getCell(columnIndex) == null ? row.createCell(columnIndex) : row.getCell(columnIndex);
                 convertAndSetCellValue(rowCell, userProvidedCellInfo.value());
                 applyDynamicHeaderDataCellStyles(sheet, headerKey, rowCell, userProvidedCellInfo.value(), context);
+                FormulaEvaluator evaluator = workbookSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+                evaluator.evaluateFormulaCell(rowCell);
             }
             columnIndex++;
         }

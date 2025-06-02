@@ -98,6 +98,9 @@ public class VerticalSheetWriter extends BaseExcelSheetWriter {
                 Object fieldValue = ReflectionUtil.getFieldValue(sheetDataObj, cellField);
                 org.apache.poi.ss.usermodel.Cell rowCell = row.getCell(columnIndex) == null ? row.createCell(columnIndex) : row.getCell(columnIndex);
                 writeDataToCell(sheet, cell, rowCell, cellField, fieldValue, writerContext);
+                applyDataCellStyles(sheet, cell, rowCell, cellField, fieldValue, writerContext);
+                FormulaEvaluator evaluator = workbookSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+                evaluator.evaluateFormulaCell(rowCell);
             }
             columnIndex++;
         }
