@@ -118,8 +118,34 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         }
     }
 
-    protected void writeUserDefinedTemplateDataToBody(List<? extends BaseSheet> sheetData, Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, List<Field> cells, Sheet sheet, ExcelSheetWriterContext context) {
+    protected void writeMultiPositionalHeadersUserDefinedTemplateDataToBody(List<? extends BaseSheet> sheetData, Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
         int headerRowIndex = sheet.headerRowAt() - 1;
+        Map<Integer, Set<Field>> headerCellFields = new HashMap<>();
+        for (Field cellField : cellFields) {
+            Cell cell = cellField.getAnnotation(Cell.class);
+            int rowIndex = cell.row() != -1 ? cell.row() - 1 : headerRowIndex;
+            if(headerCellFields.containsKey(rowIndex)) {
+                headerCellFields.get(rowIndex).add(cellField);
+            }
+            else {
+                Set<Field> fieldList = new LinkedHashSet<>();
+                fieldList.add(cellField);
+                headerCellFields.put(rowIndex, fieldList);
+            }
+        }
+        for (Map.Entry<Integer, Set<Field>> entry : headerCellFields.entrySet()) {
+            int rowIndex = entry.getKey();
+            Set<Field> cellFieldsAtRow = entry.getValue();
+            writeUserDefinedTemplateDataToBody(rowIndex, sheetData, cellFieldsAtRow, workbookSheet, sheet, context);
+        }
+    }
+
+    protected void writeUserDefinedTemplateDataToBody(List<? extends BaseSheet> sheetData, Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
+        int headerRowIndex = sheet.headerRowAt() - 1;
+        writeUserDefinedTemplateDataToBody(headerRowIndex, sheetData, cellFields, workbookSheet, sheet, context);
+    }
+
+    protected void writeUserDefinedTemplateDataToBody(int headerRowIndex, List<? extends BaseSheet> sheetData, Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
         int valueRowIndex = sheet.valueRowAt()> -1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
         context.setSheetData(sheetData);
@@ -143,22 +169,32 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         Map<Integer, Field> headerColumnIndexCellFieldMap = new HashMap<>();
 
         Map<String, Field> headerKeyFieldMap = new HashMap<>();
-        for (Field cellField : cells) {
+        for (Field cellField : cellFields) {
             Cell cell = cellField.getAnnotation(Cell.class);
             headerKeyFieldMap.put(cell.value(), cellField);
         }
         for (int c = headerColumnIndex; c <= headerColumnEndsAtIndex; c++) {
             org.apache.poi.ss.usermodel.Cell cell = workbookSheet.getRow(headerRowIndex).getCell(c);
+            if (cell == null) {
+                continue;
+            }
             CellInfo cellInfo = new CellInfo();
             Object value = BaseExcelSheetReader.extractValueBasedOnCellType(workbookSheet.getWorkbook(), cell, cellInfo);
             String headerValue = ExcelSheetReaderUtil.cleanHeaderString(value+"");
-            headerColumnIndexCellFieldMap.put(c, headerKeyFieldMap.get(headerValue));
+            Field field = headerKeyFieldMap.get(headerValue);
+            if(field == null) {
+                continue;
+            }
+            headerColumnIndexCellFieldMap.put(c, field);
         }
         for (BaseSheet sheetDataObj : sheetData) {
             context.setSheetDataObj(sheetDataObj);
             Row row = workbookSheet.getRow(valueRowIndex) == null ? workbookSheet.createRow(valueRowIndex) : workbookSheet.getRow(valueRowIndex);
             for (int c = valueColumnBeginsAtIndex; c <= valueColumnEndsAtIndex; c++) {
-                Field cellField = headerColumnIndexCellFieldMap.get(c);;
+                Field cellField = headerColumnIndexCellFieldMap.get(c);
+                if (cellField == null) {
+                    continue;
+                }
                 Cell cellInfo = cellField.getAnnotation(Cell.class);
                 Object fieldValue = ReflectionUtil.getFieldValue(sheetDataObj, cellField);
                 org.apache.poi.ss.usermodel.Cell rowCell = row.getCell(c) == null ? row.createCell(c) : row.getCell(c);
@@ -271,8 +307,38 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         applyDynamicHeaderCellStyles(sheet, header, cell, context);
     }
 
+    protected void writeMultiPositionalHeadersUserDefinedTemplateDataToBody(List<? extends BaseSheet> sheetData, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
+        int headerRowIndex = sheet.headerRowAt() - 1;
+        Map<Integer, Map<String, CellInfo>> rowIndexHeaderKeyedCellInfoMap = new HashMap<>();
+        DynamicHeaderSheet dynamicHeaderSheet = (DynamicHeaderSheet) sheetData.get(0);
+        Map<String, CellInfo> headerKeyedCellInfoMap = extractHeaderKeyedCellInfoMap(dynamicHeaderSheet);
+        for (String headerKey : headerKeyedCellInfoMap.keySet()) {
+            CellInfo cellInfo = headerKeyedCellInfoMap.get(headerKey);
+            int rowIndex = cellInfo.row() != -1 ? cellInfo.row() - 1 : headerRowIndex;
+            if(rowIndexHeaderKeyedCellInfoMap.containsKey(rowIndex)) {
+                rowIndexHeaderKeyedCellInfoMap.get(rowIndex).put(headerKey, cellInfo);
+            }
+            else {
+                Map<String, CellInfo> headerCellInfoMap = new LinkedHashMap<>();
+                headerCellInfoMap.put(headerKey, cellInfo);
+                rowIndexHeaderKeyedCellInfoMap.put(rowIndex, headerCellInfoMap);
+            }
+        }
+        for (Map.Entry<Integer, Map<String, CellInfo>> entry : rowIndexHeaderKeyedCellInfoMap.entrySet()) {
+            int rowIndex = entry.getKey();
+            Map<String, CellInfo> eachHeaderKeyedCellInfoMap = entry.getValue();
+            writeUserDefinedTemplateDynamicDataToBody(rowIndex, eachHeaderKeyedCellInfoMap, sheetData, workbookSheet, sheet, context);
+        }
+    }
+
     protected void writeUserDefinedTemplateDynamicDataToBody(List<? extends BaseSheet> sheetData, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
         int headerRowIndex = sheet.headerRowAt() - 1;
+        DynamicHeaderSheet dynamicHeaderSheet = (DynamicHeaderSheet) sheetData.get(0);
+        Map<String, CellInfo> headerKeyedCellInfoMap = extractHeaderKeyedCellInfoMap(dynamicHeaderSheet);
+        writeUserDefinedTemplateDynamicDataToBody(headerRowIndex, headerKeyedCellInfoMap, sheetData, workbookSheet, sheet, context);
+    }
+
+    protected void writeUserDefinedTemplateDynamicDataToBody(int headerRowIndex, Map<String, CellInfo> headerKeyedCellInfoMap, List<? extends BaseSheet> sheetData, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
         int valueRowIndex = sheet.valueRowAt()> -1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
 
@@ -280,8 +346,6 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
             return;
         }
 
-        DynamicHeaderSheet dynamicHeaderSheet = (DynamicHeaderSheet) sheetData.get(0);
-        Map<String, CellInfo> headerKeyedCellInfoMap = extractHeaderKeyedCellInfoMap(dynamicHeaderSheet);
         addHeaderAndDataCellStyleFromCellInfoIntoWriterContextIfAvailable(headerKeyedCellInfoMap, context);
         String headerColumnEndsAt = sheet.headerColumnEndsAt();
         int headerColumnEndsAtIndex = ExcelSheetReader.toIndentNumber(headerColumnEndsAt)  - 1;
@@ -299,6 +363,9 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
 
         for (int c = headerColumnIndex; c <= headerColumnEndsAtIndex; c++) {
             org.apache.poi.ss.usermodel.Cell cell = workbookSheet.getRow(headerRowIndex).getCell(c);
+            if (cell == null) {
+                continue;
+            }
             CellInfo cellInfo = new CellInfo();
             Object value = BaseExcelSheetReader.extractValueBasedOnCellType(workbookSheet.getWorkbook(), cell, cellInfo);
             cellInfo.setRowIndex(headerRowIndex);
@@ -313,11 +380,14 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
 
         for (BaseSheet sheetDataObj : sheetData) {
             context.setSheetDataObj(sheetDataObj);
-            dynamicHeaderSheet = (DynamicHeaderSheet) sheetDataObj;
+            DynamicHeaderSheet dynamicHeaderSheet = (DynamicHeaderSheet) sheetDataObj;
             headerKeyedCellInfoMap = extractHeaderKeyedCellInfoMap(dynamicHeaderSheet);
             Row row = workbookSheet.getRow(valueRowIndex) == null ? workbookSheet.createRow(valueRowIndex) : workbookSheet.getRow(valueRowIndex);
             for (int c = valueColumnBeginsAtIndex; c <= valueColumnEndsAtIndex; c++) {
                 CellInfo dynamicallyGeneratedCellInfo = headerColumnIndexCellInfoMap.get(c);
+                if (dynamicallyGeneratedCellInfo == null) {
+                    continue;
+                }
                 String headerKey = dynamicallyGeneratedCellInfo.getOriginalHeader();
                 CellInfo userProvidedCellInfo = headerKeyedCellInfoMap.get(headerKey);
                 if (userProvidedCellInfo == null) {

@@ -21,8 +21,12 @@ public class UserDefinedTemplateHorizontalSheetWriter extends BaseHorizontalShee
         Set<Field> cellFields = AnnotationUtil.getAnnotatedFields(baseSheet.getClass(), Cell.class);
         Workbook workbook = writerContext.containsExistingWorkbook() ? writerContext.existingWorkbook() : writerContext.template();
         org.apache.poi.ss.usermodel.Sheet workbookSheet =  workbook.getSheet(sheet.value());
-        List<Field> cells = new ArrayList<>(cellFields);
-        writeUserDefinedTemplateDataToBody(sheetData, cellFields, workbookSheet, cells, sheet, writerContext);
+        if(sheet.multiPositionalHeaders()) {
+            writeMultiPositionalHeadersUserDefinedTemplateDataToBody(sheetData, cellFields, workbookSheet, sheet, writerContext);
+        }
+        else {
+            writeUserDefinedTemplateDataToBody(sheetData, cellFields, workbookSheet, sheet, writerContext);
+        }
         applySheetStyles(sheet, workbook, workbookSheet, writerContext);
         writerContext.setWorkbook(workbook);
     }

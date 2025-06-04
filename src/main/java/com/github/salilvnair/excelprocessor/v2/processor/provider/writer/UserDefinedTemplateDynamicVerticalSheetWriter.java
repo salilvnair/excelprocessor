@@ -76,6 +76,9 @@ public class UserDefinedTemplateDynamicVerticalSheetWriter extends BaseExcelShee
             for (int r = headerRowIndex; r <= headerRowEndsIndex; r++) {
                 Row row = workbookSheet.getRow(r) == null ? workbookSheet.createRow(r) : workbookSheet.getRow(r);
                 CellInfo dynamicallyGeneratedCellInfo = headerRowIndexCellInfoMap.get(r);
+                if (dynamicallyGeneratedCellInfo == null) {
+                    continue;
+                }
                 String headerKey = dynamicallyGeneratedCellInfo.getOriginalHeader();
                 CellInfo userProvidedCellInfo = headerKeyedCellInfoMap.get(headerKey);
                 if (userProvidedCellInfo == null) {

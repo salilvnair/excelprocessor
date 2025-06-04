@@ -67,6 +67,9 @@ public class VerticalSheetWriter extends BaseExcelSheetWriter {
             String originalHeader = headerList.get(r - headerRowIndex);
             org.apache.poi.ss.usermodel.Cell rowCell = row.getCell(headerColumnIndex) == null ? row.createCell(headerColumnIndex) : row.getCell(headerColumnIndex);
             Field field = headerKeyFieldMap.get(originalHeader);
+            if (field == null) {
+                continue;
+            }
             Cell cell = field.getAnnotation(Cell.class);
             writeDataToHeaderCell(sheet, cell, rowCell, originalHeader, writerContext);
             applyHeaderCellStyles(sheet, cell, rowCell, field, originalHeader, writerContext);
@@ -83,6 +86,9 @@ public class VerticalSheetWriter extends BaseExcelSheetWriter {
             Object value = BaseExcelSheetReader.extractValueBasedOnCellType(workbook, cell, cellInfo);
             String headerValue = ExcelSheetReaderUtil.cleanHeaderString(value+"");
             Field field = headerKeyFieldMap.get(headerValue);
+            if (field == null) {
+                continue;
+            }
             Cell annotationCell = field.getAnnotation(Cell.class);
             writeDataToHeaderCell(sheet, annotationCell, cell, headerValue, writerContext);
             headerRowIndexCellFieldMap.put(r, field);
@@ -94,6 +100,9 @@ public class VerticalSheetWriter extends BaseExcelSheetWriter {
             for (int r = headerRowIndex; r <= headerRowEndsIndex; r++) {
                 Row row = workbookSheet.getRow(r) == null ? workbookSheet.createRow(r) : workbookSheet.getRow(r);
                 Field cellField = headerRowIndexCellFieldMap.get(r);
+                if (cellField == null) {
+                    continue;
+                }
                 Cell cell = cellField.getAnnotation(Cell.class);
                 Object fieldValue = ReflectionUtil.getFieldValue(sheetDataObj, cellField);
                 org.apache.poi.ss.usermodel.Cell rowCell = row.getCell(columnIndex) == null ? row.createCell(columnIndex) : row.getCell(columnIndex);

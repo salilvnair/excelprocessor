@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.salilvnair</groupId>
     <artifactId>excelprocessor</artifactId>
-    <version>4.0.3</version>
+    <version>4.0.4</version>
     <name>Excel Processing Utility</name>
     <description>POI based libarary to convert excel to java , java to excel and more</description>
     <url>https://github.com/salilvnair/excelprocessor</url>

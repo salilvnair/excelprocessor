@@ -54,6 +54,7 @@ public @interface Sheet {
     boolean streamingWorkbook() default false;
     boolean readValuesAsString() default false;
     boolean useDefaultNumberType() default false;
+    boolean multiPositionalHeaders() default false;
     Class<? extends Number> defaultNumberType() default Long.class;
 
     String[] hideColumns() default {};

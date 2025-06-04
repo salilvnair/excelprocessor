@@ -61,6 +61,9 @@ public class UserDefinedTemplateVerticalSheetWriter extends BaseExcelSheetWriter
         }
         for (int r = headerRowIndex; r <= headerRowEndsIndex; r++) {
             org.apache.poi.ss.usermodel.Cell cell = workbookSheet.getRow(r).getCell(headerColumnIndex);
+            if (cell == null) {
+                continue;
+            }
             CellInfo cellInfo = new CellInfo();
             Object value = BaseExcelSheetReader.extractValueBasedOnCellType(workbook, cell, cellInfo);
             String headerValue = ExcelSheetReaderUtil.cleanHeaderString(value+"");
@@ -73,6 +76,9 @@ public class UserDefinedTemplateVerticalSheetWriter extends BaseExcelSheetWriter
             for (int r = headerRowIndex; r <= headerRowEndsIndex; r++) {
                 row = workbookSheet.getRow(r) == null ? workbookSheet.createRow(r) : workbookSheet.getRow(r);
                 Field cellField = headerRowIndexCellFieldMap.get(r);
+                if (cellField == null) {
+                    continue;
+                }
                 Cell cell = cellField.getAnnotation(Cell.class);
                 Object fieldValue = ReflectionUtil.getFieldValue(sheetDataObj, cellField);
                 org.apache.poi.ss.usermodel.Cell rowCell = row.getCell(columnIndex) == null ? row.createCell(columnIndex) : row.getCell(columnIndex);
