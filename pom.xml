@@ -43,7 +43,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <org.json.json>20251224</org.json.json>
+        <org.json.json>20260719</org.json.json>
         <org.apache.poi.poi>5.5.1</org.apache.poi.poi>
         <org.apache.poi.poi-ooxml>5.5.1</org.apache.poi.poi-ooxml>
         <org.projectlombok.lombok>1.18.36</org.projectlombok.lombok>
