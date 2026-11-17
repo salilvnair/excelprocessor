@@ -24,7 +24,7 @@
 <dependency>
     <groupId>com.github.salilvnair</groupId>
     <artifactId>excelprocessor</artifactId>
-    <version>4.0.6</version>
+    <version>4.1.0</version>
 </dependency>
 ```
 
