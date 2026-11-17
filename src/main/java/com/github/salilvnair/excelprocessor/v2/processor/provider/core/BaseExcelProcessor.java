@@ -57,9 +57,21 @@ public abstract class BaseExcelProcessor {
         return set;
     }
     
+    /**
+     * One formatter per thread (DataFormatter is not thread-safe and costly to build per row).
+     * Formula cells are judged by their cached result, so template rows whose formulas evaluate to
+     * blank count as empty. POI 6 does this by default; setting it explicitly gives the same
+     * result when an application runs the library on POI 5.
+     */
+    private static final ThreadLocal<DataFormatter> EMPTY_CHECK_FORMATTER = ThreadLocal.withInitial(() -> {
+        DataFormatter formatter = new DataFormatter();
+        formatter.setUseCachedValuesForFormulaCells(true);
+        return formatter;
+    });
+
     public static boolean rowIsEmpty(Row row) {
         boolean isEmpty = true;
-        DataFormatter dataFormatter = new DataFormatter();
+        DataFormatter dataFormatter = EMPTY_CHECK_FORMATTER.get();
         if (row != null) {
             for (Cell cell : row) {
                 if (dataFormatter.formatCellValue(cell).trim().length() > 0) {
@@ -73,7 +85,7 @@ public abstract class BaseExcelProcessor {
     
     public static boolean rowIsEmpty(Row row, int headerColumnIndex, int lastCellNum) {
         boolean isEmpty = true;
-        DataFormatter dataFormatter = new DataFormatter();
+        DataFormatter dataFormatter = EMPTY_CHECK_FORMATTER.get();
         if (row != null) {
             for (int c = headerColumnIndex; c < lastCellNum; c++) {
                 if (dataFormatter.formatCellValue(row.getCell(c)).trim().length() > 0) {

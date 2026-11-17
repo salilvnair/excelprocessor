@@ -8,6 +8,7 @@ import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetReaderContext;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetWriterUtil;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.style.CellStyleRegistry;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.context.CellValidationMessage;
 import com.github.salilvnair.excelprocessor.v2.processor.validator.task.core.AbstractExcelTaskValidator;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
@@ -62,6 +63,16 @@ public class ExcelSheetContext {
     private AbstractExcelTask taskBean;
 
     private AbstractExcelTaskValidator taskValidatorBean;
+
+    /** workbook-scoped style/font cache shared by every sheet written with this context */
+    private CellStyleRegistry styleRegistry;
+
+    public CellStyleRegistry styleRegistry() {
+        if(styleRegistry == null) {
+            styleRegistry = new CellStyleRegistry();
+        }
+        return styleRegistry;
+    }
 
     public String fileName() {
         return fileName;

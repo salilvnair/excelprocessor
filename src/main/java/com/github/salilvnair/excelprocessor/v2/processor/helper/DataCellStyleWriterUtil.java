@@ -10,6 +10,8 @@ import com.github.salilvnair.excelprocessor.v2.model.NumberStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.model.StyleTemplateCellInfo;
 import com.github.salilvnair.excelprocessor.v2.model.TextStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.style.CellStyleResolver;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.style.CellStyleSpec;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.writer.task.helper.ExcelCellStyleTaskExecutor;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
@@ -51,7 +53,7 @@ public class DataCellStyleWriterUtil {
             BaseSheet sheetDataObj = writerContext.getSheetDataObj();
             if(sheetDataObj != null) {
                 DataCellStyle dataCellStyle  = sheetDataObj.getClass().getAnnotation(DataCellStyle.class);
-                dataCellStyleInfo = extractDataCellStyleInfo(dataCellStyle);
+                dataCellStyleInfo = classStyleInfo(dataCellStyle);
             }
             else {
                 return;
@@ -99,25 +101,29 @@ public class DataCellStyleWriterUtil {
     }
 
     private static void executeCustomTask(DataCellStyle dataCellStyle, Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, ExcelSheetWriterContext writerContext) {
-        if(!StringUtils.isEmpty(dataCellStyle.customTask())) {
-            ExcelCellStyleTaskExecutor.execute(dataCellStyle.customTask(), sheet, writerContext);
-        }
-        else {
-            for (String customTask : dataCellStyle.customTasks()) {
-                ExcelCellStyleTaskExecutor.execute(customTask, sheet, writerContext);
+        CellStyleResolver.runWithPrivateStyle(rowCell, writerContext, () -> {
+            if(!StringUtils.isEmpty(dataCellStyle.customTask())) {
+                ExcelCellStyleTaskExecutor.execute(dataCellStyle.customTask(), sheet, writerContext);
             }
-        }
+            else {
+                for (String customTask : dataCellStyle.customTasks()) {
+                    ExcelCellStyleTaskExecutor.execute(customTask, sheet, writerContext);
+                }
+            }
+        });
     }
 
     private static void executeCustomTask(DataCellStyleInfo dataCellStyle, Sheet sheet, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext writerContext) {
-        if(!StringUtils.isEmpty(dataCellStyle.getCustomTask())) {
-            ExcelCellStyleTaskExecutor.execute(dataCellStyle.getCustomTask(), sheet, writerContext);
-        }
-        else {
-            for (String customTask : dataCellStyle.getCustomTasks()) {
-                ExcelCellStyleTaskExecutor.execute(customTask, sheet, writerContext);
+        CellStyleResolver.runWithPrivateStyle(rowCell, writerContext, () -> {
+            if(!StringUtils.isEmpty(dataCellStyle.getCustomTask())) {
+                ExcelCellStyleTaskExecutor.execute(dataCellStyle.getCustomTask(), sheet, writerContext);
             }
-        }
+            else {
+                for (String customTask : dataCellStyle.getCustomTasks()) {
+                    ExcelCellStyleTaskExecutor.execute(customTask, sheet, writerContext);
+                }
+            }
+        });
     }
 
     private static void applyConditionalCellStyle(Sheet sheet, Cell cell, org.apache.poi.ss.usermodel.Cell rowCell, Field cellField, ExcelSheetWriterContext writerContext) {
@@ -147,171 +153,83 @@ public class DataCellStyleWriterUtil {
         if(dataCellStyle == null) {
             return;
         }
-        CellStyle cellStyle = null;
+        applyResolvedStyle(sheet, fieldStyleInfo(dataCellStyle), rowCell, writerContext);
+    }
 
-        if(writerContext.styleTemplate()!=null && !dataCellStyle.ignoreStyleTemplate()) {
-            if(writerContext.defaultDataCellStyle() != null ) {
-                cellStyle = writerContext.defaultDataCellStyle();
-            }
-            else {
-                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-                writerContext.setDefaultDataCellStyle(cellStyle);
-            }
-            StyleTemplateCell styleTemplateCell = dataCellStyle.styleTemplateCell();
-            int rowIndex = styleTemplateCell.row()  - 1;
-            int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCell.column())  - 1;
-            if(writerContext.styleTemplate().getSheet(sheet.value()) != null) {
-                CellStyle templateCellStyle = writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getCellStyle();
-                cellStyle.cloneStyleFrom(templateCellStyle);
-                // Copy cell width
-                rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), writerContext.styleTemplate().getSheet(sheet.value()).getColumnWidth(writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getColumnIndex()));
-                // Copy text wrapping
-                cellStyle.setWrapText(templateCellStyle.getWrapText());
-            }
-        }
-        else {
-            if(writerContext.defaultDataCellStyle() != null ) {
-                cellStyle = writerContext.defaultDataCellStyle();
-            }
-            else {
-                cellStyle = rowCell.getCellStyle();
-                if (cellStyle == null || cellStyle.getDataFormat() == 0) {
-                    cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-                }
-                writerContext.setDefaultDataCellStyle(cellStyle);
-            }
-        }
+    /** annotation -> info caches: annotations are immutable, so the derived infos can be shared */
+    private static final Map<DataCellStyle, DataCellStyleInfo> FIELD_STYLE_INFO = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final Map<DataCellStyle, DataCellStyleInfo> CLASS_STYLE_INFO = new java.util.concurrent.ConcurrentHashMap<>();
 
-        cellStyle.setWrapText(dataCellStyle.wrapText());
-        if(dataCellStyle.hasBorderStyle()) {
-            cellStyle.setBorderTop(dataCellStyle.borderStyle());
-            cellStyle.setBorderRight(dataCellStyle.borderStyle());
-            cellStyle.setBorderBottom(dataCellStyle.borderStyle());
-            cellStyle.setBorderLeft(dataCellStyle.borderStyle());
-        }
-        if(dataCellStyle.hasBorderColor()) {
-            cellStyle.setTopBorderColor(dataCellStyle.borderColor().getIndex());
-            cellStyle.setRightBorderColor(dataCellStyle.borderColor().getIndex());
-            cellStyle.setBottomBorderColor(dataCellStyle.borderColor().getIndex());
-            cellStyle.setLeftBorderColor(dataCellStyle.borderColor().getIndex());
-        }
+    private static DataCellStyleInfo fieldStyleInfo(DataCellStyle dataCellStyle) {
+        return FIELD_STYLE_INFO.computeIfAbsent(dataCellStyle, a -> {
+            DataCellStyleInfo info = extractDataCellStyleInfo(a);
+            info.setNumberStyleInfo(extractNumberStyleInfo(a.numberStyle()));
+            return info;
+        });
+    }
 
-        if(dataCellStyle.hasBackgroundColor()) {
-            cellStyle.setFillPattern(dataCellStyle.fillPattern());
-            cellStyle.setFillForegroundColor(dataCellStyle.backgroundColor().getIndex());
-            cellStyle.setFillBackgroundColor(dataCellStyle.backgroundColor().getIndex());
-        }
-
-        if(dataCellStyle.hasForegroundColor()) {
-            cellStyle.setFillPattern(dataCellStyle.fillPattern());
-            cellStyle.setFillForegroundColor(dataCellStyle.foregroundColor().getIndex());
-        }
-        if(dataCellStyle.customTextStyle()) {
-            applyTextStyleIfApplicable(rowCell, cellStyle, extractTextStyleInfo(dataCellStyle.textStyle()), writerContext);
-        }
-        applyNumberStyleIfApplicable(rowCell, cellStyle, extractNumberStyleInfo(dataCellStyle.numberStyle()), writerContext);
-        rowCell.setCellStyle(cellStyle);
+    private static DataCellStyleInfo classStyleInfo(DataCellStyle dataCellStyle) {
+        return dataCellStyle == null ? null : CLASS_STYLE_INFO.computeIfAbsent(dataCellStyle, DataCellStyleWriterUtil::extractDataCellStyleInfo);
     }
 
     public static void applyDynamicCellStyles(Sheet sheet, String header, DataCellStyleInfo dataCellStyleInfo, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext writerContext) {
         if(dataCellStyleInfo == null) {
             return;
         }
-        CellStyle cellStyle = null;
+        applyResolvedStyle(sheet, dataCellStyleInfo, rowCell, writerContext);
+    }
 
-        if(writerContext.styleTemplate()!=null && !dataCellStyleInfo.isIgnoreStyleTemplate()) {
-            if(writerContext.defaultDataCellStyle() != null ) {
-                cellStyle = writerContext.defaultDataCellStyle();
-            }
-            else {
-                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-                writerContext.setDefaultDataCellStyle(cellStyle);
-            }
-            StyleTemplateCellInfo styleTemplateCellInfo = dataCellStyleInfo.getStyleTemplateCellInfo();
-            int rowIndex = styleTemplateCellInfo.getRow()  - 1;
-            int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCellInfo.getColumn())  - 1;
-            if(writerContext.styleTemplate().getSheet(sheet.value()) != null) {
-                CellStyle templateCellStyle = writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getCellStyle();
-                cellStyle.cloneStyleFrom(templateCellStyle);
-                // Copy cell width
-                rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), writerContext.styleTemplate().getSheet(sheet.value()).getColumnWidth(writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getColumnIndex()));
-                // Copy text wrapping
-                cellStyle.setWrapText(templateCellStyle.getWrapText());
-            }
+    /**
+     * Builds the effective style of the cell as an immutable {@link CellStyleSpec} and applies the
+     * shared workbook style for it. Equal specs reuse one style, so the workbook style count stays
+     * proportional to the number of distinct styles instead of the number of cells.
+     */
+    private static void applyResolvedStyle(Sheet sheet, DataCellStyleInfo info, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext writerContext) {
+        CellStyleSpec.Builder spec = CellStyleSpec.builder();
+        CellStyle cellStyle;
+        if(writerContext.styleTemplate()!=null && !info.isIgnoreStyleTemplate()) {
+            spec.templateStyle(CellStyleResolver.templateStyle(writerContext, sheet, info.getStyleTemplateCellInfo(), rowCell));
+            cellStyle = CellStyleResolver.apply(rowCell, buildSpec(spec, info), writerContext);
         }
         else {
-            if(writerContext.defaultDataCellStyle() != null ) {
-                cellStyle = writerContext.defaultDataCellStyle();
+            // hot path: the same (style info, base style) pair resolves to the same shared style
+            int baseStyleIndex = CellStyleResolver.baseStyleIndex(rowCell);
+            org.apache.poi.ss.usermodel.Workbook workbook = rowCell.getSheet().getWorkbook();
+            cellStyle = writerContext.styleRegistry().memo(workbook, info, baseStyleIndex);
+            if(cellStyle == null) {
+                spec.baseStyleIndex(baseStyleIndex);
+                cellStyle = writerContext.styleRegistry().resolve(workbook, buildSpec(spec, info));
+                writerContext.styleRegistry().putMemo(workbook, info, baseStyleIndex, cellStyle);
             }
-            else {
-                cellStyle = rowCell.getCellStyle();
-                if (cellStyle == null || cellStyle.getDataFormat() == 0) {
-                    cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-                }
-            }
+            rowCell.setCellStyle(cellStyle);
         }
-
-        cellStyle.setWrapText(dataCellStyleInfo.isWrapText());
-        if(dataCellStyleInfo.isHasBorderStyle()) {
-            cellStyle.setBorderTop(dataCellStyleInfo.getBorderStyle());
-            cellStyle.setBorderRight(dataCellStyleInfo.getBorderStyle());
-            cellStyle.setBorderBottom(dataCellStyleInfo.getBorderStyle());
-            cellStyle.setBorderLeft(dataCellStyleInfo.getBorderStyle());
-        }
-        if(dataCellStyleInfo.isHasBorderColor()) {
-            cellStyle.setTopBorderColor(dataCellStyleInfo.getBorderColor().getIndex());
-            cellStyle.setRightBorderColor(dataCellStyleInfo.getBorderColor().getIndex());
-            cellStyle.setBottomBorderColor(dataCellStyleInfo.getBorderColor().getIndex());
-            cellStyle.setLeftBorderColor(dataCellStyleInfo.getBorderColor().getIndex());
-        }
-
-        if(dataCellStyleInfo.isHasBackgroundColor()) {
-            cellStyle.setFillPattern(dataCellStyleInfo.getFillPattern());
-            cellStyle.setFillForegroundColor(dataCellStyleInfo.getBackgroundColor().getIndex());
-            cellStyle.setFillBackgroundColor(dataCellStyleInfo.getBackgroundColor().getIndex());
-        }
-
-        if(dataCellStyleInfo.isHasForegroundColor()) {
-            cellStyle.setFillPattern(dataCellStyleInfo.getFillPattern());
-            cellStyle.setFillForegroundColor(dataCellStyleInfo.getForegroundColor().getIndex());
-        }
-
-        if(dataCellStyleInfo.isCustomTextStyle() && dataCellStyleInfo.getTextStyleInfo()!=null) {
-            applyTextStyleIfApplicable(rowCell, cellStyle, dataCellStyleInfo.getTextStyleInfo(), writerContext);
-        }
-        applyNumberStyleIfApplicable(rowCell, cellStyle, dataCellStyleInfo.getNumberStyleInfo(), writerContext);
-        rowCell.setCellStyle(cellStyle);
+        // kept for backward compatibility with tasks reading context.defaultDataCellStyle();
+        // the style is shared and must not be mutated.
+        writerContext.setDefaultDataCellStyle(cellStyle);
     }
 
-    private static void applyTextStyleIfApplicable(org.apache.poi.ss.usermodel.Cell rowCell, CellStyle cellStyle, TextStyleInfo textStyleInfo, ExcelSheetWriterContext writerContext) {
-        Font font = rowCell.getSheet().getWorkbook().createFont();
-        font.setBold(textStyleInfo.isBold());
-        font.setItalic(textStyleInfo.isItalic());
-        font.setColor(textStyleInfo.getColor().getIndex());
-        font.setStrikeout(textStyleInfo.isStrikeout());
-        if(StringUtils.isNotEmpty(textStyleInfo.getFontName())) {
-            font.setFontName(textStyleInfo.getFontName());
+    private static CellStyleSpec buildSpec(CellStyleSpec.Builder spec, DataCellStyleInfo info) {
+        spec.wrapText(info.isWrapText());
+        if(info.isHasBorderStyle()) {
+            spec.border(info.getBorderStyle());
         }
-        if(textStyleInfo.getFontHeight() > -1) {
-            font.setFontHeight(textStyleInfo.getFontHeight());
+        if(info.isHasBorderColor()) {
+            spec.borderColor(info.getBorderColor().getIndex());
         }
-        cellStyle.setFont(font);
-    }
-
-    private static void applyNumberStyleIfApplicable(org.apache.poi.ss.usermodel.Cell rowCell, CellStyle cellStyle, NumberStyleInfo numberStyleInfo, ExcelSheetWriterContext writerContext) {
-        DataFormat dataFormat = rowCell.getSheet().getWorkbook().createDataFormat();
-        if (numberStyleInfo.custom() && !numberStyleInfo.customFormat().isEmpty()) {
-            cellStyle.setDataFormat(dataFormat.getFormat(numberStyleInfo.customFormat()));
+        if(info.isHasBackgroundColor()) {
+            spec.fillPattern(info.getFillPattern());
+            spec.fillForegroundColor(info.getBackgroundColor().getIndex());
+            spec.fillBackgroundColor(info.getBackgroundColor().getIndex());
         }
-        else if (numberStyleInfo.date()) {
-            cellStyle.setDataFormat(dataFormat.getFormat(numberStyleInfo.dateFormat().format()));
+        if(info.isHasForegroundColor()) {
+            spec.fillPattern(info.getFillPattern());
+            spec.fillForegroundColor(info.getForegroundColor().getIndex());
         }
-        else if (numberStyleInfo.number()) {
-            cellStyle.setDataFormat(dataFormat.getFormat(numberStyleInfo.numberFormat().format()));
+        if(info.isCustomTextStyle() && info.getTextStyleInfo()!=null) {
+            spec.font(CellStyleResolver.font(info.getTextStyleInfo()));
         }
-        else  {
-            cellStyle.setDataFormat(dataFormat.getFormat(numberStyleInfo.categoryFormat().format()));
-        }
+        spec.dataFormat(CellStyleResolver.dataFormat(info.getNumberStyleInfo()));
+        return spec.build();
     }
 
     private static DataCellStyleInfo extractDataCellStyleInfo(DataCellStyle dataCellStyle) {

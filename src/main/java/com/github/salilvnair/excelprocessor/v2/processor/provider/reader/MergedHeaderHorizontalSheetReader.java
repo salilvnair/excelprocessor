@@ -53,12 +53,15 @@ public class MergedHeaderHorizontalSheetReader extends HorizontalSheetReader {
         int totalRows = workbookSheet.getLastRowNum();
         Row headerRow = workbookSheet.getRow(headerRowIndex);
         Row mergedHeaderRow = workbookSheet.getRow(mergedHeaderRowIndex);
+        if(headerRow == null || mergedHeaderRow == null) {
+            return;
+        }
         Map<String, CellRangeAddress> mergedHeaderStringKeyedCellRageAddress = new HashMap<>();
         for (int c = headerColumnIndex; c < mergedHeaderRow.getLastCellNum(); c++) {
             if(mergedHeaderRow.getCell(c) == null) {
                 continue;
             }
-            String headerString = mergedHeaderRow.getCell(c).getStringCellValue();
+            String headerString = ExcelSheetReaderUtil.headerText(mergedHeaderRow.getCell(c));
             if(StringUtils.isEmpty(headerString)){
                 continue;
             }
@@ -83,8 +86,11 @@ public class MergedHeaderHorizontalSheetReader extends HorizontalSheetReader {
             cellFields.forEach(cellField -> classCellHeaders.add(cellField.getAnnotation(Cell.class).value()));
         });
         for (int c = headerColumnIndex; c < headerRow.getLastCellNum(); c++) {
-            String headerString = headerRow.getCell(c).getStringCellValue();
-            headerString = ExcelSheetReaderUtil.cleanHeaderString(headerString);
+            String headerString = ExcelSheetReaderUtil.headerText(headerRow.getCell(c));
+            if(headerString.isEmpty()) {
+                ignoreHeaderColumns.add(c);
+                continue;
+            }
             if(!classCellHeaders.contains(headerString) && !sheet.dynamicHeaders()) {
                 ignoreHeaderColumns.add(c);
                 continue;

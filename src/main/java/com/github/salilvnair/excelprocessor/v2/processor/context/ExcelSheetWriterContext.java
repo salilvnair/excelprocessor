@@ -2,11 +2,13 @@ package com.github.salilvnair.excelprocessor.v2.processor.context;
 
 import com.github.salilvnair.excelprocessor.v2.model.DataCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.style.CellStyleRegistry;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.task.AbstractExcelTask;
 import lombok.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.lang.reflect.Field;
@@ -73,6 +75,34 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
     private Map<String, CellStyle> headerCellStyleMap;
 
     private Map<String, CellStyle> dataCellStyleMap;
+
+    /** workbook-scoped style/font cache; never create styles per cell, resolve them here */
+    private CellStyleRegistry styleRegistry;
+
+    /** formula evaluator reused for every cell of {@link #formulaEvaluatorWorkbook} */
+    private FormulaEvaluator formulaEvaluator;
+
+    private Workbook formulaEvaluatorWorkbook;
+
+    public CellStyleRegistry styleRegistry() {
+        if(styleRegistry == null) {
+            styleRegistry = new CellStyleRegistry();
+        }
+        return styleRegistry;
+    }
+
+    /** Evaluates {@code cell} only when it holds a formula, reusing one evaluator per workbook. */
+    public void evaluateIfFormula(Cell cell) {
+        if(cell == null || cell.getCellType() != org.apache.poi.ss.usermodel.CellType.FORMULA) {
+            return;
+        }
+        Workbook cellWorkbook = cell.getSheet().getWorkbook();
+        if(formulaEvaluator == null || formulaEvaluatorWorkbook != cellWorkbook) {
+            formulaEvaluator = cellWorkbook.getCreationHelper().createFormulaEvaluator();
+            formulaEvaluatorWorkbook = cellWorkbook;
+        }
+        formulaEvaluator.evaluateFormulaCell(cell);
+    }
 
     public Workbook workbook() {
         return super.getWorkbook();

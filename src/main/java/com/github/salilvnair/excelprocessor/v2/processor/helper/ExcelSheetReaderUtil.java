@@ -10,6 +10,8 @@ import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.ExcelFileType;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -27,10 +29,41 @@ import java.util.regex.Pattern;
  */
 public class ExcelSheetReaderUtil {
     private ExcelSheetReaderUtil(){}
+    private static final Pattern LINE_BREAKS = Pattern.compile("\\r\\n|\\r|\\n");
+
     public static String cleanHeaderString(String headerKey) {
-        headerKey = headerKey.replaceAll("\\r\\n|\\r|\\n", " ");
-        headerKey = headerKey.trim();
-        return headerKey;
+        if(headerKey == null) {
+            return "";
+        }
+        // called per cell on hot read paths: avoid the regex unless there is a line break
+        if(headerKey.indexOf('\n') >= 0 || headerKey.indexOf('\r') >= 0) {
+            headerKey = LINE_BREAKS.matcher(headerKey).replaceAll(" ");
+        }
+        return headerKey.trim();
+    }
+
+    /**
+     * Text of a header cell: "" for a missing or blank cell, the string for text cells, and the
+     * formatted value (as shown in Excel) for numeric, date, boolean and formula header cells.
+     */
+    public static String headerText(org.apache.poi.ss.usermodel.Cell cell) {
+        if(cell == null) {
+            return "";
+        }
+        CellType type = cell.getCellType();
+        if(type == CellType.STRING) {
+            return cleanHeaderString(cell.getStringCellValue());
+        }
+        if(type == CellType.BLANK || type == CellType.ERROR) {
+            return "";
+        }
+        if(type == CellType.FORMULA && cell.getCachedFormulaResultType() == CellType.STRING) {
+            return cleanHeaderString(cell.getStringCellValue());
+        }
+        // formula headers use their cached result on every POI version (POI 5's default printed the formula text)
+        DataFormatter formatter = new DataFormatter();
+        formatter.setUseCachedValuesForFormulaCells(true);
+        return cleanHeaderString(formatter.formatCellValue(cell));
     }
 
     public static String deleteJavaInValidVariables(String before) {
@@ -262,10 +295,10 @@ public class ExcelSheetReaderUtil {
         return countURLsInString(input) > 1;
     }
 
+    private static final Pattern URL_PATTERN = Pattern.compile("\\b(?:https?|ftp)://\\S+\\b");
+
     public static int countURLsInString(String input) {
-        String urlRegex = "\\b(?:https?|ftp)://\\S+\\b";
-        Pattern pattern = Pattern.compile(urlRegex);
-        Matcher matcher = pattern.matcher(input);
+        Matcher matcher = URL_PATTERN.matcher(input);
         int count = 0;
         while (matcher.find()) {
             count++;
@@ -274,10 +307,7 @@ public class ExcelSheetReaderUtil {
     }
 
     public static List<String> extractHyperlinks(String input) {
-        // Regular expression to match URLs
-        String urlRegex = "\\b(?:https?|ftp)://\\S+\\b";
-        Pattern pattern = Pattern.compile(urlRegex);
-        Matcher matcher = pattern.matcher(input);
+        Matcher matcher = URL_PATTERN.matcher(input);
 
         // Create a StringBuilder to store the extracted hyperlinks
         List<String> urls = new ArrayList<>();

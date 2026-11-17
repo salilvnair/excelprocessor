@@ -107,7 +107,8 @@ public class ReflectionUtil {
 
 	public static <T> T getFieldValue(final Object obj, final Field field) {
 		try {
-			field.setAccessible(true);
+			// setAccessible(true) runs an access check on every call; only do it once per Field
+			makeAccessible(field);
 			return (T) field.get(obj);
 		}
 		catch (Exception ignored) {}

@@ -136,18 +136,26 @@ public abstract class BaseHorizontalSheetReader extends BaseExcelSheetReader {
         }
         int totalRows = workbookSheet.getLastRowNum();
         Row headerRow = workbookSheet.getRow(headerRowIndex);
+        if(headerRow == null) {
+            // empty sheet or header row missing: there is nothing to map
+            return;
+        }
         List<String> headerStringList = orderedOrUnorderedList(sheet);
         List<String> sheetHeaders = orderedOrUnorderedList(sheet);
         Map<String, String> processedDuplicateHeaderKeyedOriginalHeaderMap = orderedOrUnorderedMap(sheet);
         List<String> ignoreHeaders = sheet.ignoreHeaders().length > 0 ? Arrays.stream(sheet.ignoreHeaders()).collect(Collectors.toList()) : context.ignoreHeaders();
         List<String> ignoreHeaderPatterns = sheet.ignoreHeaderPatterns().length > 0 ? Arrays.stream(sheet.ignoreHeaderPatterns()).collect(Collectors.toList()) : context.ignoreHeaderPatterns();
-        List<Integer> ignoreHeaderColumns = context.ignoreHeaderColumns().stream().map(col -> ExcelSheetReader.toIndentNumber(col) -1 ).collect(Collectors.toList());
+        Set<Integer> ignoreHeaderColumns = context.ignoreHeaderColumns().stream().map(col -> ExcelSheetReader.toIndentNumber(col) -1 ).collect(Collectors.toCollection(HashSet::new));
         Set<Field> sheetCells = AnnotationUtil.getAnnotatedFields(clazz, Cell.class);
-        List<String> classCellHeaders = sheetCells.stream().map(cellField -> cellField.getAnnotation(Cell.class).value()).collect(Collectors.toList());
+        Set<String> classCellHeaders = sheetCells.stream().map(cellField -> cellField.getAnnotation(Cell.class).value()).collect(Collectors.toCollection(HashSet::new));
         int lastCellNum = StringUtils.isNotEmpty(sheet.headerColumnEndsAt()) ? ExcelSheetReader.toIndentNumber(sheet.headerColumnEndsAt()) : headerRow.getLastCellNum();
         for (int c = headerColumnIndex; c < lastCellNum; c++) {
-            String headerString = headerRow.getCell(c).getStringCellValue();
-            headerString = ExcelSheetReaderUtil.cleanHeaderString(headerString);
+            String headerString = ExcelSheetReaderUtil.headerText(headerRow.getCell(c));
+            if(headerString.isEmpty()) {
+                // blank or missing header cell: the column cannot be mapped
+                ignoreHeaderColumns.add(c);
+                continue;
+            }
             if(!classCellHeaders.contains(headerString) && !sheet.dynamicHeaders()) {
                 ignoreHeaderColumns.add(c);
                 continue;

@@ -13,6 +13,7 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Salil V Nair
@@ -102,13 +103,36 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
         return cellValue;
     }
 
+    /** colour properties per (workbook, style index): every cell sharing a style has the same colours */
+    private final Map<Object, Map<Short, CellInfo>> styleColorCache = new java.util.concurrent.ConcurrentHashMap<>();
+
     protected void extractCellPropertiesAndSetCellInfo(Workbook workbook, Cell cell, CellInfo cellInfo) {
-        Color fgColor = cell.getCellStyle().getFillForegroundColorColor();
-        Color bgColor = cell.getCellStyle().getFillBackgroundColorColor();
-        cellInfo.setBackgroundColor(bgColor);
-        cellInfo.setForegroundColor(fgColor);
-        extractColorPropertiesAndSetCellInfo(fgColor, cellInfo, false);
-        extractColorPropertiesAndSetCellInfo(bgColor, cellInfo, true);
+        applyStyleColors(workbook, cell.getCellStyle(), cellInfo);
+    }
+
+    /** Copies the (cached) fill colours of {@code style} into {@code cellInfo}; {@code styleSource} scopes the cache. */
+    protected void applyStyleColors(Object styleSource, CellStyle style, CellInfo cellInfo) {
+        if(style == null) {
+            return;
+        }
+        CellInfo colors = styleColorCache
+                .computeIfAbsent(styleSource, w -> new java.util.concurrent.ConcurrentHashMap<>())
+                .computeIfAbsent(style.getIndex(), index -> {
+                    CellInfo c = new CellInfo();
+                    Color fgColor = style.getFillForegroundColorColor();
+                    Color bgColor = style.getFillBackgroundColorColor();
+                    c.setBackgroundColor(bgColor);
+                    c.setForegroundColor(fgColor);
+                    extractColorPropertiesAndSetCellInfo(fgColor, c, false);
+                    extractColorPropertiesAndSetCellInfo(bgColor, c, true);
+                    return c;
+                });
+        cellInfo.setBackgroundColor(colors.getBackgroundColor());
+        cellInfo.setForegroundColor(colors.getForegroundColor());
+        cellInfo.setForegroundHexString(colors.getForegroundHexString());
+        cellInfo.setBackgroundHexString(colors.getBackgroundHexString());
+        cellInfo.setForegroundRgb(colors.getForegroundRgb() == null ? null : colors.getForegroundRgb().clone());
+        cellInfo.setBackgroundRgb(colors.getBackgroundRgb() == null ? null : colors.getBackgroundRgb().clone());
     }
 
     private void extractColorPropertiesAndSetCellInfo(Color color, CellInfo cellInfo, boolean background) {
@@ -123,9 +147,10 @@ public abstract class BaseExcelSheetReader extends BaseExcelProcessor implements
             byte[] rgbBytes = ((XSSFColor) color).getRGB();
             if(rgbBytes != null) {
                 rgb =  new short[3];
-                rgb[0]= rgbBytes[0] < 0 ? (short) (rgbBytes[0]+256) : rgbBytes[0];
-                rgb[1]= rgbBytes[0] < 0 ? (short) (rgbBytes[1]+256) : rgbBytes[1];
-                rgb[2]= rgbBytes[0] < 0 ? (short) (rgbBytes[2]+256) : rgbBytes[2];
+                // bytes are signed in Java: convert each channel independently to 0..255
+                rgb[0] = (short) (rgbBytes[0] & 0xFF);
+                rgb[1] = (short) (rgbBytes[1] & 0xFF);
+                rgb[2] = (short) (rgbBytes[2] & 0xFF);
             }
         }
         else if (color instanceof HSSFColor) {

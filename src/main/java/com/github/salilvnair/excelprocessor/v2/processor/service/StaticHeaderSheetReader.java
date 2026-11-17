@@ -40,8 +40,7 @@ public interface StaticHeaderSheetReader {
             classObject.setRow(rowOrColumnIndexKey+1);
         }
         headerCellFieldMap.forEach((cell, field) -> {
-            String headerString = cell.value();
-            headerString = ExcelSheetReaderUtil.cleanAndProcessSimilarHeaderString(headerString, clazz, cell);
+            String headerString = headerKey(clazz, cell);
             CellInfo cellInfo = excelCellInfoMap.get(headerString);
             if(cellInfo!=null) {
                 Object fieldValue = TypeConvertor.convert(cellInfo.value(), cellInfo.cellType(), field.getType(), field);
@@ -49,6 +48,15 @@ public interface StaticHeaderSheetReader {
             }
         });
         return classObject;
+    }
+
+    /** class -> (@Cell -> header key); the key only depends on annotations, so compute it once, not per row */
+    Map<Class<?>, Map<Cell, String>> HEADER_KEYS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    static String headerKey(Class<?> clazz, Cell cell) {
+        return HEADER_KEYS
+                .computeIfAbsent(clazz, c -> new java.util.concurrent.ConcurrentHashMap<>())
+                .computeIfAbsent(cell, c -> ExcelSheetReaderUtil.cleanAndProcessSimilarHeaderString(c.value(), clazz, c));
     }
 
     static BaseSheet cellValueResolver(Class<? extends BaseSheet> clazz, Map<String, CellInfo> excelCellInfoMap, int rowOrColumnIndexKey, Map<Cell, Field> headerCellFieldMap,  Map<String, CellRangeAddress> mergedHeaderStringKeyedCellRageAddress) throws InstantiationException, IllegalAccessException {

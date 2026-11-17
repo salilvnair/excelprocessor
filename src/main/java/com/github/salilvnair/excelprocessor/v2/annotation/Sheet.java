@@ -52,6 +52,8 @@ public @interface Sheet {
 	final class DefaultTask extends AbstractExcelTask {};
     SectionHint[] sectionHints() default {};
     boolean streamingWorkbook() default false;
+    /** rows kept in memory per sheet when {@link #streamingWorkbook()} is true (SXSSF window) */
+    int streamingRowWindowSize() default 100;
     boolean readValuesAsString() default false;
     boolean useDefaultNumberType() default false;
     boolean multiPositionalHeaders() default false;

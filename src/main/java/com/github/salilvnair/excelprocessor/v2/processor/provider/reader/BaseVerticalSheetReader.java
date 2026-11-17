@@ -172,8 +172,10 @@ public class BaseVerticalSheetReader extends BaseExcelSheetReader {
             if(headerCell == null){
                 continue;
             }
-            String headerString = headerCell.getStringCellValue();
-            headerString = ExcelSheetReaderUtil.cleanHeaderString(headerString);
+            String headerString = ExcelSheetReaderUtil.headerText(headerCell);
+            if(headerString.isEmpty()) {
+                continue;
+            }
             if(!classCellHeaders.contains(headerString) && !sheet.dynamicHeaders()) {
                 ignoreHeaderRows.add(r);
                 continue;

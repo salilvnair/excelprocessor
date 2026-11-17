@@ -59,9 +59,9 @@ public class ExcelSheetWriterUtil {
         synchronized (staticFileCreatorObjectLock) {
             destinationFile = new File(new File(filePath), fileName);
         }
-        FileOutputStream fout = new FileOutputStream(destinationFile);
-        workbook.write(fout);
-        fout.close();
+        try (FileOutputStream fout = new FileOutputStream(destinationFile)) {
+            workbook.write(fout);
+        }
     }
 
     public static void write(Workbook workbook, File file) throws Exception{
@@ -69,8 +69,8 @@ public class ExcelSheetWriterUtil {
         synchronized (staticFileCreatorObjectLock) {
             destinationFile = file;
         }
-        FileOutputStream fout=new FileOutputStream(destinationFile);
-        workbook.write(fout);
-        fout.close();
+        try (FileOutputStream fout = new FileOutputStream(destinationFile)) {
+            workbook.write(fout);
+        }
     }
 }

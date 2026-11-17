@@ -4,17 +4,20 @@ import com.github.salilvnair.excelprocessor.util.AnnotationUtil;
 import com.github.salilvnair.excelprocessor.v2.annotation.Cell;
 import com.github.salilvnair.excelprocessor.v2.annotation.Sheet;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
-import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-
+/**
+ * List based streaming (SXSSF) writer for fixed-header horizontal sheets. Only
+ * {@link Sheet#streamingRowWindowSize()} rows are kept in memory by POI; the input list itself is
+ * still held by the caller. For inputs that should not be materialized use
+ * {@code ExcelSheetWriterFactory.openStreaming(...)}.
+ */
 public class StreamingHorizontalSheetWriter extends BaseHorizontalSheetWriter {
 
     @Override
@@ -22,18 +25,21 @@ public class StreamingHorizontalSheetWriter extends BaseHorizontalSheetWriter {
         BaseSheet baseSheet = sheetData.get(0);
         Sheet sheet = baseSheet.getClass().getAnnotation(Sheet.class);
         Set<Field> cellFields = AnnotationUtil.getAnnotatedFields(baseSheet.getClass(), Cell.class);
-        XSSFWorkbook workbook = (XSSFWorkbook) (context.template() == null ? ExcelSheetWriterUtil.generateWorkbook(sheet) : context.template());
-        SXSSFWorkbook sxssfWorkbook = new SXSSFWorkbook(workbook);
-        sxssfWorkbook.setCompressTempFiles(true);
-        SXSSFSheet sxssfSheet = context.template() == null ? sxssfWorkbook.createSheet(sheet.value()): sxssfWorkbook.getSheet(sheet.value());
-        if(sxssfSheet == null) {
-            sxssfSheet = sxssfWorkbook.createSheet(sheet.value());
+        StreamingWorkbookSupport.Opened opened = StreamingWorkbookSupport.open(sheet, context);
+        try {
+            SXSSFSheet sxssfSheet = StreamingWorkbookSupport.sheet(opened.workbook, sheet);
+            List<Field> cells = new ArrayList<>(cellFields);
+            writeDataToHeader(sheetData, cellFields, sxssfSheet, cells, sheet, context);
+            writeDataToBody(sheetData, cellFields, sxssfSheet, cells, sheet, context);
+            applySheetStyles(sheet, opened.workbook, sxssfSheet, context);
         }
-        sxssfSheet.setRandomAccessWindowSize(100);
-        List<Field> cells = new ArrayList<>(cellFields);
-        writeDataToHeader(sheetData, cellFields, sxssfSheet, cells, sheet, context);
-        writeDataToBody(sheetData, cellFields, sxssfSheet, cells, sheet, context);
-        context.setWorkbook(sxssfWorkbook);
+        catch (RuntimeException e) {
+            if (opened.created) {
+                opened.workbook.dispose();
+            }
+            throw e;
+        }
+        context.setWorkbook(opened.workbook);
         context.setStreamingWorkbook(true);
     }
 }

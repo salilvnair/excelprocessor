@@ -91,8 +91,7 @@ public class UserDefinedTemplateDynamicVerticalSheetWriter extends BaseExcelShee
                 org.apache.poi.ss.usermodel.Cell rowCell = row.getCell(columnIndex) == null ? row.createCell(columnIndex) : row.getCell(columnIndex);
                 convertAndSetCellValue(rowCell, userProvidedCellInfo.value());
                 applyDynamicHeaderDataCellStyles(sheet, headerKey, rowCell, userProvidedCellInfo.value(), context);
-                FormulaEvaluator evaluator = workbookSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
-                evaluator.evaluateFormulaCell(rowCell);
+                context.evaluateIfFormula(rowCell);
             }
             columnIndex++;
         }

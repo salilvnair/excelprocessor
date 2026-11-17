@@ -84,8 +84,7 @@ public class UserDefinedTemplateVerticalSheetWriter extends BaseExcelSheetWriter
                 org.apache.poi.ss.usermodel.Cell rowCell = row.getCell(columnIndex) == null ? row.createCell(columnIndex) : row.getCell(columnIndex);
                 writeDataToCell(sheet, cell, rowCell, cellField, fieldValue, writerContext);
                 applyDataCellStyles(sheet, cell, rowCell, cellField, fieldValue, writerContext);
-                FormulaEvaluator evaluator = workbookSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
-                evaluator.evaluateFormulaCell(rowCell);
+                writerContext.evaluateIfFormula(rowCell);
             }
             columnIndex++;
         }

@@ -75,8 +75,12 @@ public class ExcelSheetFactory {
             return new VerticalSheetWriter();
         }
         else {
+            boolean streamingXlsx = ExcelFileType.Extension.XLSX.equals(sheet.type()) && sheet.streamingWorkbook();
             if(sheet.userDefinedTemplate() && sheet.dynamicHeaders()) {
                 return new UserDefinedTemplateDynamicHorizontalSheetWriter();
+            }
+            else if(sheet.dynamicHeaders() && streamingXlsx) {
+                return new StreamingDynamicHorizontalSheetWriter();
             }
             else if(sheet.dynamicHeaders()) {
                 return new DynamicHorizontalSheetWriter();
@@ -84,7 +88,7 @@ public class ExcelSheetFactory {
             else if(sheet.userDefinedTemplate()) {
                 return new UserDefinedTemplateHorizontalSheetWriter();
             }
-            else if (ExcelFileType.Extension.XLSX.equals(sheet.type()) && sheet.streamingWorkbook()) {
+            else if (streamingXlsx) {
                 return new StreamingHorizontalSheetWriter();
             }
             return new HorizontalSheetWriter();

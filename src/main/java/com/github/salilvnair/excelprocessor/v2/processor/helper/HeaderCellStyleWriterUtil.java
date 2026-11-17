@@ -7,6 +7,8 @@ import com.github.salilvnair.excelprocessor.v2.model.NumberStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.model.StyleTemplateCellInfo;
 import com.github.salilvnair.excelprocessor.v2.model.TextStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.style.CellStyleResolver;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.style.CellStyleSpec;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.type.DateFormatPattern;
@@ -53,133 +55,73 @@ public class HeaderCellStyleWriterUtil {
         if(headerCellStyle == null) {
             return;
         }
-        CellStyle cellStyle = null;
-
+        CellStyleSpec.Builder spec = CellStyleSpec.builder();
         if(writerContext.styleTemplate()!=null && !headerCellStyle.ignoreStyleTemplate()) {
-            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
             StyleTemplateCell styleTemplateCell = headerCellStyle.styleTemplateCell();
-            int rowIndex = styleTemplateCell.row()  - 1;
-            int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCell.column())  - 1;
-            if(writerContext.styleTemplate().getSheet(sheet.value()) != null) {
-                CellStyle templateCellStyle = writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getCellStyle();
-                cellStyle.cloneStyleFrom(templateCellStyle);
-                // Copy cell width
-                rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), writerContext.styleTemplate().getSheet(sheet.value()).getColumnWidth(writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getColumnIndex()));
-                // Copy text wrapping
-                cellStyle.setWrapText(templateCellStyle.getWrapText());
-            }
+            spec.templateStyle(CellStyleResolver.templateStyle(writerContext, sheet, styleTemplateCell.row(), styleTemplateCell.column(), rowCell));
         }
-        else {
-            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-        }
-
-        cellStyle.setWrapText(headerCellStyle.wrapText());
-        cellStyle.setHidden(headerCellStyle.hide());
+        spec.wrapText(headerCellStyle.wrapText());
+        spec.hidden(headerCellStyle.hide());
         if(headerCellStyle.hide()) {
             rowCell.getSheet().setColumnHidden(rowCell.getColumnIndex(), true);
         }
         if(headerCellStyle.hasBorderStyle()) {
-            cellStyle.setBorderTop(headerCellStyle.borderStyle());
-            cellStyle.setBorderRight(headerCellStyle.borderStyle());
-            cellStyle.setBorderBottom(headerCellStyle.borderStyle());
-            cellStyle.setBorderLeft(headerCellStyle.borderStyle());
+            spec.border(headerCellStyle.borderStyle());
         }
         if(headerCellStyle.hasBorderColor()) {
-            cellStyle.setTopBorderColor(headerCellStyle.borderColor().getIndex());
-            cellStyle.setRightBorderColor(headerCellStyle.borderColor().getIndex());
-            cellStyle.setBottomBorderColor(headerCellStyle.borderColor().getIndex());
-            cellStyle.setLeftBorderColor(headerCellStyle.borderColor().getIndex());
+            spec.borderColor(headerCellStyle.borderColor().getIndex());
         }
+        // note: for static headers hasBackgroundColor has always applied foregroundColor (kept as-is)
         if(headerCellStyle.hasBackgroundColor()) {
-            cellStyle.setFillPattern(headerCellStyle.fillPattern());
-            cellStyle.setFillForegroundColor(headerCellStyle.foregroundColor().getIndex());
-            cellStyle.setFillBackgroundColor(headerCellStyle.foregroundColor().getIndex());
+            spec.fillPattern(headerCellStyle.fillPattern());
+            spec.fillForegroundColor(headerCellStyle.foregroundColor().getIndex());
+            spec.fillBackgroundColor(headerCellStyle.foregroundColor().getIndex());
         }
         if(headerCellStyle.hasForegroundColor()) {
-            cellStyle.setFillPattern(headerCellStyle.fillPattern());
-            cellStyle.setFillForegroundColor(headerCellStyle.foregroundColor().getIndex());
+            spec.fillPattern(headerCellStyle.fillPattern());
+            spec.fillForegroundColor(headerCellStyle.foregroundColor().getIndex());
         }
         if(headerCellStyle.customTextStyle()) {
-            applyTextStyleIfApplicable(rowCell, cellStyle, extractTextStyleInfo(headerCellStyle.textStyle()));
+            spec.font(CellStyleResolver.font(extractTextStyleInfo(headerCellStyle.textStyle())));
         }
-        rowCell.setCellStyle(cellStyle);
+        CellStyleResolver.apply(rowCell, spec.build(), writerContext);
     }
 
     public static void applyStaticDynamicCellStyles(Sheet sheet, String header, HeaderCellStyleInfo headerCellStyleInfo, org.apache.poi.ss.usermodel.Cell rowCell, ExcelSheetWriterContext writerContext) {
         if(headerCellStyleInfo == null) {
             return;
         }
-
-        CellStyle cellStyle = null;
-
+        CellStyleSpec.Builder spec = CellStyleSpec.builder();
         if(writerContext.styleTemplate()!=null && !headerCellStyleInfo.isIgnoreStyleTemplate()) {
-            cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-            StyleTemplateCellInfo styleTemplateCellInfo = headerCellStyleInfo.getStyleTemplateCellInfo();
-            int rowIndex = styleTemplateCellInfo.getRow()  - 1;
-            int columnIndex = ExcelSheetReader.toIndentNumber(styleTemplateCellInfo.getColumn())  - 1;
-            if(writerContext.styleTemplate().getSheet(sheet.value()) != null) {
-                CellStyle templateCellStyle = writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getCellStyle();
-                cellStyle.cloneStyleFrom(templateCellStyle);
-                // Copy cell width
-                rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), writerContext.styleTemplate().getSheet(sheet.value()).getColumnWidth(writerContext.styleTemplate().getSheet(sheet.value()).getRow(rowIndex).getCell(columnIndex).getColumnIndex()));
-                // Copy text wrapping
-                cellStyle.setWrapText(templateCellStyle.getWrapText());
-            }
+            spec.templateStyle(CellStyleResolver.templateStyle(writerContext, sheet, headerCellStyleInfo.getStyleTemplateCellInfo(), rowCell));
         }
         else {
-            cellStyle = rowCell.getCellStyle();
-            if (cellStyle == null || cellStyle.getDataFormat() == 0) {
-                cellStyle = rowCell.getSheet().getWorkbook().createCellStyle();
-            }
+            spec.baseStyleIndex(CellStyleResolver.baseStyleIndex(rowCell));
         }
-
-        cellStyle.setWrapText(headerCellStyleInfo.isWrapText());
-        cellStyle.setHidden(headerCellStyleInfo.isHide());
+        spec.wrapText(headerCellStyleInfo.isWrapText());
+        spec.hidden(headerCellStyleInfo.isHide());
         if(headerCellStyleInfo.isHide()) {
             rowCell.getSheet().setColumnHidden(rowCell.getColumnIndex(), true);
         }
         if(headerCellStyleInfo.isHasBorderStyle()) {
-            cellStyle.setBorderTop(headerCellStyleInfo.getBorderStyle());
-            cellStyle.setBorderRight(headerCellStyleInfo.getBorderStyle());
-            cellStyle.setBorderBottom(headerCellStyleInfo.getBorderStyle());
-            cellStyle.setBorderLeft(headerCellStyleInfo.getBorderStyle());
+            spec.border(headerCellStyleInfo.getBorderStyle());
         }
         if(headerCellStyleInfo.isHasBorderColor()) {
-            cellStyle.setTopBorderColor(headerCellStyleInfo.getBorderColor().getIndex());
-            cellStyle.setRightBorderColor(headerCellStyleInfo.getBorderColor().getIndex());
-            cellStyle.setBottomBorderColor(headerCellStyleInfo.getBorderColor().getIndex());
-            cellStyle.setLeftBorderColor(headerCellStyleInfo.getBorderColor().getIndex());
+            spec.borderColor(headerCellStyleInfo.getBorderColor().getIndex());
         }
-
         if(headerCellStyleInfo.isHasBackgroundColor()) {
-            cellStyle.setFillPattern(headerCellStyleInfo.getFillPattern());
-            cellStyle.setFillForegroundColor(headerCellStyleInfo.getBackgroundColor().getIndex());
-            cellStyle.setFillBackgroundColor(headerCellStyleInfo.getBackgroundColor().getIndex());
+            spec.fillPattern(headerCellStyleInfo.getFillPattern());
+            spec.fillForegroundColor(headerCellStyleInfo.getBackgroundColor().getIndex());
+            spec.fillBackgroundColor(headerCellStyleInfo.getBackgroundColor().getIndex());
         }
-
         if(headerCellStyleInfo.isHasForegroundColor()) {
-            cellStyle.setFillPattern(headerCellStyleInfo.getFillPattern());
-            cellStyle.setFillForegroundColor(headerCellStyleInfo.getForegroundColor().getIndex());
+            spec.fillPattern(headerCellStyleInfo.getFillPattern());
+            spec.fillForegroundColor(headerCellStyleInfo.getForegroundColor().getIndex());
         }
         if(headerCellStyleInfo.isCustomTextStyle() && headerCellStyleInfo.getTextStyleInfo()!=null) {
-            applyTextStyleIfApplicable(rowCell, cellStyle, headerCellStyleInfo.getTextStyleInfo());
+            spec.font(CellStyleResolver.font(headerCellStyleInfo.getTextStyleInfo()));
         }
-        rowCell.setCellStyle(cellStyle);
-    }
-
-    private static void applyTextStyleIfApplicable(org.apache.poi.ss.usermodel.Cell rowCell, CellStyle cellStyle, TextStyleInfo textStyleInfo) {
-        Font font = rowCell.getSheet().getWorkbook().createFont();
-        font.setBold(textStyleInfo.isBold());
-        font.setItalic(textStyleInfo.isItalic());
-        font.setColor(textStyleInfo.getColor().getIndex());
-        font.setStrikeout(textStyleInfo.isStrikeout());
-        if(StringUtils.isNotEmpty(textStyleInfo.getFontName())) {
-            font.setFontName(textStyleInfo.getFontName());
-        }
-        if(textStyleInfo.getFontHeight() > -1) {
-            font.setFontHeight(textStyleInfo.getFontHeight());
-        }
-        cellStyle.setFont(font);
+        CellStyleResolver.apply(rowCell, spec.build(), writerContext);
     }
 
     public static HeaderCellStyle extractHeaderCellStyle(Field annotatedField, ExcelSheetWriterContext writerContext) {

@@ -11,6 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,21 +23,59 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
     }
     @Override
     public <T extends BaseSheet> void write(List<T> sheetData, ExcelSheetContext sheetContext) throws Exception {
-        Workbook workbook = workbook(sheetData, sheetContext);
-        if(workbook != null) {
-            ExcelSheetWriterUtil.write(workbook, sheetContext.fileName(), sheetContext.filePath());
-            disposeStreamingWorkbook(workbook, sheetContext);
-        }
+        writeAndDispose(sheetContext, () -> workbook(sheetData, sheetContext),
+                workbook -> ExcelSheetWriterUtil.write(workbook, sheetContext.fileName(), sheetContext.filePath()));
     }
 
     @Override
     public <T extends BaseSheet> void write(ExcelSheetContext sheetContext, List<List<? extends BaseSheet>> multiOrientedSheetData) throws Exception {
-        boolean containsExistingWorkbook = false;
-        generateWorkbook(sheetContext, multiOrientedSheetData, containsExistingWorkbook);
-        Workbook workbook = sheetContext.writerContext().workbook();
-        if(workbook != null) {
-            ExcelSheetWriterUtil.write(workbook, sheetContext.fileName(), sheetContext.filePath());
-            disposeStreamingWorkbook(workbook, sheetContext);
+        writeAndDispose(sheetContext, () -> workbook(sheetContext, multiOrientedSheetData),
+                workbook -> ExcelSheetWriterUtil.write(workbook, sheetContext.fileName(), sheetContext.filePath()));
+    }
+
+    @Override
+    public void write(Map<String, List<? extends BaseSheet>> sheets, ExcelSheetContext sheetContext) {
+        try {
+            writeAndDispose(sheetContext, () -> workbook(sheets, sheetContext),
+                    workbook -> ExcelSheetWriterUtil.write(workbook, sheetContext.fileName(), sheetContext.filePath()));
+        }
+        catch (ExcelSheetWriterException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            if(!sheetContext.suppressExceptions()) {
+                throw new ExcelSheetWriterException(e);
+            }
+        }
+    }
+
+    @Override
+    public <T extends BaseSheet> void write(List<T> sheetData, ExcelSheetContext sheetContext, OutputStream outputStream) throws Exception {
+        writeAndDispose(sheetContext, () -> workbook(sheetData, sheetContext), workbook -> workbook.write(outputStream));
+    }
+
+    @Override
+    public void write(Map<String, List<? extends BaseSheet>> sheets, ExcelSheetContext sheetContext, OutputStream outputStream) throws Exception {
+        writeAndDispose(sheetContext, () -> workbook(sheets, sheetContext), workbook -> workbook.write(outputStream));
+    }
+
+    private interface WorkbookSupplier { Workbook get() throws Exception; }
+    private interface WorkbookConsumer { void accept(Workbook workbook) throws Exception; }
+
+    /**
+     * Builds and serializes a workbook, always releasing streaming temp files afterwards, including
+     * when building or serializing fails part way.
+     */
+    private void writeAndDispose(ExcelSheetContext sheetContext, WorkbookSupplier supplier, WorkbookConsumer consumer) throws Exception {
+        Workbook workbook = null;
+        try {
+            workbook = supplier.get();
+            if(workbook != null) {
+                consumer.accept(workbook);
+            }
+        }
+        finally {
+            ExcelSheetWriter.dispose(workbook != null ? workbook : sheetContext.writerContext().workbook());
         }
     }
 
@@ -103,7 +142,7 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
         return writerContext.workbook();
     }
 
-    private ExcelSheetWriterContext buildExcelSheetWriterContext(ExcelSheetContext sheetContext, boolean existingWorkbook) {
+    static ExcelSheetWriterContext buildExcelSheetWriterContext(ExcelSheetContext sheetContext, boolean existingWorkbook) {
         File excelFile = sheetContext.excelFile();
         Workbook workbook = sheetContext.workbook();
         existingWorkbook = existingWorkbook || sheetContext.template() != null;
@@ -135,6 +174,7 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
                 .dynamicHeaderDisplayNames(sheetContext.dynamicHeaderDisplayNames())
                 .dynamicHeaderCellStyleInfo(sheetContext.dynamicHeaderCellStyleInfo())
                 .dynamicHeaderDataCellStyleInfo(sheetContext.dynamicHeaderDataCellStyleInfo())
+                .styleRegistry(sheetContext.styleRegistry())
                 .build();
     }
 }

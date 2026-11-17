@@ -73,8 +73,7 @@ public class VerticalSheetWriter extends BaseExcelSheetWriter {
             Cell cell = field.getAnnotation(Cell.class);
             writeDataToHeaderCell(sheet, cell, rowCell, originalHeader, writerContext);
             applyHeaderCellStyles(sheet, cell, rowCell, field, originalHeader, writerContext);
-            FormulaEvaluator evaluator = workbookSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
-            evaluator.evaluateFormulaCell(rowCell);
+            writerContext.evaluateIfFormula(rowCell);
         }
 
         Map<Integer, Field> headerRowIndexCellFieldMap = new HashMap<>();
@@ -108,8 +107,7 @@ public class VerticalSheetWriter extends BaseExcelSheetWriter {
                 org.apache.poi.ss.usermodel.Cell rowCell = row.getCell(columnIndex) == null ? row.createCell(columnIndex) : row.getCell(columnIndex);
                 writeDataToCell(sheet, cell, rowCell, cellField, fieldValue, writerContext);
                 applyDataCellStyles(sheet, cell, rowCell, cellField, fieldValue, writerContext);
-                FormulaEvaluator evaluator = workbookSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
-                evaluator.evaluateFormulaCell(rowCell);
+                writerContext.evaluateIfFormula(rowCell);
             }
             columnIndex++;
         }

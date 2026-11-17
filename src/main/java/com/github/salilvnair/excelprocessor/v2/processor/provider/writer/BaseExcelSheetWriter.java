@@ -7,6 +7,10 @@ import com.github.salilvnair.excelprocessor.v2.model.HeaderCellStyleInfo;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.DataCellStyleWriterUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetReaderUtil;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.HeaderCellStyleWriterUtil;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.style.CellStyleRegistry;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.style.CellStyleResolver;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.style.CellStyleSpec;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.style.FontSpec;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetReader;
 import com.github.salilvnair.excelprocessor.v2.sheet.DynamicHeaderSheet;
 import com.github.salilvnair.excelprocessor.v2.type.PictureSourceType;
@@ -39,6 +43,17 @@ import java.util.stream.Collectors;
  * @author Salil V Nair
  */
 public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements ExcelSheetWriter {
+    protected static final FontSpec HYPERLINK_FONT = FontSpec.builder()
+            .bold(true)
+            .color(IndexedColors.BLUE.getIndex())
+            .underline(FontUnderline.SINGLE.getByteValue())
+            .build();
+
+    protected static final CellStyleSpec HYPERLINK_STYLE = CellStyleSpec.builder().font(HYPERLINK_FONT).build();
+
+    /** used by {@link #copyCellStyle} when no writer context is at hand */
+    private final CellStyleRegistry styleRegistry = new CellStyleRegistry();
+
     abstract void write(List<? extends BaseSheet> sheetData, ExcelSheetWriterContext context);
 
     protected void writeDataToHeaderCell(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
@@ -64,7 +79,10 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
             return;
         }
         if(dataCellStyle.columnWidthInUnits() > -1) {
-            rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), dataCellStyle.columnWidthInUnits());
+            // set once per column instead of once per cell
+            if(rowCell.getSheet().getColumnWidth(rowCell.getColumnIndex()) != dataCellStyle.columnWidthInUnits()) {
+                rowCell.getSheet().setColumnWidth(rowCell.getColumnIndex(), dataCellStyle.columnWidthInUnits());
+            }
         }
     }
 
@@ -127,6 +145,18 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         else if(value instanceof BigDecimal) {
             rowCell.setCellValue(TypeConvertor.convert(BigDecimal.class, Double.class, value));
         }
+        else if(value instanceof Boolean) {
+            rowCell.setCellValue((Boolean) value);
+        }
+        else if(value instanceof java.time.LocalDateTime) {
+            rowCell.setCellValue((java.time.LocalDateTime) value);
+        }
+        else if(value instanceof java.time.LocalDate) {
+            rowCell.setCellValue((java.time.LocalDate) value);
+        }
+        else if(value instanceof Number) {
+            rowCell.setCellValue(((Number) value).doubleValue());
+        }
     }
 
     protected void processHyperLink(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
@@ -149,20 +179,7 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
 
     protected void processMultiLinkAsSimpleText(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
         processCommonCellData(sheetInfo, cellInfo, rowCell, value, context);
-        Workbook workbook = rowCell.getSheet().getWorkbook();
-        // Create a CellStyle for the formula cell
-        CellStyle formulaCellStyle = workbook.createCellStyle();
-
-        // Create a Font with desired settings
-        Font font = workbook.createFont();
-        font.setBold(true);
-        font.setColor(IndexedColors.BLUE.getIndex());
-        font.setUnderline(FontUnderline.SINGLE.getByteValue());
-        // Set the Font to the CellStyle
-        formulaCellStyle.setFont(font);
-
-        // Apply the CellStyle to the formula cell
-        rowCell.setCellStyle(formulaCellStyle);
+        CellStyleResolver.apply(rowCell, HYPERLINK_STYLE, context);
     }
 
     protected void processUniLinkCellValue(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
@@ -173,11 +190,12 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         String linkText = "".equals(cellInfo.hyperLinkText()) ? (String) value : cellInfo.hyperLinkText();
         rowCell.setCellValue(linkText);
         rowCell.setHyperlink(link);
-        Font font = workbook.createFont();
-        font.setBold(true);
-        font.setUnderline(FontUnderline.SINGLE.getByteValue());
-        font.setColor(IndexedColors.BLUE.getIndex());
-        CellUtil.setFont(rowCell, font);
+        // keep the cell's current style, only switch the font (was CellUtil.setFont with a new font per cell)
+        CellStyleSpec linkStyle = CellStyleSpec.builder()
+                .baseStyleIndex(rowCell.getCellStyle().getIndex())
+                .font(HYPERLINK_FONT)
+                .build();
+        CellStyleResolver.apply(rowCell, linkStyle, context);
     }
 
     protected void processMultiLinkCellValue(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
@@ -185,27 +203,16 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         List<String> hyperlinks = ExcelSheetReaderUtil.extractHyperlinks(String.valueOf(value));
         String cellFormula = createHyperlinkFormula(hyperlinks);
         rowCell.setCellFormula(cellFormula);
-
-        // Create a CellStyle for the formula cell
-        CellStyle formulaCellStyle = workbook.createCellStyle();
-
-        // Create a Font with desired settings
-        Font font = workbook.createFont();
-        font.setBold(true);
-        font.setColor(IndexedColors.BLUE.getIndex());
-        font.setUnderline(FontUnderline.SINGLE.getByteValue());
-        // Set the Font to the CellStyle
-        formulaCellStyle.setFont(font);
-
-        // Apply the CellStyle to the formula cell
-        rowCell.setCellStyle(formulaCellStyle);
+        CellStyleResolver.apply(rowCell, HYPERLINK_STYLE, context);
     }
 
     protected static String createHyperlinkFormula(List<String> hyperlinks) {
         StringBuilder formulaBuilder = new StringBuilder();
 
         for (int i = 0; i < hyperlinks.size(); i++) {
-            String link = hyperlinks.get(i);
+            // Double the quotes so a crafted value cannot break out of the string literal and
+            // inject other formula calls (for example WEBSERVICE) into the HYPERLINK formula.
+            String link = hyperlinks.get(i).replace("\"", "\"\"");
 
             String hyperlink = "HYPERLINK(\"" + link + "\", \"" + link + "\")";
             formulaBuilder.append(hyperlink);
@@ -247,9 +254,15 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
 
     protected void copyCellStyle(org.apache.poi.ss.usermodel.Cell oldCell, org.apache.poi.ss.usermodel.Cell newCell){
         if(oldCell!=null && newCell!=null) {
-            CellStyle newCellStyle = newCell.getSheet().getWorkbook().createCellStyle();
-            newCellStyle.cloneStyleFrom(oldCell.getCellStyle());
-            newCell.setCellStyle(newCellStyle);
+            Workbook destination = newCell.getSheet().getWorkbook();
+            CellStyle sourceStyle = oldCell.getCellStyle();
+            if(oldCell.getSheet().getWorkbook() == destination) {
+                // same workbook: styles can be shared directly
+                newCell.setCellStyle(sourceStyle);
+            }
+            else {
+                newCell.setCellStyle(styleRegistry.copyOf(destination, sourceStyle));
+            }
 
             // If there is a cell comment, copy
             if (oldCell.getCellComment() != null) {
