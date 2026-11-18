@@ -35,6 +35,7 @@ public class TypeConvertor {
         else if(value instanceof Number) {
             convertedValue = convertNumber(value, sourceType, destinationType);
         }
+        // no ValueCoercer here: readValuesAsString/defaultNumberType rely on the 4.0 behaviour
         return convertedValue;
     }
 
@@ -53,7 +54,7 @@ public class TypeConvertor {
         else if(value instanceof Number) {
             convertedValue = convertNumber(value, sourceType, destinationType);
         }
-        return convertedValue;
+        return ValueCoercer.coerce(convertedValue, destinationType, cell);
     }
 
     public static Object convert(Object value, Type sourceType, Type destinationType, FieldInfo fieldInfo) {
@@ -70,7 +71,7 @@ public class TypeConvertor {
         else if(value instanceof Number) {
             convertedValue = convertNumber(value, sourceType, destinationType);
         }
-        return convertedValue;
+        return ValueCoercer.coerce(convertedValue, destinationType, (Cell) null);
     }
 
     private static Object resolveDateOrDateTimeString(Object value, Type sourceType, Type destinationType, Cell cell, Field cellField) {

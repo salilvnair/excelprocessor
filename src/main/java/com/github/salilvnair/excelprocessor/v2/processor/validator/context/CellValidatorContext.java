@@ -39,6 +39,13 @@ public class CellValidatorContext {
     private AbstractExcelTaskValidator taskValidatorBean;
     private List<Object> taskMetadata;
     private Function<String, Object> beanResolver;
+    /** values seen so far per unique column; set when validating while streaming */
+    private Map<String, java.util.Set<Object>> uniqueValues;
+
+    /** Values already seen per {@code unique} column while streaming, or null for list validation. */
+    public Map<String, java.util.Set<Object>> uniqueValues() {
+        return uniqueValues;
+    }
 
 
     public Map<String, Object> userValidatorMap() {

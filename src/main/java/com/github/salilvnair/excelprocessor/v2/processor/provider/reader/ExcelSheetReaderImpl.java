@@ -306,7 +306,9 @@ public class ExcelSheetReaderImpl extends BaseExcelProcessor implements ExcelShe
             FileInputStream inputS = null;
             try {
                 inputS = new FileInputStream(excelFile);
-                readerContext.setWorkbook(ExcelSheetReaderUtil.generateWorkbook(inputS, excelFile.getAbsolutePath()));
+                readerContext.setWorkbook(context.password() != null
+                        ? com.github.salilvnair.excelprocessor.v2.processor.helper.WorkbookCrypto.open(inputS, context.password())
+                        : ExcelSheetReaderUtil.generateWorkbook(inputS, excelFile.getAbsolutePath()));
                 context.setFileName(excelFile.getName());
             }
             catch (Exception e) {

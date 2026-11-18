@@ -55,12 +55,17 @@ public class ExcelSheetWriterUtil {
     }
 
     public static void write(Workbook workbook, String fileName, String filePath) throws Exception{
+        write(workbook, fileName, filePath, null);
+    }
+
+    /** Writes to filePath/fileName, encrypting the workbook when {@code password} is not null. */
+    public static void write(Workbook workbook, String fileName, String filePath, String password) throws Exception{
         File destinationFile = null;
         synchronized (staticFileCreatorObjectLock) {
             destinationFile = new File(new File(filePath), fileName);
         }
         try (FileOutputStream fout = new FileOutputStream(destinationFile)) {
-            workbook.write(fout);
+            WorkbookCrypto.write(workbook, fout, password);
         }
     }
 

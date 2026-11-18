@@ -9,7 +9,10 @@ import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import com.github.salilvnair.excelprocessor.v2.sheet.DynamicHeaderSheet;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 public class UniqueValidator extends BaseDynamicCellValidator {
@@ -24,9 +27,21 @@ public class UniqueValidator extends BaseDynamicCellValidator {
         if(allowNullOrAllowEmptyCheck(fieldValue, cellValidation)) {
             return false;
         }
+        if(fieldValue == null) {
+            return false;
+        }
+        Map<String, Set<Object>> seen = validatorContext.uniqueValues();
+        if(seen != null) {
+            // streaming: the second and later occurrences are duplicates
+            return !seen.computeIfAbsent("dynamic#" + headerKey(), k -> new HashSet<>()).add(fieldValue);
+        }
         List<? extends BaseSheet> sheetDataList = validatorContext.getCurrentSheet();
         if(CollectionUtils.isNotEmpty(sheetDataList)) {
+            // a row never duplicates itself
             return sheetDataList.stream().anyMatch(sheetData -> {
+                if(sheetData == currentInstance) {
+                    return false;
+                }
                 DynamicHeaderSheet dynamicHeaderSheet = (DynamicHeaderSheet) sheetData;
                 return fieldValue.equals(dynamicHeaderSheet.dynamicHeaderKeyedCellValueMap().get(headerKey()));
             });

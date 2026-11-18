@@ -79,6 +79,22 @@ public class ExcelSheetWriterContext extends BaseExcelSheetContext {
     /** workbook-scoped style/font cache; never create styles per cell, resolve them here */
     private CellStyleRegistry styleRegistry;
 
+    /** valid values per data set key, used for {@code @AllowedValues(dataSetKey)} dropdowns */
+    private Map<String, List<String>> validValuesDataSet;
+
+    /** validation rules of dynamic headers, used for their dropdowns */
+    private Map<String, com.github.salilvnair.excelprocessor.v2.model.CellValidationInfo> headerKeyedCellValidationInfo;
+
+    /** column index to header text of the sheet being written (horizontal sheets) */
+    private Map<Integer, String> writtenHeaders;
+
+    public Map<Integer, String> writtenHeaders() {
+        if(writtenHeaders == null) {
+            writtenHeaders = new java.util.TreeMap<>();
+        }
+        return writtenHeaders;
+    }
+
     /** formula evaluator reused for every cell of {@link #formulaEvaluatorWorkbook} */
     private FormulaEvaluator formulaEvaluator;
 

@@ -5,6 +5,7 @@ import com.github.salilvnair.excelprocessor.v2.exception.ExcelSheetWriterExcepti
 import com.github.salilvnair.excelprocessor.v2.processor.context.ExcelSheetWriterContext;
 import com.github.salilvnair.excelprocessor.v2.processor.factory.ExcelSheetFactory;
 import com.github.salilvnair.excelprocessor.v2.processor.helper.ExcelSheetWriterUtil;
+import com.github.salilvnair.excelprocessor.v2.processor.helper.WorkbookCrypto;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
 import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,20 +25,20 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
     @Override
     public <T extends BaseSheet> void write(List<T> sheetData, ExcelSheetContext sheetContext) throws Exception {
         writeAndDispose(sheetContext, () -> workbook(sheetData, sheetContext),
-                workbook -> ExcelSheetWriterUtil.write(workbook, sheetContext.fileName(), sheetContext.filePath()));
+                workbook -> ExcelSheetWriterUtil.write(workbook, sheetContext.fileName(), sheetContext.filePath(), sheetContext.password()));
     }
 
     @Override
     public <T extends BaseSheet> void write(ExcelSheetContext sheetContext, List<List<? extends BaseSheet>> multiOrientedSheetData) throws Exception {
         writeAndDispose(sheetContext, () -> workbook(sheetContext, multiOrientedSheetData),
-                workbook -> ExcelSheetWriterUtil.write(workbook, sheetContext.fileName(), sheetContext.filePath()));
+                workbook -> ExcelSheetWriterUtil.write(workbook, sheetContext.fileName(), sheetContext.filePath(), sheetContext.password()));
     }
 
     @Override
     public void write(Map<String, List<? extends BaseSheet>> sheets, ExcelSheetContext sheetContext) {
         try {
             writeAndDispose(sheetContext, () -> workbook(sheets, sheetContext),
-                    workbook -> ExcelSheetWriterUtil.write(workbook, sheetContext.fileName(), sheetContext.filePath()));
+                    workbook -> ExcelSheetWriterUtil.write(workbook, sheetContext.fileName(), sheetContext.filePath(), sheetContext.password()));
         }
         catch (ExcelSheetWriterException e) {
             throw e;
@@ -51,12 +52,12 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
 
     @Override
     public <T extends BaseSheet> void write(List<T> sheetData, ExcelSheetContext sheetContext, OutputStream outputStream) throws Exception {
-        writeAndDispose(sheetContext, () -> workbook(sheetData, sheetContext), workbook -> workbook.write(outputStream));
+        writeAndDispose(sheetContext, () -> workbook(sheetData, sheetContext), workbook -> WorkbookCrypto.write(workbook, outputStream, sheetContext.password()));
     }
 
     @Override
     public void write(Map<String, List<? extends BaseSheet>> sheets, ExcelSheetContext sheetContext, OutputStream outputStream) throws Exception {
-        writeAndDispose(sheetContext, () -> workbook(sheets, sheetContext), workbook -> workbook.write(outputStream));
+        writeAndDispose(sheetContext, () -> workbook(sheets, sheetContext), workbook -> WorkbookCrypto.write(workbook, outputStream, sheetContext.password()));
     }
 
     private interface WorkbookSupplier { Workbook get() throws Exception; }
@@ -150,7 +151,9 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
             FileInputStream inputS = null;
             try {
                 inputS = new FileInputStream(excelFile);
-                workbook = ExcelSheetWriterUtil.generateWorkbook(inputS, excelFile.getAbsolutePath());
+                workbook = sheetContext.password() != null
+                        ? WorkbookCrypto.open(inputS, sheetContext.password())
+                        : ExcelSheetWriterUtil.generateWorkbook(inputS, excelFile.getAbsolutePath());
                 sheetContext.setFileName(excelFile.getName());
             }
             catch (Exception e) {
@@ -175,6 +178,8 @@ public class ExcelSheetWriterImpl implements ExcelSheetWriter {
                 .dynamicHeaderCellStyleInfo(sheetContext.dynamicHeaderCellStyleInfo())
                 .dynamicHeaderDataCellStyleInfo(sheetContext.dynamicHeaderDataCellStyleInfo())
                 .styleRegistry(sheetContext.styleRegistry())
+                .validValuesDataSet(sheetContext.validValuesDataSet())
+                .headerKeyedCellValidationInfo(sheetContext.headerKeyedCellValidationInfo())
                 .build();
     }
 }

@@ -60,4 +60,24 @@ public @interface Sheet {
     Class<? extends Number> defaultNumberType() default Long.class;
 
     String[] hideColumns() default {};
+
+    /** writing: keep the header row (and the rows above it) visible while scrolling */
+    boolean freezeHeader() default false;
+
+    /** writing: add Excel filter buttons to the header row, covering the written rows */
+    boolean autoFilter() default false;
+
+    /** writing: size each written column to its content (streaming: measured over every written row) */
+    boolean autoSizeColumns() default false;
+
+    /** writing: height of the header row in points; -1 keeps Excel's default */
+    float headerRowHeight() default -1;
+
+    /**
+     * writing: turn {@code @AllowedValues} (values, {@code dataSetKey} from the context's
+     * validValuesDataSet, or an int {@code range}) and enum fields into Excel dropdowns or number
+     * limits on the data rows, so a blank template already offers the valid choices. Dynamic headers
+     * use the context's {@code headerKeyedCellValidationInfo}.
+     */
+    boolean allowedValuesDropdown() default false;
 }

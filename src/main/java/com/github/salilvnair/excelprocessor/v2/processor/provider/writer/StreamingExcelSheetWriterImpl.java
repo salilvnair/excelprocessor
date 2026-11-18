@@ -47,6 +47,7 @@ public class StreamingExcelSheetWriterImpl extends BaseHorizontalSheetWriter imp
     private int nextRowIndex;
     private long rowsWritten;
     private long totalRowsWritten;
+    private boolean sheetCompleted;
 
     public StreamingExcelSheetWriterImpl(ExcelSheetContext sheetContext) {
         this.sheetContext = sheetContext;
@@ -73,7 +74,7 @@ public class StreamingExcelSheetWriterImpl extends BaseHorizontalSheetWriter imp
         Set<Field> cellFields = AnnotationUtil.getAnnotatedFields(sheetClass, Cell.class);
         List<Field> cells = new ArrayList<>(cellFields);
         writeDataToHeader(prototypeList, cellFields, workbookSheet, cells, sheet, context);
-        fixedLayout = bodyLayout(cellFields, workbookSheet, cells, sheet);
+        fixedLayout = bodyLayout(cellFields, workbookSheet, cells, sheet, context);
         nextRowIndex = fixedLayout.firstValueRowIndex();
         applySheetStyles(sheet, workbook, workbookSheet, context);
         return this;
@@ -98,10 +99,24 @@ public class StreamingExcelSheetWriterImpl extends BaseHorizontalSheetWriter imp
         context.setSheetData(prototypeList);
         context.setSheetDataObj(prototype);
         writeDynamicDataToHeader(prototypeList, workbookSheet, sheet, context);
-        dynamicLayout = dynamicBodyLayout(extractHeaderKeyedCellInfoMap(prototype), workbookSheet, sheet);
+        dynamicLayout = dynamicBodyLayout(extractHeaderKeyedCellInfoMap(prototype), workbookSheet, sheet, context);
         nextRowIndex = dynamicLayout.firstValueRowIndex();
         applySheetStyles(sheet, workbook, workbookSheet, context);
         return this;
+    }
+
+    @Override
+    protected boolean completesSheetInApplySheetStyles() {
+        return false;
+    }
+
+    /** Applies the options that need the final row count (auto filter, column widths) to the current sheet. */
+    private void completeSheet() {
+        if (sheet != null && !sheetCompleted) {
+            sheetCompleted = true;
+            SheetFeatures.complete(sheet, workbookSheet, context);
+            context.writtenHeaders().clear();
+        }
     }
 
     @Override
@@ -149,8 +164,9 @@ public class StreamingExcelSheetWriterImpl extends BaseHorizontalSheetWriter imp
         if (workbook == null) {
             throw new IllegalStateException("Nothing to finish: no sheet was started");
         }
+        completeSheet();
         finished = true;
-        workbook.write(outputStream);
+        com.github.salilvnair.excelprocessor.v2.processor.helper.WorkbookCrypto.write(workbook, outputStream, sheetContext.password());
     }
 
     @Override
@@ -206,6 +222,7 @@ public class StreamingExcelSheetWriterImpl extends BaseHorizontalSheetWriter imp
             context.setExistingWorkbook(workbook);
             sheetContext.setWorkbook(workbook);
         }
+        completeSheet();
         if (workbook.getSheet(sheet.value()) != null && workbook.getSheet(sheet.value()).getLastRowNum() > -1) {
             throw new ExcelSheetWriterException("Sheet '" + sheet.value() + "' was already written by this writer");
         }
@@ -215,6 +232,7 @@ public class StreamingExcelSheetWriterImpl extends BaseHorizontalSheetWriter imp
         this.fixedLayout = null;
         this.dynamicLayout = null;
         this.rowsWritten = 0;
+        this.sheetCompleted = false;
         return sheet;
     }
 

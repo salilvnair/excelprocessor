@@ -1,0 +1,42 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <!--
+        Builds the three artifacts in one reactor: the core library first, then the modules that
+        depend on it.  mvn -f pom-all.xml verify
+        Each module also builds on its own; the starter and the plugin then need the core installed.
+    -->
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.github.salilvnair</groupId>
+    <artifactId>excelprocessor-build</artifactId>
+    <version>4.2.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Excel Processor (all modules)</name>
+
+    <modules>
+        <module>pom.xml</module>
+        <module>excelprocessor-spring-boot-starter</module>
+        <module>excelprocessor-maven-plugin</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <!-- the aggregator itself is never published -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.4</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.1.4</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

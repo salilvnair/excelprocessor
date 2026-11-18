@@ -157,6 +157,12 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
         else if(value instanceof Number) {
             rowCell.setCellValue(((Number) value).doubleValue());
         }
+        else if(value instanceof Enum) {
+            rowCell.setCellValue(com.github.salilvnair.excelprocessor.v2.helper.ValueCoercer.enumLabel((Enum<?>) value));
+        }
+        else if(value instanceof Character) {
+            rowCell.setCellValue(String.valueOf(value));
+        }
     }
 
     protected void processHyperLink(Sheet sheetInfo, Cell cellInfo, org.apache.poi.ss.usermodel.Cell rowCell, Object value, ExcelSheetWriterContext context) {
@@ -326,6 +332,16 @@ public abstract class BaseExcelSheetWriter extends BaseExcelProcessor implements
 
     protected void applySheetStyles(Sheet sheet, Workbook workbook, org.apache.poi.ss.usermodel.Sheet workbookSheet, ExcelSheetWriterContext writerContext) {
         hideColumnsIfApplicable(sheet, workbook, workbookSheet, writerContext);
+        SheetFeatures.applyLayout(sheet, workbookSheet, writerContext);
+        if(completesSheetInApplySheetStyles()) {
+            SheetFeatures.complete(sheet, workbookSheet, writerContext);
+            writerContext.writtenHeaders().clear();
+        }
+    }
+
+    /** List writers apply styles after the last row; the streaming writer completes the sheet later. */
+    protected boolean completesSheetInApplySheetStyles() {
+        return true;
     }
 
     protected void hideColumnsIfApplicable(Sheet sheet, Workbook workbook, org.apache.poi.ss.usermodel.Sheet workbookSheet, ExcelSheetWriterContext writerContext) {

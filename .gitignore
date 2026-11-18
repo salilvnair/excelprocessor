@@ -16,6 +16,6 @@ Thumbs.db
 /dist
 /build
 /bin
-/target
+target/
 
 excelprocessor.iml

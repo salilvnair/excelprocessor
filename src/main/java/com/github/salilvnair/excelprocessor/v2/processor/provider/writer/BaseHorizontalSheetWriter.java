@@ -46,6 +46,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
             applyHeaderCellStyles(sheet, cell, rowCell, field, originalHeader, context);
             context.evaluateIfFormula(rowCell);
         }
+        SheetFeatures.headerRow(workbookSheet.getRow(headerRowIndex), sheet);
     }
 
     /**
@@ -73,7 +74,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
 
     protected void writeDataToBody(List<? extends BaseSheet> sheetData, Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, List<Field> cells, Sheet sheet, ExcelSheetWriterContext context) {
         context.setSheetData(sheetData);
-        BodyLayout<Field> layout = bodyLayout(cellFields, workbookSheet, cells, sheet);
+        BodyLayout<Field> layout = bodyLayout(cellFields, workbookSheet, cells, sheet, context);
         int valueRowIndex = layout.firstValueRowIndex;
         for (BaseSheet sheetDataObj : sheetData) {
             writeBodyRow(sheetDataObj, valueRowIndex, layout, workbookSheet, sheet, context);
@@ -81,7 +82,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         }
     }
 
-    protected BodyLayout<Field> bodyLayout(Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, List<Field> cells, Sheet sheet) {
+    protected BodyLayout<Field> bodyLayout(Set<Field> cellFields, org.apache.poi.ss.usermodel.Sheet workbookSheet, List<Field> cells, Sheet sheet, ExcelSheetWriterContext context) {
         int headerRowIndex = sheet.headerRowAt() - 1;
         int valueRowIndex = sheet.valueRowAt()> -1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
@@ -129,6 +130,8 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
             }
             headerColumnIndexCellFieldMap.put(c, field);
         }
+        context.writtenHeaders().clear();
+        headerColumnIndexCellFieldMap.forEach((c, field) -> context.writtenHeaders().put(c, field.getAnnotation(Cell.class).value()));
         return new BodyLayout<>(valueRowIndex, valueColumnBeginsAtIndex, valueColumnEndsAtIndex, headerColumnIndexCellFieldMap);
     }
 
@@ -218,6 +221,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
                 continue;
             }
             headerColumnIndexCellFieldMap.put(c, field);
+            context.writtenHeaders().put(c, headerValue);
         }
         for (BaseSheet sheetDataObj : sheetData) {
             context.setSheetDataObj(sheetDataObj);
@@ -257,6 +261,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
             applyDynamicHeaderCellStyles(sheet, originalHeader, rowCell, context);
             context.evaluateIfFormula(rowCell);
         }
+        SheetFeatures.headerRow(workbookSheet.getRow(headerRowIndex), sheet);
     }
 
     protected void writeDynamicDataToBody(List<? extends BaseSheet> sheetData, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
@@ -264,7 +269,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
             return;
         }
         Map<String, CellInfo> firstRowCells = extractHeaderKeyedCellInfoMap((DynamicHeaderSheet) sheetData.get(0));
-        BodyLayout<CellInfo> layout = dynamicBodyLayout(firstRowCells, workbookSheet, sheet);
+        BodyLayout<CellInfo> layout = dynamicBodyLayout(firstRowCells, workbookSheet, sheet, context);
         int valueRowIndex = layout.firstValueRowIndex;
         for (BaseSheet sheetDataObj : sheetData) {
             writeDynamicBodyRow((DynamicHeaderSheet) sheetDataObj, valueRowIndex, layout, workbookSheet, sheet, context);
@@ -272,7 +277,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
         }
     }
 
-    protected BodyLayout<CellInfo> dynamicBodyLayout(Map<String, CellInfo> headerKeyedCellInfoMap, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet) {
+    protected BodyLayout<CellInfo> dynamicBodyLayout(Map<String, CellInfo> headerKeyedCellInfoMap, org.apache.poi.ss.usermodel.Sheet workbookSheet, Sheet sheet, ExcelSheetWriterContext context) {
         int headerRowIndex = sheet.headerRowAt() - 1;
         int valueRowIndex = sheet.valueRowAt()> -1 ? sheet.valueRowAt() - 1 : headerRowIndex+1;
         int headerColumnIndex = ExcelSheetWriter.toIndentNumber(sheet.headerColumnAt())  - 1;
@@ -304,7 +309,8 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
             cellInfo.setOriginalHeader(originalHeader);
             headerColumnIndexCellInfoMap.put(c, cellInfo);
         }
-
+        context.writtenHeaders().clear();
+        headerColumnIndexCellInfoMap.forEach((c, cellInfo) -> context.writtenHeaders().put(c, cellInfo.getOriginalHeader()));
         return new BodyLayout<>(valueRowIndex, valueColumnBeginsAtIndex, valueColumnEndsAtIndex, headerColumnIndexCellInfoMap);
     }
 
@@ -421,6 +427,7 @@ public abstract class BaseHorizontalSheetWriter extends BaseExcelSheetWriter {
             cellInfo.setHeader(header);
             cellInfo.setOriginalHeader(originalHeader);
             headerColumnIndexCellInfoMap.put(c, cellInfo);
+            context.writtenHeaders().put(c, originalHeader);
         }
 
         for (BaseSheet sheetDataObj : sheetData) {

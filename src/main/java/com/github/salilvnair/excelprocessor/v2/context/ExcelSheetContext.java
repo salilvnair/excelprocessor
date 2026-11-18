@@ -59,6 +59,8 @@ public class ExcelSheetContext {
     private boolean suppressTaskExceptions = true;
     private List<Object> taskMetadata;
     private Function<String, Object> beanResolver;
+    /** opens encrypted workbooks on read and encrypts the output on write */
+    private String password;
 
     private AbstractExcelTask taskBean;
 
@@ -76,6 +78,10 @@ public class ExcelSheetContext {
 
     public String fileName() {
         return fileName;
+    }
+
+    public String password() {
+        return password;
     }
 
     public Workbook workbook() {
@@ -253,7 +259,9 @@ public class ExcelSheetContext {
 
         public ExcelSheetContextBuilder workbook(InputStream inputStream, ExcelFileType excelFileType) {
             try {
-                Workbook workbook = ExcelSheetWriterUtil.generateWorkbook(inputStream, excelFileType);
+                Workbook workbook = excelSheetContext.password() != null
+                        ? com.github.salilvnair.excelprocessor.v2.processor.helper.WorkbookCrypto.open(inputStream, excelSheetContext.password())
+                        : ExcelSheetWriterUtil.generateWorkbook(inputStream, excelFileType);
                 excelSheetContext.setWorkbook(workbook);
             }
             catch (Exception e) {
@@ -266,7 +274,9 @@ public class ExcelSheetContext {
 
         public ExcelSheetContextBuilder workbook(InputStream inputStream, String fileNameWithExtension) {
             try {
-                Workbook workbook = ExcelSheetWriterUtil.generateWorkbook(inputStream, fileNameWithExtension);
+                Workbook workbook = excelSheetContext.password() != null
+                        ? com.github.salilvnair.excelprocessor.v2.processor.helper.WorkbookCrypto.open(inputStream, excelSheetContext.password())
+                        : ExcelSheetWriterUtil.generateWorkbook(inputStream, fileNameWithExtension);
                 excelSheetContext.setWorkbook(workbook);
             }
             catch (Exception e) {
@@ -279,7 +289,9 @@ public class ExcelSheetContext {
 
         public ExcelSheetContextBuilder workbook(byte[] bytes, String fileNameWithExtension) {
             try {
-                Workbook workbook = ExcelSheetWriterUtil.generateWorkbook(new ByteArrayInputStream(bytes), fileNameWithExtension);
+                Workbook workbook = excelSheetContext.password() != null
+                        ? com.github.salilvnair.excelprocessor.v2.processor.helper.WorkbookCrypto.open(new ByteArrayInputStream(bytes), excelSheetContext.password())
+                        : ExcelSheetWriterUtil.generateWorkbook(new ByteArrayInputStream(bytes), fileNameWithExtension);
                 excelSheetContext.setWorkbook(workbook);
             }
             catch (Exception e) {
@@ -292,7 +304,9 @@ public class ExcelSheetContext {
 
         public ExcelSheetContextBuilder workbook(byte[] bytes, ExcelFileType excelFileType) {
             try {
-                Workbook workbook = ExcelSheetWriterUtil.generateWorkbook(new ByteArrayInputStream(bytes), excelFileType);
+                Workbook workbook = excelSheetContext.password() != null
+                        ? com.github.salilvnair.excelprocessor.v2.processor.helper.WorkbookCrypto.open(new ByteArrayInputStream(bytes), excelSheetContext.password())
+                        : ExcelSheetWriterUtil.generateWorkbook(new ByteArrayInputStream(bytes), excelFileType);
                 excelSheetContext.setWorkbook(workbook);
             }
             catch (Exception e) {
@@ -556,6 +570,16 @@ public class ExcelSheetContext {
             return this;
         }
 
+
+        /**
+         * Password of an encrypted workbook to read, or to encrypt the written workbook with (XLSX:
+         * agile encryption, XLS: RC4). Set it before {@code workbook(InputStream...)} variants,
+         * which open the workbook straight away.
+         */
+        public ExcelSheetContextBuilder password(String password) {
+            excelSheetContext.setPassword(password);
+            return this;
+        }
 
         public ExcelSheetContextBuilder beanResolver(Function<String, Object> resolverFunction) {
             excelSheetContext.setBeanResolver(resolverFunction);

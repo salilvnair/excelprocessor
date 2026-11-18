@@ -110,7 +110,7 @@ public class ExcelSheetReaderUtil {
         return finalString;
     }
 
-    public static String processSimilarHeaderString(String headerString, Class<? extends BaseSheet> clazz, int columnIndex, int rowIndex) {
+    public static String processSimilarHeaderString(String headerString, Class<?> clazz, int columnIndex, int rowIndex) {
         if(clazz.isAnnotationPresent(Sheet.class)) {
             Sheet sheet = clazz.getAnnotation(Sheet.class);
             if(sheet.duplicateHeaders()) {
@@ -227,12 +227,12 @@ public class ExcelSheetReaderUtil {
         return headerString;
     }
 
-    public static String processSimilarHeaderString(String headerString, Class<? extends BaseSheet> clazz, int c, int r, List<String> headerStringList) {
+    public static String processSimilarHeaderString(String headerString, Class<?> clazz, int c, int r, List<String> headerStringList) {
         headerString = processSimilarHeaderString(headerString, clazz, c, r);
         return headerString;
     }
 
-    public static boolean oneOfTheIgnoreHeaders(String headerString, Class<? extends BaseSheet> clazz) {
+    public static boolean oneOfTheIgnoreHeaders(String headerString, Class<?> clazz) {
         if (clazz.isAnnotationPresent(Sheet.class)) {
             Sheet sheet = clazz.getAnnotation(Sheet.class);
             return Arrays.asList(sheet.ignoreHeaders()).contains(headerString);

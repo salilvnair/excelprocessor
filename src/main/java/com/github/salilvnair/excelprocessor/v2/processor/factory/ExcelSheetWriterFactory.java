@@ -1,6 +1,11 @@
 package com.github.salilvnair.excelprocessor.v2.processor.factory;
 
 import com.github.salilvnair.excelprocessor.v2.context.ExcelSheetContext;
+import com.github.salilvnair.excelprocessor.v2.csv.CsvFormat;
+import com.github.salilvnair.excelprocessor.v2.csv.CsvSheetWriter;
+
+import java.io.OutputStream;
+import java.io.Writer;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.writer.ExcelSheetWriterImpl;
 import com.github.salilvnair.excelprocessor.v2.processor.provider.writer.StreamingExcelSheetWriterImpl;
 import com.github.salilvnair.excelprocessor.v2.service.ExcelSheetWriter;
@@ -26,5 +31,14 @@ public class ExcelSheetWriterFactory {
 
     public static StreamingExcelSheetWriter openStreaming() {
         return openStreaming(ExcelSheetContext.builder().build());
+    }
+
+    /** Opens a row-at-a-time CSV/TSV writer for {@code @Sheet} classes. Close it to flush. */
+    public static CsvSheetWriter openCsv(OutputStream outputStream, CsvFormat format) {
+        return new CsvSheetWriter(outputStream, format);
+    }
+
+    public static CsvSheetWriter openCsv(Writer writer, CsvFormat format) {
+        return new CsvSheetWriter(writer, format);
     }
 }

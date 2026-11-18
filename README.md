@@ -251,6 +251,207 @@ Approximate timings for 50,000 rows × 10 columns on one machine:
 `ExcelSheetReaderFactory.generate(true, batchSize)` (concurrent read) shares one POI workbook
 between threads and is not faster than a normal read. Use the streaming reader for speed.
 
+## New in 4.2.0 (not released yet)
+
+The development version is `4.2.0-SNAPSHOT`; 4.1.0 is the current release.
+
+### Validation while streaming
+
+`StreamingExcelSheetReader.validate(...)` runs the `@CellValidation` / `@AllowedValues` rules (or
+`headerKeyedCellValidationInfo` for dynamic sheets) on each row as it is read. Rows are never
+collected; only the values of `unique` columns are kept, to find duplicates. The handler
+receives every row with its messages, so valid rows can be saved straight away.
+
+```java
+try (StreamingExcelSheetReader reader = ExcelSheetReaderFactory.openStreaming(file, context)) {
+    ValidationReport report = reader.validate(OrderSheet.class, (row, messages) -> {
+        if (messages.isEmpty()) repository.save(row);
+    });
+    report.rowsRead(); report.rowsWithErrors(); report.messages();   // row + column per message
+}
+```
+
+`unique` is checked against the rows read so far, so the second and later occurrences of a value
+are reported. Custom validators see the current row only; `getCurrentSheet()` is null.
+
+### Annotated error workbook
+
+```java
+ExcelErrorReport.of(uploadedFile, report)          // or a List<CellValidationMessage>
+        .highlight(IndexedColors.ROSE)              // null: no fill
+        .comments(true)                             // a cell comment with the messages
+        .errorsSheet("Errors")                      // summary sheet with links; null leaves it out
+        .writeTo(outputStream);
+```
+
+The uploaded file is not changed. Each distinct original style gets one highlighted copy, so the
+style count stays small however many cells fail.
+
+### Sheet options when writing
+
+```java
+@Sheet(value = "Orders", freezeHeader = true, autoFilter = true, autoSizeColumns = true,
+       headerRowHeight = 24, allowedValuesDropdown = true)
+```
+
+* `allowedValuesDropdown` turns `@AllowedValues` values, a `dataSetKey` from the context's
+  `validValuesDataSet`, an int `range` and enum fields into Excel dropdowns (or number limits) on
+  the data rows. A blank template therefore already offers the valid choices. Lists over 255
+  characters, or values containing commas, are stored on a hidden `ExcelProcessorLists` sheet.
+  Dynamic headers use `headerKeyedCellValidationInfo`.
+* All options work with the list writers and the streaming writer; `autoSizeColumns` measures
+  every row written, including rows SXSSF has already flushed.
+
+### Native conditional formatting
+
+```java
+@ConditionalFormat(operator = Operator.LESS_THAN, value = "0", fontColor = IndexedColors.RED, bold = true)
+@ConditionalFormat(formula = "AND({cell}<>\"\",{cell}<TODAY())", backgroundColor = IndexedColors.ROSE)
+@Cell("Due date")
+private Date dueDate;
+```
+
+Each annotation becomes one Excel rule for the whole column. Excel evaluates it, so it costs
+nothing per row, works with streaming and stays correct when values are edited. (`@DataCellStyle`
+conditional styles run Java code for every cell instead.)
+
+### More types on read, enums and records
+
+Fields can now be `LocalDate`, `LocalDateTime`, `LocalTime`, `Instant`, `BigDecimal`,
+`BigInteger`, primitives, `Boolean` (`yes/no`, `y/n`, `1/0`, `true/false`), `Character` and enums.
+Text cells are parsed too: `"1,200"` into an `int`, or `"2026-12-31"` into a `LocalDate`. Enums
+match by name (ignoring case, with spaces treated as `_`) or by an `@ExcelValue` label, and are
+written with their first label:
+
+```java
+enum Status { @ExcelValue("In progress") IN_PROGRESS, @ExcelValue({"Done", "Closed"}) DONE }
+```
+
+Records can be read with the streaming reader:
+
+```java
+@Sheet("Orders")
+record OrderRow(@Cell("Order Id") String id, @Cell("Amount") BigDecimal amount, @Cell("Qty") int qty) {}
+
+try (Stream<OrderRow> rows = reader.streamRecords(OrderRow.class)) { ... }
+```
+
+### Workbook outline
+
+```java
+WorkbookOutline outline = ExcelSheetReaderFactory.outline(file);   // XLSX, XLS, CSV, TSV
+SheetOutline orders = outline.sheet("Orders");
+orders.headers();                             // [Order Id, Customer, Amount, ...]
+orders.dataRows();                            // all non-empty rows
+orders.column("Amount").get().type();         // INTEGER, DECIMAL, DATE, BOOLEAN, TEXT or BLANK
+```
+
+No annotated class is needed, so upload screens can show a column-mapping step first. XLSX and
+CSV are streamed. Types are inferred from the first 1,000 rows (`OutlineOptions.sampleRows`).
+
+### CSV and TSV with the same classes
+
+```java
+try (StreamingExcelSheetReader reader = ExcelSheetReaderFactory.openCsv(file, CsvFormat.csv(), context)) {
+    reader.stream(OrderSheet.class) ... ;     // stream, readAll, validate, streamRecords
+}
+try (CsvSheetWriter writer = ExcelSheetWriterFactory.openCsv(outputStream, CsvFormat.tsv())) {
+    writer.begin(OrderSheet.class);           // or begin(DynamicSheet.class, headers)
+    rows.forEach(writer::writeRow);
+}
+```
+
+RFC 4180 quoting, a UTF-8 BOM and CR/LF line endings are handled. By default values are text and
+are converted to the field type; `withInferTypes(true)` makes numbers and booleans typed, as XLSX
+cells are. The writer prefixes text starting with `= + - @` with `'` so spreadsheet programs do not
+run it as a formula, and the reader removes the prefix again (`withEscapeFormulas(false)` turns
+both off).
+
+### Password-protected workbooks
+
+```java
+ExcelSheetContext.builder().password("secret")
+```
+
+On read, encrypted XLSX and XLS files open in the list reader, the streaming reader and the
+outline. On write, the list and streaming writers encrypt the output: XLSX with agile (AES)
+encryption, which is what Excel's "Encrypt with Password" uses, and XLS with RC4. The streaming
+reader decrypts to a temporary file, which it deletes on `close()`. An encrypted XLSX is assembled
+in memory once before it is written.
+
+### New artifacts
+
+**`excelprocessor-spring-boot-starter`** (Spring Boot 4.x):
+
+```xml
+<dependency>
+    <groupId>com.github.salilvnair</groupId>
+    <artifactId>excelprocessor-spring-boot-starter</artifactId>
+    <version>4.2.0-SNAPSHOT</version>
+</dependency>
+```
+
+* Auto-configures `ExcelSheetReader`, `ExcelSheetWriter` and `ExcelProcessorTemplate`. Its
+  contexts resolve `excelTaskBeanName` / `excelTaskValidatorBeanName` and bean-named tasks from
+  the Spring context.
+* A controller can return `ExcelExport`. Rows are written straight to the response, XLSX or CSV,
+  so neither the rows nor the file are held in memory. This also works in `@RestController`s.
+
+  ```java
+  @GetMapping("/orders.xlsx")
+  ExcelExport<OrderSheet> export() {
+      return ExcelExport.of(OrderSheet.class, orderRepository::streamAll).fileName("orders.xlsx");
+  }
+  ```
+* `template.importRows(upload.getInputStream(), upload.getOriginalFilename(), OrderSheet.class, handler)`
+  validates an upload row by row and returns a `ValidationReport`. `template.outline(...)`
+  describes an upload.
+* Properties: `excelprocessor.resolve-beans`, `excelprocessor.fail-on-task-exceptions`,
+  `excelprocessor.web-exports`.
+
+**`excelprocessor-maven-plugin`** generates `@Sheet` classes from sample files in
+`src/main/excel` (XLSX, XLS, CSV, TSV) during `generate-sources`:
+
+```xml
+<plugin>
+    <groupId>com.github.salilvnair</groupId>
+    <artifactId>excelprocessor-maven-plugin</artifactId>
+    <version>4.2.0-SNAPSHOT</version>
+    <executions><execution><goals><goal>generate-sheets</goal></goals></execution></executions>
+    <configuration>
+        <packageName>com.acme.sheets</packageName>
+        <!-- optional: <lombok>true</lombok> <headerRow>3</headerRow> <sheets><sheet>Orders</sheet></sheets> -->
+    </configuration>
+</plugin>
+```
+
+Field names come from the headers, and field types are inferred from the sampled rows. Repeated
+headers get `@Cell(column = ...)`. Unchanged files are not rewritten.
+
+### Upgrading from 4.1.0
+
+* **`unique` validation is fixed.** 4.0.x and 4.1.0 compared each row with itself, so every
+  non-empty value was reported as a duplicate. Now only values that occur more than once are
+  reported.
+* **Dependencies:** `org.json` and `commons-logging` were removed, because the library never used
+  them. Add them yourself if your code relied on getting them through excelprocessor. `gson` is
+  now optional: `CellValidationMessage.toString()` builds the same JSON without it, and only
+  `ReflectionUtil.toEntity` / `toGenericListEntity` still need Gson on your classpath.
+* **More values reach your fields.** Text cells in number, date, boolean and enum fields are now
+  converted; 4.1.0 left those fields unset. Enum values are written with their `@ExcelValue`
+  label.
+* The vertical, sectional and merged-header readers are still part of the core jar. Moving them
+  into a separate module would break the 4.x API, so it waits for a 5.0 release.
+
+### Building all modules
+
+```
+mvn -f pom-all.xml verify          # core, starter and plugin in one reactor
+```
+
+The starter and the plugin can also be built on their own once the core is installed
+(`mvn install`). Publishing signs with GPG; add `-Dgpg.skip` for local installs.
+
 ## Upgrading from 4.0.6
 
 * **Apache POI 6.0.0.** The library still runs on POI 5.5.1, and the test suite passes on both.
@@ -277,6 +478,9 @@ between threads and is not faster than a normal read. Use the streaming reader f
 
 * Dependencies are checked against [OSV](https://osv.dev). The update to POI 6.0.0
   (log4j-api 2.26.1) and org.json 20260814 fixed GHSA-qv9r-c865-cp47 and GHSA-ghc9-756g-vrcv.
+* The library no longer depends on `org.json` or `commons-logging` (neither was used), and `gson`
+  is optional, so fewer transitive jars reach your application.
+* CSV output escapes text that starts with `= + - @` (CSV/formula injection).
 * Multi-hyperlink cells (`@Cell(hyperLink = true, multiHyperLink = true)`) escape quotes, so cell
   values cannot inject other functions into the generated `HYPERLINK` formula.
 * The streaming reader uses POI's hardened StAX factory (no DTDs or external entities) and opens

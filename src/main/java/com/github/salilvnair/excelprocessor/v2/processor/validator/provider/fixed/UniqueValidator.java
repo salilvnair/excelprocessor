@@ -8,7 +8,10 @@ import com.github.salilvnair.excelprocessor.v2.sheet.BaseSheet;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.lang.reflect.Field;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 public class UniqueValidator extends BaseCellValidator {
@@ -20,9 +23,18 @@ public class UniqueValidator extends BaseCellValidator {
 
     @Override
     protected boolean violated(Object fieldValue, Object currentInstance, CellValidatorContext validatorContext) {
+        if(fieldValue == null || (fieldValue instanceof String && ((String) fieldValue).isEmpty())) {
+            return false;
+        }
+        Map<String, Set<Object>> seen = validatorContext.uniqueValues();
+        if(seen != null) {
+            // streaming: the second and later occurrences are duplicates
+            return !seen.computeIfAbsent(field.getDeclaringClass().getName() + "#" + field.getName(), k -> new HashSet<>()).add(fieldValue);
+        }
         List<? extends BaseSheet> sheetDataList = validatorContext.getCurrentSheet();
         if(CollectionUtils.isNotEmpty(sheetDataList)) {
-            return sheetDataList.stream().anyMatch(sheetData -> fieldValue.equals(ReflectionUtil.getFieldValue(sheetData, field)));
+            // every row holding a value that another row also holds is reported (a row never duplicates itself)
+            return sheetDataList.stream().anyMatch(sheetData -> sheetData != currentInstance && fieldValue.equals(ReflectionUtil.getFieldValue(sheetData, field)));
         }
         return false;
     }

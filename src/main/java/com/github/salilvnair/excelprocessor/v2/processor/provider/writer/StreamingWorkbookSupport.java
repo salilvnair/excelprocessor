@@ -60,6 +60,7 @@ final class StreamingWorkbookSupport {
             sxssfSheet = workbook.createSheet(sheet.value());
         }
         sxssfSheet.setRandomAccessWindowSize(windowSize(sheet));
+        SheetFeatures.prepareStreamingSheet(sxssfSheet, sheet);
         return sxssfSheet;
     }
 
